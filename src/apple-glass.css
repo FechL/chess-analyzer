@@ -85,7 +85,7 @@ body {
   padding-inline: 30px;
 }
 .breadcrumb {
-  font-size: 12px;
+  font-size: 14px;
   color: #49596f;
 }
 .breadcrumb > span {
@@ -96,7 +96,7 @@ body {
 }
 .header-local {
   color: #8795a9;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1.4px;
 }
 .header-local .status-dot {
@@ -164,7 +164,7 @@ body {
   > div
   > div:first-child
   .text-xs {
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1.8px;
   color: #8e9eb5;
 }
@@ -213,17 +213,17 @@ body {
 }
 .kuda-shell > aside > div:first-child > div:first-child .text-xs {
   color: #5c6f8a;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 2.8px;
 }
 .kuda-shell nav > div > div > span {
   color: #60728c;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1.2px;
 }
 .kuda-shell nav button {
   color: #69788c;
-  font-size: 12px;
+  font-size: 14px;
   border-radius: 10px;
   height: 38px;
 }
@@ -327,11 +327,11 @@ body {
 }
 .page-intro p {
   color: #8996a9;
-  font-size: 12px;
+  font-size: 14px;
 }
 .eyebrow {
   color: #5b7190;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 2px;
 }
 .tiny-line {
@@ -343,7 +343,7 @@ body {
 .small-label,
 .section-label {
   color: #5e728e;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
 }
 .muted {
@@ -356,7 +356,7 @@ body {
 .button {
   min-height: 36px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 13px;
   padding: 10px 14px;
   font-weight: 550;
   transition:
@@ -470,7 +470,7 @@ kbd {
   border-radius: 4px;
   background: linear-gradient(#fff, #edf1f7);
   box-shadow: 0 1px 0 rgb(130 151 180 / 12%);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .analysis-grid {
@@ -482,17 +482,17 @@ kbd {
 }
 .game-heading h2 {
   color: #5a6d87;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 550;
 }
 .game-heading .small-label {
   color: #627590;
-  font-size: 8px;
+  font-size: 10px;
 }
 .game-heading .subtle-pill {
   color: #5f7390;
   background: rgb(255 255 255 / 60%);
-  font-size: 9px;
+  font-size: 11px;
 }
 .board-and-eval {
   gap: 11px;
@@ -520,16 +520,16 @@ kbd {
 }
 .player-name strong {
   color: #65768d;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 550;
 }
 .player-name > span {
   color: #62748e;
-  font-size: 9px;
+  font-size: 11px;
 }
 .player-side {
   color: #667892;
-  font-size: 8px;
+  font-size: 10px;
 }
 .player-turn.is-active {
   background: #80b4e8;
@@ -621,7 +621,7 @@ kbd {
 }
 .coordinate {
   font-family: var(--apple-font);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
 }
 .coordinate.rank {
@@ -647,7 +647,7 @@ kbd {
   box-shadow: 0 -1px 2px rgb(40 57 79 / 12%);
 }
 .eval-bar > span {
-  font-size: 8px;
+  font-size: 10px;
   color: #eef4fd;
 }
 .eval-bar > span.positive {
@@ -667,15 +667,15 @@ kbd {
 }
 .move-position {
   color: #8499b5;
-  font-size: 10px;
+  font-size: 12px;
 }
 .move-position > span {
   color: #697b96;
-  font-size: 9px;
+  font-size: 11px;
 }
 .board-under {
   color: #647792;
-  font-size: 9px;
+  font-size: 11px;
 }
 .board-under .status-dot {
   background: #8baac7;
@@ -723,7 +723,7 @@ kbd {
   justify-content: center;
   height: 32px;
   border-radius: 9px;
-  font-size: 11px;
+  font-size: 13px;
   color: #5f728d;
 }
 .panel-tabs > button.active {
@@ -752,16 +752,16 @@ kbd {
 }
 .engine-chip > strong {
   color: #8097b7;
-  font-size: 11px;
+  font-size: 13px;
 }
 .engine-chip > span {
   color: #657995;
   border-color: #e0e9f6;
-  font-size: 8px;
+  font-size: 10px;
 }
 .local-state {
   color: #647894;
-  font-size: 8px;
+  font-size: 10px;
 }
 .local-state .status-dot {
   background: #86b8a1;
@@ -771,7 +771,7 @@ kbd {
 }
 .review-overview > .section-label {
   color: #667993;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1.1px;
 }
 .review-overview > .section-label > button {
@@ -782,7 +782,7 @@ kbd {
 }
 .accuracy-scores > div > span:nth-child(2) {
   color: #627590;
-  font-size: 11px;
+  font-size: 13px;
 }
 .accuracy-scores strong {
   color: #6d85a6;
@@ -793,7 +793,7 @@ kbd {
 }
 .accuracy-scores strong small {
   color: #6c7e98;
-  font-size: 11px;
+  font-size: 13px;
 }
 .score-divider {
   background: #e3eaf4;
@@ -813,7 +813,7 @@ kbd {
 }
 .review-button {
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 13px;
   padding: 12px;
   min-height: 39px;
 }
@@ -835,11 +835,11 @@ kbd {
 }
 .classification-summary strong {
   color: #5a708d;
-  font-size: 12px;
+  font-size: 14px;
 }
 .classification-summary small {
   color: #647894;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: -0.2px;
 }
 .notation-heading {
@@ -847,11 +847,11 @@ kbd {
   border-color: rgb(158 178 206 / 14%);
   color: #5b7190;
   padding: 10px 18px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .notation-heading > span:last-child {
   color: #6e7f9a;
-  font-size: 8px;
+  font-size: 10px;
 }
 .move-list {
   padding: 7px 11px;
@@ -860,11 +860,11 @@ kbd {
 }
 .move-number {
   color: #6b7e99;
-  font-size: 10px;
+  font-size: 12px;
 }
 .move-cell {
   color: #8199b8;
-  font-size: 11px;
+  font-size: 13px;
   border-radius: 6px;
 }
 .move-cell:hover {
@@ -903,16 +903,16 @@ kbd {
 .coach-label > strong,
 .coach-move {
   color: #a4936e;
-  font-size: 10px;
+  font-size: 12px;
 }
 .coach-card p {
   color: #696f72;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
 }
 .coach-card > .text-button {
   color: #9d8d68;
-  font-size: 10px;
+  font-size: 12px;
 }
 .analysis-bottom {
   grid-template-columns: 1.2fr 1fr;
@@ -927,11 +927,11 @@ kbd {
 }
 .card-heading h3 {
   color: #5b7293;
-  font-size: 11px;
+  font-size: 13px;
 }
 .card-heading > span {
   color: #667a97;
-  font-size: 9px;
+  font-size: 11px;
 }
 .eval-chart svg polyline {
   stroke: #6e9fda;
@@ -945,7 +945,7 @@ kbd {
 .chart-empty,
 .chart-axis {
   color: #667b97;
-  font-size: 9px;
+  font-size: 11px;
 }
 .opening-callout {
   padding: 20px;
@@ -966,19 +966,19 @@ kbd {
 }
 .opening-callout .small-label {
   color: #667b98;
-  font-size: 8px;
+  font-size: 10px;
 }
 .opening-callout h3 {
   color: #5c7395;
-  font-size: 14px;
+  font-size: 16px;
 }
 .opening-callout p {
   color: #667a98;
-  font-size: 10px;
+  font-size: 12px;
 }
 .opening-callout .text-button {
   color: #5b7498;
-  font-size: 10px;
+  font-size: 12px;
 }
 .critical-moments {
   padding: 18px;
@@ -1006,14 +1006,14 @@ kbd {
 }
 .workspace-footer {
   color: #657996;
-  font-size: 9px;
+  font-size: 11px;
 }
 .workspace-footer .status-dot {
   background: #a7bbd1;
 }
 .workspace-footer .text-button {
   color: #607797;
-  font-size: 9px;
+  font-size: 11px;
 }
 .evaluation-head h2 {
   color: #708ead;
@@ -1022,7 +1022,7 @@ kbd {
 }
 .evaluation-head p {
   color: #667b97;
-  font-size: 10px;
+  font-size: 12px;
 }
 .depth-badge,
 .line-index {
@@ -1033,10 +1033,10 @@ kbd {
 }
 .line-heading h3 {
   color: #5a7292;
-  font-size: 11px;
+  font-size: 13px;
 }
 .line-heading .text-button {
-  font-size: 9px;
+  font-size: 11px;
 }
 .engine-line {
   border-top-color: #e8effa;
@@ -1049,7 +1049,7 @@ kbd {
 }
 .engine-line p {
   color: #647a97;
-  font-size: 11px;
+  font-size: 13px;
 }
 .engine-line > svg {
   color: #7286a1;
@@ -1094,7 +1094,7 @@ kbd {
 }
 .empty-inline {
   color: #667b97;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* Frosted sheets and inset controls. */
@@ -1130,11 +1130,11 @@ kbd {
 }
 .modal-description {
   color: #647996;
-  font-size: 12px;
+  font-size: 14px;
 }
 .field-label {
   color: #627796;
-  font-size: 11px;
+  font-size: 13px;
 }
 .import-textarea,
 select,
@@ -1208,7 +1208,7 @@ textarea::placeholder {
 }
 .prose {
   color: #627795;
-  font-size: 12px;
+  font-size: 14px;
 }
 .prose h3,
 .prose strong {
@@ -1232,7 +1232,7 @@ textarea::placeholder {
 }
 .study-tip p {
   color: #677b99;
-  font-size: 11px;
+  font-size: 13px;
 }
 .toast {
   color: #577295;
@@ -1307,7 +1307,7 @@ textarea::placeholder {
 .feature-banner p,
 .academy-feature p {
   color: #687d9b;
-  font-size: 11px;
+  font-size: 13px;
 }
 .catalog-toolbar h3 {
   color: #647a99;
@@ -1327,7 +1327,7 @@ textarea::placeholder {
 .trainer-mode > button {
   color: #647996;
   border-radius: 8px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .segmented > button.active,
 .trainer-mode > button.active {
@@ -1473,7 +1473,7 @@ textarea::placeholder {
 }
 .exercise-feedback {
   color: #647c9c;
-  font-size: 11px;
+  font-size: 13px;
 }
 .exercise-feedback.success {
   background: linear-gradient(#edf7f2, #e4f1eb);
@@ -1490,7 +1490,7 @@ textarea::placeholder {
   box-shadow:
     inset 0 1px 0 #fff,
     0 1px 3px #ae956815;
-  font-size: 11px;
+  font-size: 13px;
 }
 .puzzle-title h2,
 .puzzle-sidebar-head h3 {
@@ -1555,7 +1555,7 @@ textarea::placeholder {
 }
 .bot-persona p {
   color: #687e9d;
-  font-size: 11px;
+  font-size: 13px;
 }
 .bot-levels > button {
   background: linear-gradient(#fff, #f0f5fd);
@@ -1779,7 +1779,7 @@ textarea::placeholder {
     font-size: 28px;
   }
   .intro-actions .button {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 @media (max-width: 1100px) {
@@ -1848,7 +1848,7 @@ textarea::placeholder {
     max-width: 560px;
   }
   .board-under {
-    font-size: 9px;
+    font-size: 11px;
   }
   .board-controls {
     margin-left: 31px;
@@ -1879,11 +1879,11 @@ textarea::placeholder {
     line-height: 1.3;
   }
   .page-intro p {
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.7;
   }
   .eyebrow {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: 1.7px;
   }
   .intro-actions {
@@ -1892,7 +1892,7 @@ textarea::placeholder {
   }
   .intro-actions .button {
     min-height: 35px;
-    font-size: 11px;
+    font-size: 13px;
     border-radius: 10px;
   }
   .board-and-eval {
@@ -1910,7 +1910,7 @@ textarea::placeholder {
     height: 90%;
   }
   .coordinate {
-    font-size: 7px;
+    font-size: 9px;
   }
   .eval-bar {
     width: 17px;
@@ -1921,10 +1921,10 @@ textarea::placeholder {
     height: 45px;
   }
   .player-name strong {
-    font-size: 11px;
+    font-size: 13px;
   }
   .player-name > span {
-    font-size: 9px;
+    font-size: 11px;
   }
   .board-controls {
     margin-left: 24px;
@@ -1935,13 +1935,13 @@ textarea::placeholder {
     margin-left: 25px;
   }
   .game-heading h2 {
-    font-size: 13px;
+    font-size: 15px;
   }
   .game-heading .small-label {
-    font-size: 7px;
+    font-size: 9px;
   }
   .board-under {
-    font-size: 9px;
+    font-size: 11px;
   }
   .panel-tabs {
     height: 47px;
@@ -1956,7 +1956,7 @@ textarea::placeholder {
     gap: 6px;
   }
   .classification-summary small {
-    font-size: 8px;
+    font-size: 10px;
   }
   .accuracy-scores strong {
     font-size: 30px;
@@ -1972,13 +1972,13 @@ textarea::placeholder {
     font-size: 20px;
   }
   .board-theme-options > button {
-    font-size: 9px;
+    font-size: 11px;
   }
   .workspace-footer {
-    font-size: 8px;
+    font-size: 10px;
   }
   .workspace-footer .text-button {
-    font-size: 8px;
+    font-size: 10px;
   }
   .feature-banner,
   .academy-feature {
@@ -1991,11 +1991,11 @@ textarea::placeholder {
     padding: 20px;
   }
   .bot-board-actions .button {
-    font-size: 9px;
+    font-size: 11px;
   }
   .trainer-actions .button,
   .puzzle-navigation .button {
-    font-size: 9px;
+    font-size: 11px;
     padding-inline: 9px;
   }
 }

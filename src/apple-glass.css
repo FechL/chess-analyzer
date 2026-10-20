@@ -474,8 +474,13 @@ kbd {
 }
 
 .analysis-grid {
-  grid-template-columns: minmax(0, 1.2fr) minmax(330px, 1fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(310px, 0.8fr);
+  gap: 35px;
+}
+.analysis-grid > .board-section {
+  max-width: none;
+  width: 100%;
+  margin: 0;
 }
 .game-heading {
   margin-bottom: 8px;
@@ -915,8 +920,8 @@ kbd {
   font-size: 12px;
 }
 .analysis-bottom {
-  grid-template-columns: 1.2fr 1fr;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(310px, 0.8fr);
+  gap: 35px;
   margin-top: 25px;
 }
 .eval-chart-card {
@@ -1739,17 +1744,7 @@ textarea::placeholder {
   color: #556e8f;
 }
 
-@media (min-width: 1101px) {
-  .analysis-grid > .board-section {
-    max-width: 560px;
-    width: 100%;
-    margin: 0 auto;
-  }
-}
 @media (min-width: 1101px) and (max-height: 850px) {
-  .analysis-grid > .board-section {
-    max-width: max(370px, calc(100dvh - 325px));
-  }
   .analysis-page .page-intro {
     margin-bottom: 23px;
   }
@@ -1768,12 +1763,12 @@ textarea::placeholder {
     padding: 25px 24px 22px;
   }
   .analysis-grid {
-    gap: 22px;
-    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr);
+    gap: 23px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.85fr);
   }
   .analysis-bottom {
-    gap: 22px;
-    grid-template-columns: 1.15fr 1fr;
+    gap: 23px;
+    grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.85fr);
   }
   .page-intro h1 {
     font-size: 28px;
@@ -1782,7 +1777,7 @@ textarea::placeholder {
     font-size: 12px;
   }
 }
-@media (max-width: 1100px) {
+@media (max-width: 1050px) {
   .analysis-grid {
     grid-template-columns: 1fr;
   }

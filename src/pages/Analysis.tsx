@@ -274,6 +274,21 @@ export default function Analysis({
   return (
     <div className="page analysis-page">
       <div className="workspace-toolbar">
+        <div className="game-heading">
+          <div>
+            <span className="small-label">
+              {game.event.includes("Opera")
+                ? "PERMAINAN KLASIK"
+                : "PERMAINAN AKTIF"}
+            </span>
+            <h2>
+              {game.event.includes("Opera") ? "The Opera Game" : game.event}
+            </h2>
+          </div>
+          <span className="subtle-pill">
+            {game.result === "*" ? "Analisis bebas" : game.result}
+          </span>
+        </div>
         <div className="intro-actions">
           <button className="button secondary" onClick={onSave}>
             <Bookmark size={16} /> Simpan
@@ -285,21 +300,6 @@ export default function Analysis({
       </div>
       <div className="analysis-grid">
         <section className="board-section">
-          <div className="game-heading">
-            <div>
-              <span className="small-label">
-                {game.event.includes("Opera")
-                  ? "PERMAINAN KLASIK"
-                  : "PERMAINAN AKTIF"}
-              </span>
-              <h2>
-                {game.event.includes("Opera") ? "The Opera Game" : game.event}
-              </h2>
-            </div>
-            <span className="subtle-pill">
-              {game.result === "*" ? "Analisis bebas" : game.result}
-            </span>
-          </div>
           <div className="board-and-eval">
             <EvalBar
               cp={result?.cp}

@@ -343,7 +343,20 @@ body {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
+}
+.page.analysis-page,
+.page.bot-page {
+  padding-top: 12px;
+}
+.workspace-toolbar > .game-heading {
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+  margin: 0 auto 0 29px;
+}
+.workspace-toolbar .game-heading h2 {
+  overflow-wrap: anywhere;
 }
 .workspace-toolbar > .intro-actions {
   flex-direction: row;
@@ -1550,6 +1563,11 @@ textarea::placeholder {
 }
 .bot-config {
   padding: 22px;
+}
+.bot-engine-status {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 .bot-persona {
   border-bottom-color: #e2edfb;

@@ -245,11 +245,6 @@ export default function BotPage({
   };
   return (
     <div className="page bot-page">
-      <div className="workspace-toolbar">
-        <span className="subtle-pill">
-          <CpuIcon /> Stockfish lokal
-        </span>
-      </div>
       <div className="bot-layout">
         <section className="bot-board-area">
           <PlayerRow
@@ -334,6 +329,11 @@ export default function BotPage({
           )}
         </section>
         <aside className="bot-config">
+          <div className="bot-engine-status">
+            <span className="subtle-pill">
+              <CpuIcon /> Stockfish lokal
+            </span>
+          </div>
           <div className="bot-persona">
             <div className={`bot-avatar avatar-${level}`}>
               <img

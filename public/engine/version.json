@@ -1,0 +1,5 @@
+{
+  "version": "19.0.1",
+  "build": "stockfish-19-lite-single",
+  "source": "https://github.com/nmrugg/stockfish.js"
+}

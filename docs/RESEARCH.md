@@ -36,4 +36,4 @@ Pilihan utama engine diberi label Terbaik. Untuk langkah lain, ambang penurunan 
 
 [ObsidianUI Dashboard Shell](https://www.obsidianui.dev/docs/dashboard-shell) dipasang dari [registry resmi](https://www.obsidianui.dev/r/dashboard-shell.json), beserta stylesheet dan dependensi Radix/Motion. Digunakan untuk shell aplikasi, navigasi, drawer mobile, fokus keyboard, dan sidebar yang bisa diubah ukurannya.
 
-Tema khusus: latar ivory, papan sage, aksen hijau, tipografi DM Sans/Manrope lokal. Warna papan walnut dan slate tersedia. Papan, grafik, lesson runner, dan komponen khusus catur ditulis untuk aplikasi ini.
+Tema khusus: material kaca buram dengan blur dan highlight, latar biru/lilac lembut, aksen biru, serta tipografi sistem bergaya Apple. Tombol memakai gradasi, bayangan inset, dan respons tekan; papan memakai bingkai bertepi bevel dan bayangan bidak untuk sentuhan skeuomorfik ringan. Warna papan walnut dan slate tersedia. Papan, grafik, lesson runner, dan komponen khusus catur ditulis untuk aplikasi ini.

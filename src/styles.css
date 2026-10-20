@@ -364,11 +364,6 @@ textarea::placeholder {
   color: #89947f;
   margin-bottom: 10px;
 }
-.tiny-line {
-  width: 17px;
-  height: 1px;
-  background: #92a783;
-}
 .page-intro h1 {
   font-family: "Manrope Variable", sans-serif;
   font-size: 32px;

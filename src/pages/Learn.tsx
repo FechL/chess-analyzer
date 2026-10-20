@@ -49,9 +49,7 @@ export function OpeningsPage({
     <div className="page learning-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> OPENING EXPLORER
-          </div>
+          <div className="eyebrow">OPENING EXPLORER</div>
           <h1>
             Langkah pertama.
             <br />
@@ -269,9 +267,7 @@ export function AcademyPage({
     <div className="page learning-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> AKADEMI KUDA
-          </div>
+          <div className="eyebrow">AKADEMI KUDA</div>
           <h1>
             Pahami satu ide.
             <br />
@@ -462,9 +458,7 @@ export function PuzzlesPage({
     <div className="page puzzle-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> LATIHAN TAKTIK
-          </div>
+          <div className="eyebrow">LATIHAN TAKTIK</div>
           <h1>
             Lihat yang tidak terlihat<span>.</span>
           </h1>

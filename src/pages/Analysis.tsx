@@ -273,16 +273,7 @@ export default function Analysis({
         : "Jalankan ulasan untuk menemukan momen penting dan mempelajari alternatif yang lebih baik.";
   return (
     <div className="page analysis-page">
-      <div className="page-intro">
-        <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> RUANG ANALISIS
-          </div>
-          <h1>
-            Setiap langkah punya cerita<span>.</span>
-          </h1>
-          <p>Temukan idenya. Pahami kesalahannya. Mainkan lebih baik.</p>
-        </div>
+      <div className="workspace-toolbar">
         <div className="intro-actions">
           <button className="button secondary" onClick={onSave}>
             <Bookmark size={16} /> Simpan

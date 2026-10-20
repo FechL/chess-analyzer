@@ -245,18 +245,7 @@ export default function BotPage({
   };
   return (
     <div className="page bot-page">
-      <div className="page-intro">
-        <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> LAWAN BOT
-          </div>
-          <h1>
-            Lawan yang selalu siap<span>.</span>
-          </h1>
-          <p>
-            Uji ide baru. Ambil waktu berpikir. Belajar dari setiap permainan.
-          </p>
-        </div>
+      <div className="workspace-toolbar">
         <span className="subtle-pill">
           <CpuIcon /> Stockfish lokal
         </span>

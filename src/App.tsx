@@ -680,9 +680,7 @@ function Library({
     <div className="page library-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">
-            <span className="tiny-line" /> KOLEKSI PRIBADI
-          </div>
+          <div className="eyebrow">KOLEKSI PRIBADI</div>
           <h1>
             Permainan berlalu.
             <br />

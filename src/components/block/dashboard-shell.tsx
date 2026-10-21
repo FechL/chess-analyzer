@@ -1,5 +1,7 @@
+// i18n: rendered text
 // ObsidianUI Dashboard Shell — MIT. Source: https://www.obsidianui.dev/r/dashboard-shell.json
 "use client";
+import { useI18n } from "@/lib/i18n";
 
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
@@ -102,6 +104,8 @@ export function DashboardButton({
   type = "button",
   ...props
 }: DashboardButtonProps) {
+  const { t } = useI18n();
+
   return (
     <button
       type={type}
@@ -186,6 +190,8 @@ export function DashboardMenu({
   onOpenChange,
   ...props
 }: DashboardMenuProps) {
+  const { t } = useI18n();
+
   const [isOpen, setIsOpen] = useControllableState(
     open,
     defaultOpen,
@@ -215,35 +221,39 @@ export function DashboardMenuContent({
   sideOffset = 6,
   ...props
 }: DashboardMenuContentProps) {
+  const { t } = useI18n();
+
   const isOpen = useContext(LayerOpenContext);
   const isDark = useContext(ShellDarkContext);
   const reduceMotion = !!useReducedMotion();
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <DropdownMenuPrimitive.Portal forceMount>
-          <DropdownMenuPrimitive.Content
-            forceMount
-            asChild
-            sideOffset={sideOffset}
-            {...props}
-          >
-            <motion.div
-              {...layerMotion(reduceMotion)}
-              className={cn(
-                layerClassName,
-                isDark && "dark",
-                "obsidian-dashboard-shell-scroll max-h-(--radix-dropdown-menu-content-available-height) min-w-40 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain",
-                className,
-              )}
+      {t(
+        isOpen && (
+          <DropdownMenuPrimitive.Portal forceMount>
+            <DropdownMenuPrimitive.Content
+              forceMount
+              asChild
+              sideOffset={sideOffset}
+              {...props}
             >
-              <HoverHighlightList highlightClassName="rounded-md bg-(--obsidian-dashboard-shell-menu-highlight)">
-                {children}
-              </HoverHighlightList>
-            </motion.div>
-          </DropdownMenuPrimitive.Content>
-        </DropdownMenuPrimitive.Portal>
+              <motion.div
+                {...layerMotion(reduceMotion)}
+                className={cn(
+                  layerClassName,
+                  isDark && "dark",
+                  "obsidian-dashboard-shell-scroll max-h-(--radix-dropdown-menu-content-available-height) min-w-40 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overscroll-contain",
+                  className,
+                )}
+              >
+                <HoverHighlightList highlightClassName="rounded-md bg-(--obsidian-dashboard-shell-menu-highlight)">
+                  {t(children)}
+                </HoverHighlightList>
+              </motion.div>
+            </DropdownMenuPrimitive.Content>
+          </DropdownMenuPrimitive.Portal>
+        ),
       )}
     </AnimatePresence>
   );
@@ -276,6 +286,8 @@ export function DashboardMenuItem({
   onBlur,
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.Item>) {
+  const { t } = useI18n();
+
   const focusHandlers = useHighlightOnFocus(onFocus, onBlur);
   return (
     <DropdownMenuPrimitive.Item
@@ -295,6 +307,8 @@ export function DashboardMenuRadioItem({
   onBlur,
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+  const { t } = useI18n();
+
   const focusHandlers = useHighlightOnFocus(onFocus, onBlur);
   return (
     <DropdownMenuPrimitive.RadioItem
@@ -306,7 +320,7 @@ export function DashboardMenuRadioItem({
       {...focusHandlers}
       {...props}
     >
-      {children}
+      {t(children)}
       <DropdownMenuPrimitive.ItemIndicator className="absolute right-2.5 flex">
         <Check aria-hidden className="size-3.5!" />
       </DropdownMenuPrimitive.ItemIndicator>
@@ -318,6 +332,8 @@ export function DashboardMenuLabel({
   className,
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.Label>) {
+  const { t } = useI18n();
+
   return (
     <DropdownMenuPrimitive.Label
       className={cn(
@@ -333,6 +349,8 @@ export function DashboardMenuSeparator({
   className,
   ...props
 }: ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+  const { t } = useI18n();
+
   return (
     <DropdownMenuPrimitive.Separator
       className={cn(
@@ -354,6 +372,8 @@ export function DashboardPopover({
   onOpenChange,
   ...props
 }: DashboardPopoverProps) {
+  const { t } = useI18n();
+
   const [isOpen, setIsOpen] = useControllableState(
     open,
     defaultOpen,
@@ -384,34 +404,38 @@ export function DashboardPopoverContent({
   sideOffset = 6,
   ...props
 }: DashboardPopoverContentProps) {
+  const { t } = useI18n();
+
   const isOpen = useContext(LayerOpenContext);
   const isDark = useContext(ShellDarkContext);
   const reduceMotion = !!useReducedMotion();
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <PopoverPrimitive.Portal forceMount>
-          <PopoverPrimitive.Content
-            forceMount
-            asChild
-            align={align}
-            sideOffset={sideOffset}
-            {...props}
-          >
-            <motion.div
-              {...layerMotion(reduceMotion)}
-              className={cn(
-                layerClassName,
-                isDark && "dark",
-                "w-72 origin-(--radix-popover-content-transform-origin)",
-                className,
-              )}
+      {t(
+        isOpen && (
+          <PopoverPrimitive.Portal forceMount>
+            <PopoverPrimitive.Content
+              forceMount
+              asChild
+              align={align}
+              sideOffset={sideOffset}
+              {...props}
             >
-              {children}
-            </motion.div>
-          </PopoverPrimitive.Content>
-        </PopoverPrimitive.Portal>
+              <motion.div
+                {...layerMotion(reduceMotion)}
+                className={cn(
+                  layerClassName,
+                  isDark && "dark",
+                  "w-72 origin-(--radix-popover-content-transform-origin)",
+                  className,
+                )}
+              >
+                {t(children)}
+              </motion.div>
+            </PopoverPrimitive.Content>
+          </PopoverPrimitive.Portal>
+        ),
       )}
     </AnimatePresence>
   );
@@ -439,100 +463,106 @@ export function DashboardConfirmDialog({
   tone = "default",
   onConfirm,
 }: DashboardConfirmDialogProps) {
+  const { t } = useI18n();
+
   const isDark = useContext(ShellDarkContext);
   const reduceMotion = !!useReducedMotion();
 
   return (
     <AlertDialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
-        {open && (
-          <AlertDialogPrimitive.Portal forceMount>
-            <AlertDialogPrimitive.Overlay forceMount asChild>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: reduceMotion ? 0 : 0.18,
-                  ease: EASE_OUT,
-                }}
-                className={cn(
-                  "fixed inset-0 z-50 backdrop-blur-[2px]",
-                  isDark ? "bg-black/50" : "bg-black/25",
-                )}
-              />
-            </AlertDialogPrimitive.Overlay>
-            <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-4">
-              <AlertDialogPrimitive.Content forceMount asChild>
+        {t(
+          open && (
+            <AlertDialogPrimitive.Portal forceMount>
+              <AlertDialogPrimitive.Overlay forceMount asChild>
                 <motion.div
-                  initial={
-                    reduceMotion
-                      ? { opacity: 0 }
-                      : { opacity: 0, scale: 0.94, y: 6, filter: "blur(6px)" }
-                  }
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    transition: reduceMotion
-                      ? { duration: 0 }
-                      : {
-                          ...LAYER_SPRING,
-                          opacity: { duration: 0.16, ease: EASE_OUT },
-                          filter: { duration: 0.2, ease: EASE_OUT },
-                        },
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: reduceMotion ? 0 : 0.18,
+                    ease: EASE_OUT,
                   }}
-                  exit={
-                    reduceMotion
-                      ? { opacity: 0, transition: { duration: 0 } }
-                      : {
-                          opacity: 0,
-                          scale: 0.97,
-                          y: 4,
-                          filter: "blur(4px)",
-                          transition: { duration: 0.14, ease: EASE_OUT },
-                        }
-                  }
                   className={cn(
-                    "obsidian-dashboard-shell-layer pointer-events-auto flex w-full max-w-sm flex-col gap-4 rounded-xl bg-(--obsidian-dashboard-shell-background) p-4 text-(--obsidian-dashboard-shell-foreground) shadow-(--obsidian-dashboard-shell-menu-shadow) outline-none",
-                    isDark && "dark",
+                    "fixed inset-0 z-50 backdrop-blur-[2px]",
+                    isDark ? "bg-black/50" : "bg-black/25",
                   )}
-                >
-                  <div className="flex flex-col gap-1.5">
-                    <AlertDialogPrimitive.Title className="text-sm font-medium leading-snug">
-                      {title}
-                    </AlertDialogPrimitive.Title>
-                    {description ? (
-                      <AlertDialogPrimitive.Description className="text-xs leading-relaxed text-(--obsidian-dashboard-shell-text-muted)">
-                        {description}
-                      </AlertDialogPrimitive.Description>
-                    ) : (
-                      <AlertDialogPrimitive.Description className="sr-only">
-                        {title}
-                      </AlertDialogPrimitive.Description>
+                />
+              </AlertDialogPrimitive.Overlay>
+              <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center p-4">
+                <AlertDialogPrimitive.Content forceMount asChild>
+                  <motion.div
+                    initial={
+                      reduceMotion
+                        ? { opacity: 0 }
+                        : { opacity: 0, scale: 0.94, y: 6, filter: "blur(6px)" }
+                    }
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                      filter: "blur(0px)",
+                      transition: reduceMotion
+                        ? { duration: 0 }
+                        : {
+                            ...LAYER_SPRING,
+                            opacity: { duration: 0.16, ease: EASE_OUT },
+                            filter: { duration: 0.2, ease: EASE_OUT },
+                          },
+                    }}
+                    exit={
+                      reduceMotion
+                        ? { opacity: 0, transition: { duration: 0 } }
+                        : {
+                            opacity: 0,
+                            scale: 0.97,
+                            y: 4,
+                            filter: "blur(4px)",
+                            transition: { duration: 0.14, ease: EASE_OUT },
+                          }
+                    }
+                    className={cn(
+                      "obsidian-dashboard-shell-layer pointer-events-auto flex w-full max-w-sm flex-col gap-4 rounded-xl bg-(--obsidian-dashboard-shell-background) p-4 text-(--obsidian-dashboard-shell-foreground) shadow-(--obsidian-dashboard-shell-menu-shadow) outline-none",
+                      isDark && "dark",
                     )}
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <AlertDialogPrimitive.Cancel asChild>
-                      <DashboardButton variant="secondary" size="sm">
-                        {cancelLabel}
-                      </DashboardButton>
-                    </AlertDialogPrimitive.Cancel>
-                    <AlertDialogPrimitive.Action asChild>
-                      <DashboardButton
-                        variant={tone === "danger" ? "danger" : "primary"}
-                        size="sm"
-                        onClick={onConfirm}
-                      >
-                        {confirmLabel}
-                      </DashboardButton>
-                    </AlertDialogPrimitive.Action>
-                  </div>
-                </motion.div>
-              </AlertDialogPrimitive.Content>
-            </div>
-          </AlertDialogPrimitive.Portal>
+                  >
+                    <div className="flex flex-col gap-1.5">
+                      <AlertDialogPrimitive.Title className="text-sm font-medium leading-snug">
+                        {t(title)}
+                      </AlertDialogPrimitive.Title>
+                      {t(
+                        description ? (
+                          <AlertDialogPrimitive.Description className="text-xs leading-relaxed text-(--obsidian-dashboard-shell-text-muted)">
+                            {t(description)}
+                          </AlertDialogPrimitive.Description>
+                        ) : (
+                          <AlertDialogPrimitive.Description className="sr-only">
+                            {t(title)}
+                          </AlertDialogPrimitive.Description>
+                        ),
+                      )}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <AlertDialogPrimitive.Cancel asChild>
+                        <DashboardButton variant="secondary" size="sm">
+                          {t(cancelLabel)}
+                        </DashboardButton>
+                      </AlertDialogPrimitive.Cancel>
+                      <AlertDialogPrimitive.Action asChild>
+                        <DashboardButton
+                          variant={tone === "danger" ? "danger" : "primary"}
+                          size="sm"
+                          onClick={onConfirm}
+                        >
+                          {t(confirmLabel)}
+                        </DashboardButton>
+                      </AlertDialogPrimitive.Action>
+                    </div>
+                  </motion.div>
+                </AlertDialogPrimitive.Content>
+              </div>
+            </AlertDialogPrimitive.Portal>
+          ),
         )}
       </AnimatePresence>
     </AlertDialogPrimitive.Root>
@@ -559,6 +589,8 @@ export function DashboardFilterMenu({
   align = "start",
   className,
 }: DashboardFilterMenuProps) {
+  const { t } = useI18n();
+
   const currentLabel =
     options.find((option) => option.value === value)?.label ?? value;
 
@@ -568,22 +600,24 @@ export function DashboardFilterMenu({
         <DashboardButton
           variant="secondary"
           size="sm"
-          aria-label={label ? `${label}: ${currentLabel}` : undefined}
+          aria-label={t(label ? `${label}: ${currentLabel}` : undefined)}
           className={cn("group gap-0 overflow-hidden px-0", className)}
         >
-          {label && (
-            <>
-              <span className="px-[9px] font-normal text-(--obsidian-dashboard-shell-text-subtle)">
-                {label}
-              </span>
-              <span
-                aria-hidden
-                className="h-full w-px bg-(--obsidian-dashboard-shell-border)"
-              />
-            </>
+          {t(
+            label && (
+              <>
+                <span className="px-[9px] font-normal text-(--obsidian-dashboard-shell-text-subtle)">
+                  {t(label)}
+                </span>
+                <span
+                  aria-hidden
+                  className="h-full w-px bg-(--obsidian-dashboard-shell-border)"
+                />
+              </>
+            ),
           )}
           <span className="flex items-center gap-1.5 px-[9px]">
-            {currentLabel}
+            {t(currentLabel)}
             <ChevronDown
               aria-hidden
               className="text-(--obsidian-dashboard-shell-text-subtle) transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -592,13 +626,15 @@ export function DashboardFilterMenu({
         </DashboardButton>
       </DashboardMenuTrigger>
       <DashboardMenuContent align={align} className="min-w-44">
-        {label && <DashboardMenuLabel>{label}</DashboardMenuLabel>}
+        {t(label && <DashboardMenuLabel>{t(label)}</DashboardMenuLabel>)}
         <DashboardMenuRadioGroup value={value} onValueChange={onValueChange}>
-          {options.map((option) => (
-            <DashboardMenuRadioItem key={option.value} value={option.value}>
-              {option.label}
-            </DashboardMenuRadioItem>
-          ))}
+          {t(
+            options.map((option) => (
+              <DashboardMenuRadioItem key={option.value} value={option.value}>
+                {t(option.label)}
+              </DashboardMenuRadioItem>
+            )),
+          )}
         </DashboardMenuRadioGroup>
       </DashboardMenuContent>
     </DashboardMenu>
@@ -745,6 +781,8 @@ export function DashboardShell({
   style,
   ...props
 }: DashboardShellProps) {
+  const { t } = useI18n();
+
   const reduceMotion = useReducedMotion();
   const uid = useId();
   const titleId = `${uid}-title`;
@@ -908,7 +946,7 @@ export function DashboardShell({
             variant="secondary"
             size="icon"
             className="@2xl/dashboard-shell:hidden"
-            aria-label="Buka navigasi"
+            aria-label={t("Buka navigasi")}
             aria-expanded={isDrawerOpen}
             aria-controls={isDrawerOpen ? drawerId : undefined}
             onClick={() => setIsDrawerOpen(true)}
@@ -919,55 +957,65 @@ export function DashboardShell({
             id={titleId}
             className="truncate text-base font-medium leading-none tracking-normal"
           >
-            {title}
+            {t(title)}
           </Heading>
-          {status && (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] pl-[3px] pr-[6px] text-xs leading-none">
-              <span
-                aria-hidden
-                className={cn(
-                  "relative flex size-3 items-center justify-center",
-                  statusToneClasses[statusTone],
-                )}
-              >
-                <span className="absolute inset-0 rounded-full bg-current opacity-25" />
-                <span className="size-1.5 rounded-full bg-current" />
+          {t(
+            status && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) py-[3px] pl-[3px] pr-[6px] text-xs leading-none">
+                <span
+                  aria-hidden
+                  className={cn(
+                    "relative flex size-3 items-center justify-center",
+                    statusToneClasses[statusTone],
+                  )}
+                >
+                  <span className="absolute inset-0 rounded-full bg-current opacity-25" />
+                  <span className="size-1.5 rounded-full bg-current" />
+                </span>
+                {t(status)}
               </span>
-              {status}
-            </span>
+            ),
           )}
         </div>
-        {headerActions && (
-          <div className="flex shrink-0 items-center gap-2">
-            {headerActions}
-          </div>
+        {t(
+          headerActions && (
+            <div className="flex shrink-0 items-center gap-2">
+              {t(headerActions)}
+            </div>
+          ),
         )}
       </div>
-      {tabList}
+      {t(tabList)}
     </header>
   );
 
   const body = (
     <>
-      {(filters || toolbarActions) && (
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 p-4">
-          {filters && (
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              {filters}
-            </div>
-          )}
-          {toolbarActions && (
-            <div className="ml-auto flex shrink-0 items-center gap-1">
-              {toolbarActions}
-            </div>
-          )}
-        </div>
+      {t(
+        (filters || toolbarActions) && (
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 p-4">
+            {t(
+              filters && (
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  {t(filters)}
+                </div>
+              ),
+            )}
+            {t(
+              toolbarActions && (
+                <div className="ml-auto flex shrink-0 items-center gap-1">
+                  {t(toolbarActions)}
+                </div>
+              ),
+            )}
+          </div>
+        ),
       )}
       <div
         ref={contentRef}
         className="obsidian-dashboard-shell-scroll min-h-0 flex-1 overflow-auto"
       >
-        {children}
+        {t(children)}
       </div>
     </>
   );
@@ -998,7 +1046,7 @@ export function DashboardShell({
             <div
               role="separator"
               aria-orientation="vertical"
-              aria-label="Ubah lebar sidebar"
+              aria-label={t("Ubah lebar sidebar")}
               aria-controls={sidebarId}
               aria-valuemin={minSidebarWidth}
               aria-valuemax={maxSidebarWidth}
@@ -1024,95 +1072,103 @@ export function DashboardShell({
             inert={isDrawerOpen}
             className="flex min-h-0 min-w-0 flex-1 flex-col"
           >
-            {tabs?.length ? (
-              <TabsPrimitive.Root
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="flex min-h-0 flex-1 flex-col"
-              >
-                {renderHeader(
-                  <TabsPrimitive.List
-                    aria-labelledby={titleId}
-                    className="border-b border-(--obsidian-dashboard-shell-border) px-3 pb-2.5"
-                  >
-                    <HoverHighlightList
-                      className="flex flex-wrap items-center gap-1"
-                      highlightClassName="rounded-md bg-(--obsidian-dashboard-shell-hover)"
-                    >
-                      {tabs.map((item) => (
-                        <ShellTab
-                          key={item.value}
-                          item={item}
-                          isActive={item.value === activeTab}
-                          pillId={tabPillId}
-                        />
-                      ))}
-                    </HoverHighlightList>
-                  </TabsPrimitive.List>,
-                )}
-                <TabsPrimitive.Content
+            {t(
+              tabs?.length ? (
+                <TabsPrimitive.Root
                   value={activeTab}
-                  className="flex min-h-0 flex-1 flex-col outline-none"
+                  onValueChange={setActiveTab}
+                  className="flex min-h-0 flex-1 flex-col"
                 >
-                  {body}
-                </TabsPrimitive.Content>
-              </TabsPrimitive.Root>
-            ) : (
-              <>
-                {renderHeader()}
-                {body}
-              </>
+                  {t(
+                    renderHeader(
+                      <TabsPrimitive.List
+                        aria-labelledby={titleId}
+                        className="border-b border-(--obsidian-dashboard-shell-border) px-3 pb-2.5"
+                      >
+                        <HoverHighlightList
+                          className="flex flex-wrap items-center gap-1"
+                          highlightClassName="rounded-md bg-(--obsidian-dashboard-shell-hover)"
+                        >
+                          {t(
+                            tabs.map((item) => (
+                              <ShellTab
+                                key={item.value}
+                                item={item}
+                                isActive={item.value === activeTab}
+                                pillId={tabPillId}
+                              />
+                            )),
+                          )}
+                        </HoverHighlightList>
+                      </TabsPrimitive.List>,
+                    ),
+                  )}
+                  <TabsPrimitive.Content
+                    value={activeTab}
+                    className="flex min-h-0 flex-1 flex-col outline-none"
+                  >
+                    {t(body)}
+                  </TabsPrimitive.Content>
+                </TabsPrimitive.Root>
+              ) : (
+                <>
+                  {t(renderHeader())}
+                  {t(body)}
+                </>
+              ),
             )}
           </section>
 
           <AnimatePresence>
-            {isDrawerOpen && (
-              <motion.div
-                key="drawer"
-                className="absolute inset-0 z-30 @2xl/dashboard-shell:hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: reduceMotion ? 0 : 0.2,
-                  ease: EASE_OUT,
-                }}
-              >
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-black/40"
-                  onClick={closeDrawer}
-                />
+            {t(
+              isDrawerOpen && (
                 <motion.div
-                  id={drawerId}
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label={navigationLabel}
-                  onKeyDown={(event) => {
-                    if (event.key === "Escape") {
-                      event.stopPropagation();
-                      closeDrawer();
-                    } else if (event.key === "Tab") {
-                      keepFocusInside(event);
-                    }
-                  }}
-                  className="absolute inset-y-0 left-0 flex w-[254px] max-w-[85%] flex-col border-r border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-sidebar) shadow-[0_16px_40px_rgb(0_0_0/0.35)]"
-                  initial={{ x: reduceMotion ? 0 : "-100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: reduceMotion ? 0 : "-100%" }}
+                  key="drawer"
+                  className="absolute inset-0 z-30 @2xl/dashboard-shell:hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{
-                    duration: reduceMotion ? 0 : 0.28,
+                    duration: reduceMotion ? 0 : 0.2,
                     ease: EASE_OUT,
                   }}
                 >
-                  <SidebarContent
-                    {...sidebarProps}
-                    onSelect={selectItemFromDrawer}
-                    onClose={closeDrawer}
-                    closeButtonRef={closeButtonRef}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-black/40"
+                    onClick={closeDrawer}
                   />
+                  <motion.div
+                    id={drawerId}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t(navigationLabel)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        event.stopPropagation();
+                        closeDrawer();
+                      } else if (event.key === "Tab") {
+                        keepFocusInside(event);
+                      }
+                    }}
+                    className="absolute inset-y-0 left-0 flex w-[254px] max-w-[85%] flex-col border-r border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-sidebar) shadow-[0_16px_40px_rgb(0_0_0/0.35)]"
+                    initial={{ x: reduceMotion ? 0 : "-100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: reduceMotion ? 0 : "-100%" }}
+                    transition={{
+                      duration: reduceMotion ? 0 : 0.28,
+                      ease: EASE_OUT,
+                    }}
+                  >
+                    <SidebarContent
+                      {...sidebarProps}
+                      onSelect={selectItemFromDrawer}
+                      onClose={closeDrawer}
+                      closeButtonRef={closeButtonRef}
+                    />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              ),
             )}
           </AnimatePresence>
         </div>
@@ -1141,6 +1197,8 @@ function HoverHighlightList({
   highlightClassName?: string;
   children: ReactNode;
 }) {
+  const { t } = useI18n();
+
   const reduceMotion = !!useReducedMotion();
   const listRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -1209,7 +1267,7 @@ function HoverHighlightList({
           animate={{ opacity: isVisible ? 1 : 0 }}
           transition={{ duration: isVisible ? 0.12 : 0.15, ease: "easeOut" }}
         />
-        {children}
+        {t(children)}
       </div>
     </HoverHighlightContext.Provider>
   );
@@ -1238,80 +1296,94 @@ const SidebarContent = memo(function SidebarContent({
   onClose,
   closeButtonRef,
 }: SidebarContentProps) {
+  const { t } = useI18n();
+
   // Each sidebar instance (docked and drawer) needs its own pill, or the pill would jump between them.
   const pillId = useId();
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 border-b border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-panel) p-3">
-        {brand.logo && (
-          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden">
-            {brand.logo}
-          </span>
+        {t(
+          brand.logo && (
+            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden">
+              {t(brand.logo)}
+            </span>
+          ),
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="block truncate text-sm font-medium leading-none tracking-[-0.01em]">
-            {brand.name}
+            {t(brand.name)}
           </span>
-          {brand.description && (
-            <span className="block truncate text-xs leading-none text-(--obsidian-dashboard-shell-text-subtle)">
-              {brand.description}
-            </span>
+          {t(
+            brand.description && (
+              <span className="block truncate text-xs leading-none text-(--obsidian-dashboard-shell-text-subtle)">
+                {t(brand.description)}
+              </span>
+            ),
           )}
         </div>
-        {onClose && (
-          <DashboardButton
-            ref={closeButtonRef}
-            variant="ghost"
-            size="icon"
-            aria-label="Tutup navigasi"
-            onClick={onClose}
-          >
-            <X aria-hidden />
-          </DashboardButton>
+        {t(
+          onClose && (
+            <DashboardButton
+              ref={closeButtonRef}
+              variant="ghost"
+              size="icon"
+              aria-label={t("Tutup navigasi")}
+              onClick={onClose}
+            >
+              <X aria-hidden />
+            </DashboardButton>
+          ),
         )}
       </div>
 
       <motion.nav
         layoutScroll
-        aria-label={navigationLabel}
+        aria-label={t(navigationLabel)}
         className="obsidian-dashboard-shell-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
       >
         <HoverHighlightList>
-          {navigation.map((section, index) => (
-            <NavSection
-              key={section.id}
-              title={section.title}
-              items={section.items}
-              activeItemId={activeItemId}
-              pillId={pillId}
-              onSelect={onSelect}
-              className={
-                index < navigation.length - 1
-                  ? "border-b border-(--obsidian-dashboard-shell-border)"
-                  : undefined
-              }
-            />
-          ))}
+          {t(
+            navigation.map((section, index) => (
+              <NavSection
+                key={section.id}
+                title={t(section.title)}
+                items={section.items}
+                activeItemId={activeItemId}
+                pillId={pillId}
+                onSelect={onSelect}
+                className={
+                  index < navigation.length - 1
+                    ? "border-b border-(--obsidian-dashboard-shell-border)"
+                    : undefined
+                }
+              />
+            )),
+          )}
         </HoverHighlightList>
       </motion.nav>
 
-      {secondaryNavigation && secondaryNavigation.length > 0 && (
-        <HoverHighlightList className="shrink-0 border-t border-(--obsidian-dashboard-shell-border)">
-          <NavSection
-            items={secondaryNavigation}
-            activeItemId={activeItemId}
-            pillId={pillId}
-            onSelect={onSelect}
-            isQuiet
-          />
-        </HoverHighlightList>
+      {t(
+        secondaryNavigation && secondaryNavigation.length > 0 && (
+          <HoverHighlightList className="shrink-0 border-t border-(--obsidian-dashboard-shell-border)">
+            <NavSection
+              items={secondaryNavigation}
+              activeItemId={activeItemId}
+              pillId={pillId}
+              onSelect={onSelect}
+              isQuiet
+            />
+          </HoverHighlightList>
+        ),
       )}
 
-      {footer && (
-        <div className="shrink-0 border-t border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-panel) p-4">
-          {footer}
-        </div>
+      {t(
+        footer && (
+          <div className="shrink-0 border-t border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-panel) p-4">
+            {t(footer)}
+          </div>
+        ),
       )}
     </div>
   );
@@ -1336,32 +1408,38 @@ function NavSection({
   isQuiet = false,
   className,
 }: NavSectionProps) {
+  const { t } = useI18n();
+
   const titleId = useId();
 
   return (
     <div className={cn("flex flex-col gap-1 p-3", className)}>
-      {title && (
-        <span
-          id={titleId}
-          className="block py-1 text-xs font-medium uppercase leading-none tracking-[1px] text-(--obsidian-dashboard-shell-text-subtle)"
-        >
-          {title}
-        </span>
+      {t(
+        title && (
+          <span
+            id={titleId}
+            className="block py-1 text-xs font-medium uppercase leading-none tracking-[1px] text-(--obsidian-dashboard-shell-text-subtle)"
+          >
+            {t(title)}
+          </span>
+        ),
       )}
       <ul
         aria-labelledby={title ? titleId : undefined}
         className="flex flex-col gap-px"
       >
-        {items.map((item) => (
-          <NavItem
-            key={item.id}
-            item={item}
-            isActive={item.id === activeItemId}
-            isQuiet={isQuiet}
-            pillId={pillId}
-            onSelect={onSelect}
-          />
-        ))}
+        {t(
+          items.map((item) => (
+            <NavItem
+              key={item.id}
+              item={item}
+              isActive={item.id === activeItemId}
+              isQuiet={isQuiet}
+              pillId={pillId}
+              onSelect={onSelect}
+            />
+          )),
+        )}
       </ul>
     </div>
   );
@@ -1376,6 +1454,8 @@ type NavItemProps = {
 };
 
 function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
+  const { t } = useI18n();
+
   const highlight = useContext(HoverHighlightContext);
   const linkComponent = useContext(ShellLinkContext);
   const reduceMotion = useReducedMotion();
@@ -1399,50 +1479,58 @@ function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
 
   const content = (
     <>
-      {isActive && (
-        <motion.span
-          layoutId={pillId}
-          aria-hidden
-          className="absolute inset-0 rounded-lg bg-(--obsidian-dashboard-shell-muted) shadow-(--obsidian-dashboard-shell-control-shadow)"
-          transition={reduceMotion ? { duration: 0 } : PILL_SPRING}
-        />
-      )}
-      {Icon ? (
-        <Icon
-          aria-hidden
-          className="relative size-4 shrink-0 text-(--obsidian-dashboard-shell-icon)"
-        />
-      ) : item.color ? (
-        <span
-          aria-hidden
-          className="relative flex size-4 shrink-0 items-center justify-center"
-        >
-          <span
-            className="size-2 rounded-full"
-            style={{ backgroundColor: item.color }}
+      {t(
+        isActive && (
+          <motion.span
+            layoutId={pillId}
+            aria-hidden
+            className="absolute inset-0 rounded-lg bg-(--obsidian-dashboard-shell-muted) shadow-(--obsidian-dashboard-shell-control-shadow)"
+            transition={reduceMotion ? { duration: 0 } : PILL_SPRING}
           />
-        </span>
-      ) : null}
+        ),
+      )}
+      {t(
+        Icon ? (
+          <Icon
+            aria-hidden
+            className="relative size-4 shrink-0 text-(--obsidian-dashboard-shell-icon)"
+          />
+        ) : item.color ? (
+          <span
+            aria-hidden
+            className="relative flex size-4 shrink-0 items-center justify-center"
+          >
+            <span
+              className="size-2 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+          </span>
+        ) : null,
+      )}
       <span className="relative min-w-0 flex-1 truncate text-left">
-        {item.label}
+        {t(item.label)}
       </span>
-      {item.count !== undefined && (
-        <span className="relative inline-flex h-4 min-w-6 shrink-0 items-center justify-center rounded-[5px] border-[0.5px] border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) px-1 text-[11px] font-normal leading-none tabular-nums text-(--obsidian-dashboard-shell-text-muted)">
-          {item.count}
-        </span>
+      {t(
+        item.count !== undefined && (
+          <span className="relative inline-flex h-4 min-w-6 shrink-0 items-center justify-center rounded-[5px] border-[0.5px] border-(--obsidian-dashboard-shell-border-strong) bg-(--obsidian-dashboard-shell-muted) px-1 text-[11px] font-normal leading-none tabular-nums text-(--obsidian-dashboard-shell-text-muted)">
+            {t(item.count)}
+          </span>
+        ),
       )}
     </>
   );
 
   return (
     <li>
-      {item.href ? (
-        // The link component comes from the app, usually next/link, and keeps its identity between renders.
-        createElement(linkComponent, { href: item.href, ...shared }, content)
-      ) : (
-        <button type="button" {...shared}>
-          {content}
-        </button>
+      {t(
+        item.href ? (
+          // The link component comes from the app, usually next/link, and keeps its identity between renders.
+          createElement(linkComponent, { href: item.href, ...shared }, content)
+        ) : (
+          <button type="button" {...shared}>
+            {t(content)}
+          </button>
+        ),
       )}
     </li>
   );
@@ -1455,6 +1543,8 @@ type ShellTabProps = {
 };
 
 function ShellTab({ item, isActive, pillId }: ShellTabProps) {
+  const { t } = useI18n();
+
   const highlight = useContext(HoverHighlightContext);
   const reduceMotion = useReducedMotion();
 
@@ -1466,23 +1556,25 @@ function ShellTab({ item, isActive, pillId }: ShellTabProps) {
       }}
       className="group relative grid h-7 cursor-pointer select-none place-items-center rounded-md px-2.5 text-xs leading-none text-(--obsidian-dashboard-shell-text-subtle) outline-none transition-[color,scale] duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] hover:text-(--obsidian-dashboard-shell-foreground) focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) active:scale-[0.97] active:duration-75 data-[state=active]:text-(--obsidian-dashboard-shell-foreground)"
     >
-      {isActive && (
-        <motion.span
-          layoutId={pillId}
-          aria-hidden
-          className="absolute inset-0 rounded-md bg-(--obsidian-dashboard-shell-muted) shadow-(--obsidian-dashboard-shell-control-shadow)"
-          transition={reduceMotion ? { duration: 0 } : PILL_SPRING}
-        />
+      {t(
+        isActive && (
+          <motion.span
+            layoutId={pillId}
+            aria-hidden
+            className="absolute inset-0 rounded-md bg-(--obsidian-dashboard-shell-muted) shadow-(--obsidian-dashboard-shell-control-shadow)"
+            transition={reduceMotion ? { duration: 0 } : PILL_SPRING}
+          />
+        ),
       )}
       {/* The hidden bold copy reserves the active width so the row never shifts. */}
       <span
         aria-hidden
         className="invisible relative col-start-1 row-start-1 font-medium"
       >
-        {item.label}
+        {t(item.label)}
       </span>
       <span className="relative col-start-1 row-start-1 group-data-[state=active]:font-medium">
-        {item.label}
+        {t(item.label)}
       </span>
     </TabsPrimitive.Trigger>
   );

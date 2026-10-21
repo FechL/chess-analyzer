@@ -1,3 +1,6 @@
+// i18n: rendered text
+import { pieceAsset } from "../lib/preferences";
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import {
@@ -22,6 +25,7 @@ import {
   Trash2,
   WandSparkles,
 } from "lucide-react";
+import { NotationLine } from "../components/Notation";
 import Board, { EvalBar } from "../components/Board";
 import {
   IconButton,
@@ -130,6 +134,8 @@ export default function Analysis({
   customEditing: boolean;
   onCustomEditingChange: (editing: boolean) => void;
 }) {
+  const { t } = useI18n();
+
   const [activeVariationId, setActiveVariationId] = useState<string>();
   const activeVariation = mainGame.variations?.find(
     (item) => item.id === activeVariationId,
@@ -592,57 +598,78 @@ export default function Analysis({
       <div className="workspace-toolbar">
         <div className="game-title-block">
           <strong>
-            {game.source === "Bebas" || game.source === "Kustom"
-              ? game.source === "Kustom" || game.event.includes("Kustom")
-                ? "Analisis Bebas (Kustom)"
-                : "Analisis Bebas"
-              : "Impor " + (game.source || "PGN")}
+            {t(
+              game.source === "Bebas" || game.source === "Kustom"
+                ? game.source === "Kustom" || game.event.includes("Kustom")
+                  ? "Analisis Bebas (Kustom)"
+                  : "Analisis Bebas"
+                : "Impor " + (game.source || "PGN"),
+            )}
           </strong>
-          {!customEditing && (
-            <div className="game-players">
-              {(["w", "b"] as const).map((color) => {
-                const name = color === "w" ? game.white : game.black;
-                const elo = color === "w" ? game.whiteElo : game.blackElo;
-                return (
-                  <span className="game-player" key={color}>
-                    <span
-                      className={"player-color player-color-" + color}
-                      aria-hidden="true"
-                    />
-                    <strong>{color === "w" ? "Putih" : "Hitam"}</strong>
-                    <span>
-                      {name}
-                      {elo ? " (" + elo + ")" : ""}
-                    </span>
-                    {(activeVariation || mainGame.moveTimes?.some(Boolean)) && (
-                      <time
-                        aria-label={
-                          "Sisa waktu " + (color === "w" ? "putih" : "hitam")
-                        }
-                      >
-                        {activeVariation ? "-:-:-" : playerClock(color)}
-                      </time>
-                    )}
-                  </span>
-                );
-              })}
-            </div>
+          {t(
+            !customEditing && (
+              <div className="game-players">
+                {t(
+                  (["w", "b"] as const).map((color) => {
+                    const name = color === "w" ? game.white : game.black;
+                    const elo = color === "w" ? game.whiteElo : game.blackElo;
+                    return (
+                      <span className="game-player" key={color}>
+                        <span
+                          className={"player-color player-color-" + color}
+                          aria-hidden="true"
+                        />
+                        <strong>{t(color === "w" ? "Putih" : "Hitam")}</strong>
+                        <span>
+                          {t(name)}
+                          {t(elo ? " (" + elo + ")" : "")}
+                        </span>
+                        {t(
+                          (activeVariation ||
+                            mainGame.moveTimes?.some(Boolean)) && (
+                            <time
+                              aria-label={t(
+                                "Sisa waktu " +
+                                  (color === "w" ? "putih" : "hitam"),
+                              )}
+                            >
+                              {t(
+                                activeVariation ? "-:-:-" : playerClock(color),
+                              )}
+                            </time>
+                          ),
+                        )}
+                      </span>
+                    );
+                  }),
+                )}
+              </div>
+            ),
           )}
         </div>
-        {!customEditing && (
-          <button className="button secondary" onClick={onSave}>
-            <Bookmark size={16} /> Simpan
-          </button>
+        {t(
+          !customEditing && (
+            <button className="button secondary" onClick={onSave}>
+              <Bookmark size={16} />
+              {t(" Simpan")}
+            </button>
+          ),
         )}
         <button className="button secondary" onClick={onNewGame}>
-          <Plus size={15} /> New Game
+          <Plus size={15} />
+          {t(" New Game")}
         </button>
         <button className="button primary" onClick={onImport}>
-          <ArrowDownToLine size={16} /> Impor permainan
+          <ArrowDownToLine size={16} />
+          {t(" Impor permainan")}
         </button>
       </div>
       <div className="analysis-grid">
         <section className="board-section">
+          <div className="board-turn-status">
+            <span className="status-dot" />
+            {t(gameStatus(position))}
+          </div>
           <div className="board-and-eval">
             <EvalBar
               cp={evaluation?.cp}
@@ -661,6 +688,13 @@ export default function Analysis({
                 onEditSquare={editSquare}
                 onDeleteDropSquare={deleteDraggedPiece}
                 lastMove={currentMove}
+                annotation={
+                  settings.showPieceAnnotation && !customEditing
+                    ? currentBook
+                      ? "book"
+                      : currentReview?.annotation
+                    : undefined
+                }
                 arrow={
                   settings.showArrows
                     ? result?.lines
@@ -675,6 +709,12 @@ export default function Analysis({
           <NavigationControls
             ply={ply}
             total={game.moves.length}
+            outsideNotation={!!activeVariation}
+            onReturnToMain={() => {
+              stopReview();
+              setActiveVariationId(undefined);
+              setPly(mainGame.moves.length);
+            }}
             onChange={setPly}
             onFlip={() => setFlipped((f) => !f)}
           />
@@ -683,468 +723,586 @@ export default function Analysis({
           <div className="analysis-sidebar-content">
             <aside className="analysis-panel">
               <div className="panel-tabs">
-                {(customEditing
-                  ? [["editor", "Atur buah"]]
-                  : [
-                      ["review", "Ulasan"],
-                      ["engine", "Engine"],
-                      ["notes", "Catatan"],
-                      ["options", "Opsi"],
-                    ]
-                ).map(([value, label]) => (
-                  <button
-                    className={tab === value ? "active" : ""}
-                    key={value}
-                    onClick={() => setTab(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
+                {t(
+                  (customEditing
+                    ? [["editor", "Atur buah"]]
+                    : [
+                        ["review", "Ulasan"],
+                        ["engine", "Engine"],
+                        ["notes", "Catatan"],
+                        ["options", "Opsi"],
+                      ]
+                  ).map(([value, label]) => (
+                    <button
+                      className={tab === value ? "active" : ""}
+                      key={value}
+                      onClick={() => setTab(value)}
+                    >
+                      {t(label)}
+                    </button>
+                  )),
+                )}
                 <IconButton
-                  label="Tentang analisis"
+                  label={t("Tentang analisis")}
                   onClick={() => setShowInfo(true)}
                 >
                   <CircleHelp size={15} />
                 </IconButton>
               </div>
-              {!customEditing && (tab === "review" || tab === "engine") && (
-                <div className="engine-status">
-                  <div className="engine-chip">
-                    <Cpu size={15} />
-                    <strong>Stockfish 19</strong>
-                    <span>{settings.engine}</span>
+              {t(
+                !customEditing && (tab === "review" || tab === "engine") && (
+                  <div className="engine-status">
+                    <div className="engine-chip">
+                      <Cpu size={15} />
+                      <strong>{t("Stockfish 19")}</strong>
+                      <span>{t(settings.engine)}</span>
+                    </div>
+                    <button
+                      className="text-button engine-settings-link"
+                      onClick={() => setTab("options")}
+                    >
+                      {t("Ganti engine ")}
+                      <ArrowRight size={13} />
+                    </button>
                   </div>
-                  <button
-                    className="text-button engine-settings-link"
-                    onClick={() => setTab("options")}
-                  >
-                    Ganti engine <ArrowRight size={13} />
-                  </button>
-                </div>
+                ),
               )}
-              {!customEditing && (error || engineError) && (
-                <div className="error-message" role="alert">
-                  {error || engineError}
-                  <button onClick={() => setError("")}>×</button>
-                </div>
+              {t(
+                !customEditing && (error || engineError) && (
+                  <div className="error-message" role="alert">
+                    {t(error || engineError)}
+                    <button onClick={() => setError("")}>{t("×")}</button>
+                  </div>
+                ),
               )}
-              {tab === "review" && !customEditing && (
-                <>
-                  <div className="review-overview">
-                    <div className="review-overview-heading">
-                      <div className="section-label">
-                        AKURASI PERMAINAN{" "}
+              {t(
+                tab === "review" && !customEditing && (
+                  <>
+                    <div className="review-overview">
+                      <div className="review-overview-heading">
+                        <div className="section-label">
+                          {t("AKURASI PERMAINAN")}
+                          {t(" ")}
+                          <button
+                            onClick={() => setShowInfo(true)}
+                            aria-label={t("Metode akurasi")}
+                          >
+                            <CircleHelp size={13} />
+                          </button>
+                        </div>
                         <button
-                          onClick={() => setShowInfo(true)}
-                          aria-label="Metode akurasi"
+                          className="text-button review-action-button"
+                          onClick={runReview}
+                          disabled={status !== "ready" || !game.moves.length}
                         >
-                          <CircleHelp size={13} />
+                          {t(
+                            reviewing ? (
+                              <>
+                                <span>{t("Hentikan ulasan")}</span>
+                                <span>
+                                  {t(progress)}
+                                  {t("%")}
+                                </span>
+                              </>
+                            ) : (
+                              <span>
+                                {t(
+                                  review.length
+                                    ? "Analisis ulang"
+                                    : "Analisis seluruh permainan",
+                                )}
+                              </span>
+                            ),
+                          )}
                         </button>
                       </div>
-                      <button
-                        className="text-button review-action-button"
-                        onClick={runReview}
-                        disabled={status !== "ready" || !game.moves.length}
-                      >
-                        {reviewing ? (
-                          <>
-                            <span>Hentikan ulasan</span>
-                            <span>{progress}%</span>
-                          </>
-                        ) : (
-                          <span>
-                            {review.length
-                              ? "Analisis ulang"
-                              : "Analisis seluruh permainan"}
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                    <div className="accuracy-scores">
-                      <div>
-                        <span className="color-dot white" />
-                        <span>Putih</span>
-                        <strong>
-                          {accuracy("w")}
-                          <small>%</small>
-                        </strong>
+                      <div className="accuracy-scores">
+                        <div>
+                          <span className="color-dot white" />
+                          <span>{t("Putih")}</span>
+                          <strong>
+                            {t(accuracy("w"))}
+                            <small>{t("%")}</small>
+                          </strong>
+                        </div>
+                        <span className="score-divider" />
+                        <div>
+                          <span className="color-dot black" />
+                          <span>{t("Hitam")}</span>
+                          <strong>
+                            {t(accuracy("b"))}
+                            <small>{t("%")}</small>
+                          </strong>
+                        </div>
                       </div>
-                      <span className="score-divider" />
-                      <div>
-                        <span className="color-dot black" />
-                        <span>Hitam</span>
-                        <strong>
-                          {accuracy("b")}
-                          <small>%</small>
-                        </strong>
-                      </div>
-                    </div>
-                    {reviewing && (
-                      <div className="review-progress">
-                        <span style={{ width: `${progress}%` }} />
-                      </div>
-                    )}
-                    {classificationCounts.length > 0 && (
-                      <div
-                        className="classification-summary"
-                        tabIndex={0}
-                        role="region"
-                        aria-label="Ringkasan penilaian langkah"
-                      >
-                        {classificationCounts.map(({ key, count }) => (
-                          <div key={key}>
-                            <span style={{ color: LABELS[key].color }}>
-                              {LABELS[key].symbol}
-                            </span>
-                            <strong>{count}</strong>
-                            <small>{LABELS[key].label}</small>
+                      {t(
+                        reviewing && (
+                          <div className="review-progress">
+                            <span style={{ width: `${progress}%` }} />
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="notation-heading">
-                    <span>Notasi permainan</span>
-                    <span>
-                      {mainGame.moves.length} ply
-                      {activeVariation
-                        ? " · Variasi " +
-                          ((mainGame.variations?.findIndex(
-                            (item) => item.id === activeVariation.id,
-                          ) ?? 0) +
-                            1)
-                        : ""}
-                    </span>
-                  </div>
-                  <MoveList {...notationProps} />
-                  <div className="coach-card">
-                    <div className="coach-label">
-                      <span className="coach-avatar">
-                        {currentBook ? (
-                          <BookOpen size={17} />
-                        ) : (
-                          <Lightbulb size={17} />
-                        )}
-                      </span>
-                      <strong>
-                        {currentBook
-                          ? "Book Move"
-                          : currentReview
-                            ? LABELS[currentReview.annotation].label
-                            : currentMove
-                              ? "Menilai langkah…"
-                              : "Catatan pelatih"}
-                      </strong>
-                      {(currentBook || currentReview) && (
-                        <span className="coach-move">{currentMove?.san}</span>
+                        ),
+                      )}
+                      {t(
+                        classificationCounts.length > 0 && (
+                          <div
+                            className="classification-summary"
+                            tabIndex={0}
+                            role="region"
+                            aria-label={t("Ringkasan penilaian langkah")}
+                          >
+                            {t(
+                              classificationCounts.map(({ key, count }) => (
+                                <div key={key}>
+                                  <span style={{ color: LABELS[key].color }}>
+                                    {t(LABELS[key].symbol)}
+                                  </span>
+                                  <strong>{t(count)}</strong>
+                                  <small>{t(LABELS[key].label)}</small>
+                                </div>
+                              )),
+                            )}
+                          </div>
+                        ),
                       )}
                     </div>
-                    <p>{coachText}</p>
-                  </div>
-                </>
-              )}
-              {tab === "engine" && !customEditing && (
-                <div className="engine-details">
-                  <div className="line-heading">
-                    <h3>Variasi terbaik</h3>
-                  </div>
-                  {result?.lines.length ? (
-                    result.lines.map((line, i) => (
-                      <button
-                        className="engine-line"
-                        key={i}
-                        onClick={() => {
-                          const uci = line.pv[0];
-                          if (uci)
-                            playMove(uci.slice(0, 2), uci.slice(2, 4), uci[4]);
-                        }}
-                      >
-                        <span className="line-index">{i + 1}</span>
-                        <div>
-                          <div className="engine-line-meta">
-                            <strong>{formatEval(line.cp, line.mate)}</strong>
-                            <span className="variation-depth">
-                              depth {line.depth}
+                    <div className="notation-heading">
+                      <span>{t("Notasi permainan")}</span>
+                      <span>
+                        {t(mainGame.moves.length)}
+                        {t(" ply")}
+                        {t(
+                          activeVariation
+                            ? " · Variasi " +
+                                ((mainGame.variations?.findIndex(
+                                  (item) => item.id === activeVariation.id,
+                                ) ?? 0) +
+                                  1)
+                            : "",
+                        )}
+                      </span>
+                    </div>
+                    <MoveList {...notationProps} />
+                    <div className="coach-card">
+                      <div className="coach-label">
+                        <span className="coach-avatar">
+                          {t(
+                            currentBook ? (
+                              <BookOpen size={17} />
+                            ) : (
+                              <Lightbulb size={17} />
+                            ),
+                          )}
+                        </span>
+                        <strong>
+                          {t(
+                            currentBook
+                              ? "Book Move"
+                              : currentReview
+                                ? LABELS[currentReview.annotation].label
+                                : currentMove
+                                  ? "Menilai langkah…"
+                                  : "Catatan pelatih",
+                          )}
+                        </strong>
+                        {t(
+                          (currentBook || currentReview) && (
+                            <span className="coach-move">
+                              {t(currentMove?.san)}
                             </span>
-                          </div>
-                          <p>{pvToSan(fen, line.pv, 8).join(" ")}</p>
-                        </div>
-                        <ArrowRight size={15} />
-                      </button>
-                    ))
-                  ) : (
-                    <div className="empty-inline">
-                      {position.isGameOver()
-                        ? gameStatus(position)
-                        : !settings.liveEngine
-                          ? "Aktifkan live engine di tab Opsi untuk menganalisis posisi."
-                          : "Engine sedang menyiapkan variasi…"}
-                    </div>
-                  )}
-                  <div className="notation-heading">
-                    <span>Notasi permainan</span>
-                    <span>
-                      {mainGame.moves.length} ply
-                      {activeVariation
-                        ? " · Variasi " +
-                          ((mainGame.variations?.findIndex(
-                            (item) => item.id === activeVariation.id,
-                          ) ?? 0) +
-                            1)
-                        : ""}
-                    </span>
-                  </div>
-                  <MoveList {...notationProps} />
-                </div>
-              )}
-              {customEditing && (
-                <div className="piece-editor">
-                  <p>Pilih buah lalu klik petak, atau seret buah ke papan.</p>
-                  {["w", "b"].map((color) => (
-                    <div className="piece-editor-group" key={color}>
-                      <strong>{color === "w" ? "Putih" : "Hitam"}</strong>
-                      <div>
-                        {["q", "r", "b", "n", "p"].map((type) => {
-                          const code =
-                            color === "w" ? type.toUpperCase() : type;
-                          const names: Record<string, string> = {
-                            q: "Menteri",
-                            r: "Benteng",
-                            b: "Gajah",
-                            n: "Kuda",
-                            p: "Pion",
-                          };
-                          return (
-                            <button
-                              key={code}
-                              aria-label={
-                                (color === "w" ? "Putih " : "Hitam ") +
-                                names[type]
-                              }
-                              className={editorPiece === code ? "active" : ""}
-                              draggable
-                              onDragStart={(e) =>
-                                e.dataTransfer.setData(
-                                  "application/x-kuda-piece",
-                                  code,
-                                )
-                              }
-                              onClick={() => {
-                                setEditorPiece(code);
-                                setEditorSquare(undefined);
-                              }}
-                            >
-                              <img
-                                src={
-                                  "/pieces/" +
-                                  color +
-                                  type.toUpperCase() +
-                                  ".svg"
-                                }
-                                alt=""
-                              />
-                            </button>
-                          );
-                        })}
+                          ),
+                        )}
                       </div>
+                      <p>{t(coachText)}</p>
                     </div>
-                  ))}
-                  <p>
-                    {editorSquare
-                      ? "Petak " + editorSquare + " dipilih"
-                      : editorPiece
-                        ? "Buah siap diletakkan"
-                        : "Pilih petak berisi buah untuk menghapusnya"}
-                  </p>
-                  <div className="piece-editor-actions">
-                    <button
-                      className="button secondary"
-                      disabled={
-                        !editorSquare ||
-                        new Chess(game.startFen).get(
-                          editorSquare as import("chess.js").Square,
-                        )?.type === "k"
-                      }
-                      onClick={deleteEditorSquare}
-                    >
-                      <Trash2 size={15} /> Hapus buah
-                    </button>
-                    <button className="button secondary" onClick={resetEditor}>
-                      <RotateCcw size={15} /> Reset
-                    </button>
-                  </div>
-                  <button
-                    className="button primary"
-                    onClick={() => {
-                      onCustomEditingChange(false);
-                      setEditorPiece(undefined);
-                      setEditorSquare(undefined);
-                      setTab("review");
-                    }}
-                  >
-                    Selesai mengatur
-                  </button>
-                </div>
+                  </>
+                ),
               )}
-              {tab === "options" && !customEditing && (
-                <div className="engine-options">
-                  <div className="settings-section">
-                    <label htmlFor="engine-choice">Pilih engine</label>
-                    <select
-                      id="engine-choice"
-                      value={settings.engine}
-                      onChange={(e) => {
-                        stopReview();
-                        setEvaluation(undefined);
-                        evaluationCache.current.clear();
-                        onSettingsChange({
-                          ...settings,
-                          engine: e.target.value as Settings["engine"],
-                        });
+              {t(
+                tab === "engine" && !customEditing && (
+                  <div className="engine-details">
+                    <div className="line-heading">
+                      <h3>{t("Variasi terbaik")}</h3>
+                    </div>
+                    {t(
+                      result?.lines.length ? (
+                        result.lines.map((line, i) => (
+                          <button
+                            className="engine-line"
+                            key={i}
+                            onClick={() => {
+                              const uci = line.pv[0];
+                              if (uci)
+                                playMove(
+                                  uci.slice(0, 2),
+                                  uci.slice(2, 4),
+                                  uci[4],
+                                );
+                            }}
+                          >
+                            <span className="line-index">{t(i + 1)}</span>
+                            <div>
+                              <div className="engine-line-meta">
+                                <strong>
+                                  {t(formatEval(line.cp, line.mate))}
+                                </strong>
+                                <span className="variation-depth">
+                                  {t("depth ")}
+                                  {t(line.depth)}
+                                </span>
+                              </div>
+                              <p>
+                                <NotationLine
+                                  moves={pvToSan(fen, line.pv, 8)}
+                                  turn={position.turn()}
+                                />
+                              </p>
+                            </div>
+                            <ArrowRight size={15} />
+                          </button>
+                        ))
+                      ) : (
+                        <div className="empty-inline">
+                          {t(
+                            position.isGameOver()
+                              ? gameStatus(position)
+                              : !settings.liveEngine
+                                ? "Aktifkan live engine di tab Opsi untuk menganalisis posisi."
+                                : "Engine sedang menyiapkan variasi…",
+                          )}
+                        </div>
+                      ),
+                    )}
+                    <div className="notation-heading">
+                      <span>{t("Notasi permainan")}</span>
+                      <span>
+                        {t(mainGame.moves.length)}
+                        {t(" ply")}
+                        {t(
+                          activeVariation
+                            ? " · Variasi " +
+                                ((mainGame.variations?.findIndex(
+                                  (item) => item.id === activeVariation.id,
+                                ) ?? 0) +
+                                  1)
+                            : "",
+                        )}
+                      </span>
+                    </div>
+                    <MoveList {...notationProps} />
+                  </div>
+                ),
+              )}
+              {t(
+                customEditing && (
+                  <div className="piece-editor">
+                    <p>
+                      {t(
+                        "Pilih buah lalu klik petak, atau seret buah ke papan.",
+                      )}
+                    </p>
+                    {t(
+                      ["w", "b"].map((color) => (
+                        <div className="piece-editor-group" key={color}>
+                          <strong>
+                            {t(color === "w" ? "Putih" : "Hitam")}
+                          </strong>
+                          <div>
+                            {t(
+                              ["q", "r", "b", "n", "p"].map((type) => {
+                                const code =
+                                  color === "w" ? type.toUpperCase() : type;
+                                const names: Record<string, string> = {
+                                  q: "Menteri",
+                                  r: "Benteng",
+                                  b: "Gajah",
+                                  n: "Kuda",
+                                  p: "Pion",
+                                };
+                                return (
+                                  <button
+                                    key={code}
+                                    aria-label={t(
+                                      (color === "w" ? "Putih " : "Hitam ") +
+                                        names[type],
+                                    )}
+                                    className={
+                                      editorPiece === code ? "active" : ""
+                                    }
+                                    draggable
+                                    onDragStart={(e) =>
+                                      e.dataTransfer.setData(
+                                        "application/x-kuda-piece",
+                                        code,
+                                      )
+                                    }
+                                    onClick={() => {
+                                      setEditorPiece(code);
+                                      setEditorSquare(undefined);
+                                    }}
+                                  >
+                                    <img
+                                      src={
+                                        "/pieces/" +
+                                        color +
+                                        type.toUpperCase() +
+                                        ".svg"
+                                      }
+                                      alt={t("")}
+                                    />
+                                  </button>
+                                );
+                              }),
+                            )}
+                          </div>
+                        </div>
+                      )),
+                    )}
+                    <p>
+                      {t(
+                        editorSquare
+                          ? "Petak " + editorSquare + " dipilih"
+                          : editorPiece
+                            ? "Buah siap diletakkan"
+                            : "Pilih petak berisi buah untuk menghapusnya",
+                      )}
+                    </p>
+                    <div className="piece-editor-actions">
+                      <button
+                        className="button secondary"
+                        disabled={
+                          !editorSquare ||
+                          new Chess(game.startFen).get(
+                            editorSquare as import("chess.js").Square,
+                          )?.type === "k"
+                        }
+                        onClick={deleteEditorSquare}
+                      >
+                        <Trash2 size={15} />
+                        {t(" Hapus buah")}
+                      </button>
+                      <button
+                        className="button secondary"
+                        onClick={resetEditor}
+                      >
+                        <RotateCcw size={15} />
+                        {t(" Reset")}
+                      </button>
+                    </div>
+                    <button
+                      className="button primary"
+                      onClick={() => {
+                        onCustomEditingChange(false);
+                        setEditorPiece(undefined);
+                        setEditorSquare(undefined);
+                        setTab("review");
                       }}
                     >
-                      <option value="lite">Stockfish 19 Lite</option>
-                      <option value="full">Stockfish 19 Full</option>
-                    </select>
+                      {t("Selesai mengatur")}
+                    </button>
                   </div>
-                  <div className="settings-section">
-                    <label className="board-sound-setting">
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={settings.liveEngine}
-                        onChange={(e) =>
-                          onSettingsChange({
-                            ...settings,
-                            liveEngine: e.target.checked,
-                          })
-                        }
-                      />
-                      Live engine
-                    </label>
-                  </div>
-                  <div className="settings-section">
-                    <label htmlFor="engine-depth">Batas depth</label>
-                    <select
-                      id="engine-depth"
-                      value={settings.engineDepth}
-                      onChange={(e) =>
-                        onSettingsChange({
-                          ...settings,
-                          engineDepth: Number(e.target.value),
-                        })
-                      }
-                    >
-                      <option value={0}>Otomatis · mengikuti waktu</option>
-                      {[8, 12, 16, 20, 24, 30].map((depth) => (
-                        <option key={depth} value={depth}>
-                          Depth {depth}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="settings-section">
-                    <label htmlFor="analysis-time">
-                      Waktu analisis{" "}
-                      <strong>{settings.analysisMs / 1000} detik</strong>
-                    </label>
-                    <input
-                      id="analysis-time"
-                      type="range"
-                      min="200"
-                      max="10000"
-                      step="100"
-                      value={settings.analysisMs}
-                      onChange={(e) =>
-                        onSettingsChange({
-                          ...settings,
-                          analysisMs: Number(e.target.value),
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="settings-section">
-                    <label className="board-sound-setting">
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={settings.showArrows}
-                        onChange={(e) =>
-                          onSettingsChange({
-                            ...settings,
-                            showArrows: e.target.checked,
-                          })
-                        }
-                      />
-                      Tampilkan panah engine
-                    </label>
-                  </div>
-                  <div className="settings-section">
-                    <label htmlFor="variation-count">Jumlah variasi</label>
-                    <select
-                      id="variation-count"
-                      value={settings.multiPV}
-                      onChange={(e) =>
-                        onSettingsChange({
-                          ...settings,
-                          multiPV: Number(e.target.value),
-                        })
-                      }
-                    >
-                      {[1, 2, 3].map((count) => (
-                        <option key={count} value={count}>
-                          {count} variasi
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+                ),
               )}
-              {tab === "notes" && !customEditing && (
-                <div className="notes-panel">
-                  <MessageSquareText size={27} />
-                  <h3>Ide yang layak diingat.</h3>
-                  <p>
-                    Catatan untuk posisi ini tersimpan otomatis di browser Anda.
-                  </p>
-                  <label htmlFor="position-note">
-                    {ply
-                      ? `Setelah ${Math.ceil(ply / 2)}. ${currentMove?.san}`
-                      : "Posisi awal"}
-                  </label>
-                  <textarea
-                    id="position-note"
-                    value={notes[fen] ?? ""}
-                    onChange={(e) =>
-                      setNotes((n) => ({ ...n, [fen]: e.target.value }))
-                    }
-                    placeholder="Apa rencanamu? Ancaman apa yang perlu diperhatikan?"
-                    rows={9}
-                  />
-                  <span className="saved-note">
-                    <Check size={13} /> Tersimpan di perangkat
-                  </span>
-                  <button
-                    className="button secondary"
-                    onClick={() =>
-                      downloadFile(
-                        "kuda-catatan.txt",
-                        `FEN: ${fen}\n\n${notes[fen] ?? ""}`,
-                      )
-                    }
-                  >
-                    <ArrowDownToLine size={15} /> Ekspor catatan
-                  </button>
-                </div>
+              {t(
+                tab === "options" && !customEditing && (
+                  <div className="engine-options">
+                    <div className="settings-section">
+                      <label htmlFor="engine-choice">{t("Pilih engine")}</label>
+                      <select
+                        id="engine-choice"
+                        value={settings.engine}
+                        onChange={(e) => {
+                          stopReview();
+                          setEvaluation(undefined);
+                          evaluationCache.current.clear();
+                          onSettingsChange({
+                            ...settings,
+                            engine: e.target.value as Settings["engine"],
+                          });
+                        }}
+                      >
+                        <option value="lite">{t("Stockfish 19 Lite")}</option>
+                        <option value="full">{t("Stockfish 19 Full")}</option>
+                      </select>
+                    </div>
+                    <div className="settings-section">
+                      <label className="board-sound-setting">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={settings.liveEngine}
+                          onChange={(e) =>
+                            onSettingsChange({
+                              ...settings,
+                              liveEngine: e.target.checked,
+                            })
+                          }
+                        />
+                        {t("Live engine")}
+                      </label>
+                    </div>
+                    <div className="settings-section">
+                      <label htmlFor="engine-depth">{t("Batas depth")}</label>
+                      <select
+                        id="engine-depth"
+                        value={settings.engineDepth}
+                        onChange={(e) =>
+                          onSettingsChange({
+                            ...settings,
+                            engineDepth: Number(e.target.value),
+                          })
+                        }
+                      >
+                        <option value={0}>
+                          {t("Otomatis · mengikuti waktu")}
+                        </option>
+                        {t(
+                          [8, 12, 16, 20, 24, 30].map((depth) => (
+                            <option key={depth} value={depth}>
+                              {t("Depth ")}
+                              {t(depth)}
+                            </option>
+                          )),
+                        )}
+                      </select>
+                    </div>
+                    <div className="settings-section">
+                      <label htmlFor="analysis-time">
+                        {t("Waktu analisis")}
+                        {t(" ")}
+                        <strong>
+                          {t(settings.analysisMs / 1000)}
+                          {t(" detik")}
+                        </strong>
+                      </label>
+                      <input
+                        id="analysis-time"
+                        type="range"
+                        min="200"
+                        max="10000"
+                        step="100"
+                        value={settings.analysisMs}
+                        onChange={(e) =>
+                          onSettingsChange({
+                            ...settings,
+                            analysisMs: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="settings-section">
+                      <label className="board-sound-setting">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={settings.showArrows}
+                          onChange={(e) =>
+                            onSettingsChange({
+                              ...settings,
+                              showArrows: e.target.checked,
+                            })
+                          }
+                        />
+                        {t("Tampilkan panah engine")}
+                      </label>
+                    </div>
+                    <div className="settings-section">
+                      <label className="board-sound-setting">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={settings.showPieceAnnotation}
+                          onChange={(e) =>
+                            onSettingsChange({
+                              ...settings,
+                              showPieceAnnotation: e.target.checked,
+                            })
+                          }
+                        />
+                        {t("Tampilkan kategori pada buah")}
+                      </label>
+                    </div>
+                    <div className="settings-section">
+                      <label htmlFor="variation-count">
+                        {t("Jumlah variasi")}
+                      </label>
+                      <select
+                        id="variation-count"
+                        value={settings.multiPV}
+                        onChange={(e) =>
+                          onSettingsChange({
+                            ...settings,
+                            multiPV: Number(e.target.value),
+                          })
+                        }
+                      >
+                        {t(
+                          [1, 2, 3].map((count) => (
+                            <option key={count} value={count}>
+                              {t(count)}
+                              {t(" variasi")}
+                            </option>
+                          )),
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                ),
+              )}
+              {t(
+                tab === "notes" && !customEditing && (
+                  <div className="notes-panel">
+                    <MessageSquareText size={27} />
+                    <h3>{t("Ide yang layak diingat.")}</h3>
+                    <p>
+                      {t(
+                        "Catatan untuk posisi ini tersimpan otomatis di browser Anda.",
+                      )}
+                    </p>
+                    <label htmlFor="position-note">
+                      {t(
+                        ply
+                          ? `Setelah ${Math.ceil(ply / 2)}. ${currentMove?.san}`
+                          : "Posisi awal",
+                      )}
+                    </label>
+                    <textarea
+                      id="position-note"
+                      value={notes[fen] ?? ""}
+                      onChange={(e) =>
+                        setNotes((n) => ({ ...n, [fen]: e.target.value }))
+                      }
+                      placeholder={t(
+                        "Apa rencanamu? Ancaman apa yang perlu diperhatikan?",
+                      )}
+                      rows={9}
+                    />
+                    <span className="saved-note">
+                      <Check size={13} />
+                      {t(" Tersimpan di perangkat")}
+                    </span>
+                    <button
+                      className="button secondary"
+                      onClick={() =>
+                        downloadFile(
+                          "kuda-catatan.txt",
+                          `FEN: ${fen}\n\n${notes[fen] ?? ""}`,
+                        )
+                      }
+                    >
+                      <ArrowDownToLine size={15} />
+                      {t(" Ekspor catatan")}
+                    </button>
+                  </div>
+                ),
               )}
             </aside>
             <section className="eval-chart-card">
               <div className="card-heading">
                 <div>
                   <TrendingUp size={16} />
-                  <h3>Alur permainan</h3>
+                  <h3>{t("Alur permainan")}</h3>
                 </div>
-                {activeVariation && <span>Keluar dari notasi</span>}
+                {t(activeVariation && <span>{t("Keluar dari notasi")}</span>)}
               </div>
               <EvaluationChart
                 review={mainReview}
@@ -1158,98 +1316,97 @@ export default function Analysis({
         </div>
         <div className="board-under">
           <span>
-            <span className="status-dot" />
-            {gameStatus(position)}
-          </span>
-          <span>
-            ← → navigasi <kbd>F</kbd> balik papan
+            {t("← → navigasi ")}
+            <kbd>{t("F")}</kbd>
+            {t(" balik papan")}
           </span>
           <div className="export-actions board-export-actions">
             <button
               className="text-button"
               onClick={() => downloadFile("kuda-position.fen", fen)}
             >
-              Ekspor FEN <ArrowDownToLine size={13} />
+              {t("Ekspor FEN ")}
+              <ArrowDownToLine size={13} />
             </button>
             <button
               className="text-button"
               onClick={() => downloadFile("kuda-game.pgn", toPgn(game))}
             >
-              Ekspor PGN <ArrowDownToLine size={13} />
+              {t("Ekspor PGN ")}
+              <ArrowDownToLine size={13} />
             </button>
           </div>
         </div>
-        {activeVariation && (
-          <div className="variation-notice">
-            <GitBranch size={15} />
-            <span>Anda menjelajahi variasi baru.</span>
-            <button
-              onClick={() => {
-                stopReview();
-                setActiveVariationId(undefined);
-                setPly(Math.min(ply, mainGame.moves.length));
-              }}
-            >
-              Kembali ke jalur utama
-            </button>
-          </div>
+        {t(
+          activeVariation && (
+            <div className="variation-notice">
+              <GitBranch size={15} />
+              <span>{t("Anda menjelajahi variasi baru.")}</span>
+              <button
+                onClick={() => {
+                  stopReview();
+                  setActiveVariationId(undefined);
+                  setPly(mainGame.moves.length);
+                }}
+              >
+                {t("Kembali ke jalur utama")}
+              </button>
+            </div>
+          ),
         )}
       </div>
-      {showInfo && (
-        <Modal
-          title="Memahami hasil analisis"
-          onClose={() => setShowInfo(false)}
-        >
-          <div className="prose">
-            <p>
-              Evaluasi positif menguntungkan putih; negatif menguntungkan hitam.
-              M menunjukkan jarak menuju skakmat menurut engine.
-            </p>
-            <p>
-              Akurasi adalah estimasi aplikasi berdasarkan perubahan peluang
-              menang dari evaluasi Stockfish, dengan kurva publik yang juga
-              digunakan Lichess. Label langkah memakai ambang aplikasi sendiri
-              dan tidak sama dengan skor resmi platform lain.
-            </p>
-            <p>
-              Peluang terlewat menandai kesempatan taktis berupa tangkapan atau
-              skak yang diabaikan: keunggulan minimal +2 turun di bawah +1, atau
-              posisi sekitar seimbang (−0,5 sampai +0,5) turun ke −2 atau lebih
-              buruk, dari sudut pemain yang melangkah. Kedua evaluasi memerlukan
-              depth minimal 12. Skor akurasi tetap dihitung dari penurunan
-              peluang menang.
-            </p>
-            <p>
-              Brilian memakai aturan lokal: pilihan utama engine pada depth
-              minimal 12 yang mengorbankan buah, tetap mempertahankan posisi,
-              dan tidak langsung mendapatkan kembali material dalam variasi
-              utama. Ini perkiraan aplikasi, bukan label resmi platform lain.
-            </p>
-            <p>
-              Book Move dikenali dari posisi dan langkah dalam database opening
-              Lichess yang tersimpan lokal. Transposisi ikut dikenali. Langkah
-              di luar database belum tentu buruk. Label ini terpisah dari skor
-              akurasi Stockfish.
-            </p>
-            <p>
-              Ulasan cepat memakai 350 ms per posisi. Posisi rumit atau
-              pengorbanan mungkin membutuhkan pencarian lebih lama. Buka tab
-              Opsi dan naikkan waktu analisis untuk memeriksanya.
-            </p>
-            <p>
-              Stockfish lite memakai jaringan yang lebih kecil daripada versi
-              penuh. Catatan pelatih memakai aturan dan hasil engine, tanpa LLM
-              atau API eksternal.
-            </p>
-            <a
-              href="https://official-stockfish.github.io/docs/stockfish-wiki/Stockfish-FAQ.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Dokumentasi evaluasi Stockfish ↗
-            </a>
-          </div>
-        </Modal>
+      {t(
+        showInfo && (
+          <Modal
+            title={t("Memahami hasil analisis")}
+            onClose={() => setShowInfo(false)}
+          >
+            <div className="prose">
+              <p>
+                {t(
+                  "Evaluasi positif menguntungkan putih; negatif menguntungkan hitam. M menunjukkan jarak menuju skakmat menurut engine.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Akurasi adalah estimasi aplikasi berdasarkan perubahan peluang menang dari evaluasi Stockfish, dengan kurva publik yang juga digunakan Lichess. Label langkah memakai ambang aplikasi sendiri dan tidak sama dengan skor resmi platform lain.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Peluang terlewat menandai kesempatan taktis berupa tangkapan atau skak yang diabaikan: keunggulan minimal +2 turun di bawah +1, atau posisi sekitar seimbang (−0,5 sampai +0,5) turun ke −2 atau lebih buruk, dari sudut pemain yang melangkah. Kedua evaluasi memerlukan depth minimal 12. Skor akurasi tetap dihitung dari penurunan peluang menang.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Brilian memakai aturan lokal: pilihan utama engine pada depth minimal 12 yang mengorbankan buah, tetap mempertahankan posisi, dan tidak langsung mendapatkan kembali material dalam variasi utama. Ini perkiraan aplikasi, bukan label resmi platform lain.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Book Move dikenali dari posisi dan langkah dalam database opening Lichess yang tersimpan lokal. Transposisi ikut dikenali. Langkah di luar database belum tentu buruk. Label ini terpisah dari skor akurasi Stockfish.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Ulasan cepat memakai 350 ms per posisi. Posisi rumit atau pengorbanan mungkin membutuhkan pencarian lebih lama. Buka tab Opsi dan naikkan waktu analisis untuk memeriksanya.",
+                )}
+              </p>
+              <p>
+                {t(
+                  "Stockfish lite memakai jaringan yang lebih kecil daripada versi penuh. Catatan pelatih memakai aturan dan hasil engine, tanpa LLM atau API eksternal.",
+                )}
+              </p>
+              <a
+                href="https://official-stockfish.github.io/docs/stockfish-wiki/Stockfish-FAQ.html"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("Dokumentasi evaluasi Stockfish ↗")}
+              </a>
+            </div>
+          </Modal>
+        ),
       )}
     </div>
   );
@@ -1268,6 +1425,8 @@ function EvaluationChart({
   onSelect: (n: number) => void;
   showMoveIndicator?: boolean;
 }) {
+  const { t } = useI18n();
+
   const { values, segments } = reviewSegments(review);
   const x = (i: number) => 10 + (i / Math.max(1, total)) * 780;
   const y = (cp: number) => 55 - 39 * Math.tanh(cp / 400);
@@ -1276,7 +1435,7 @@ function EvaluationChart({
       <svg
         viewBox="0 0 800 110"
         preserveAspectRatio="none"
-        aria-label="Grafik evaluasi permainan"
+        aria-label={t("Grafik evaluasi permainan")}
       >
         <defs>
           <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
@@ -1292,84 +1451,101 @@ function EvaluationChart({
           stroke="#dfe4dc"
           strokeDasharray="4 5"
         />
-        {segments.map((segment, index) => {
-          const path = segment
-            .map((point) => `${x(point.ply)},${y(point.cp)}`)
-            .join(" ");
-          return (
-            <g key={index}>
-              <polygon
-                points={`${x(segment[0].ply)},100 ${path} ${x(segment.at(-1)!.ply)},100`}
-                fill="url(#chart-fill)"
-              />
-              <polyline
-                points={path}
-                fill="none"
-                stroke="#5b8e72"
-                strokeWidth="2.5"
-                vectorEffect="non-scaling-stroke"
-              />
-            </g>
-          );
-        })}
-        {showMoveIndicator && (
-          <line
-            x1={x(ply)}
-            x2={x(ply)}
-            y1="9"
-            y2="99"
-            stroke="#9da799"
-            strokeDasharray="3 3"
-          />
+        {t(
+          segments.map((segment, index) => {
+            const path = segment
+              .map((point) => `${x(point.ply)},${y(point.cp)}`)
+              .join(" ");
+            return (
+              <g key={index}>
+                <polygon
+                  points={`${x(segment[0].ply)},100 ${path} ${x(segment.at(-1)!.ply)},100`}
+                  fill="url(#chart-fill)"
+                />
+                <polyline
+                  points={path}
+                  fill="none"
+                  stroke="#5b8e72"
+                  strokeWidth="2.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </g>
+            );
+          }),
         )}
-        {review
-          .filter((item) =>
-            [
-              "best",
-              "brilliant",
-              "inaccuracy",
-              "mistake",
-              "blunder",
-              "miss",
-            ].includes(item.annotation),
-          )
-          .map((item) => (
-            <circle
-              key={`${item.ply}-${item.annotation}`}
-              className="evaluation-marker"
-              cx={x(item.ply)}
-              cy={y(values.get(item.ply) ?? item.after.cp)}
-              r="4"
-              style={{ fill: LABELS[item.annotation].color }}
-              stroke="white"
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-            >
-              <title>{`${LABELS[item.annotation].label}: ${item.san}`}</title>
-            </circle>
-          ))}
+        {t(
+          showMoveIndicator && (
+            <line
+              x1={x(ply)}
+              x2={x(ply)}
+              y1="9"
+              y2="99"
+              stroke="#9da799"
+              strokeDasharray="3 3"
+            />
+          ),
+        )}
+        {t(
+          review
+            .filter((item) =>
+              [
+                "best",
+                "brilliant",
+                "inaccuracy",
+                "mistake",
+                "blunder",
+                "miss",
+              ].includes(item.annotation),
+            )
+            .map((item) => (
+              <circle
+                key={`${item.ply}-${item.annotation}`}
+                className="evaluation-marker"
+                cx={x(item.ply)}
+                cy={y(values.get(item.ply) ?? item.after.cp)}
+                r="4"
+                style={{ fill: LABELS[item.annotation].color }}
+                stroke="white"
+                strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
+              >
+                <title>
+                  {t(`${LABELS[item.annotation].label}: ${item.san}`)}
+                </title>
+              </circle>
+            )),
+        )}
       </svg>
-      {!review.length && (
-        <div className="chart-empty">
-          Jalankan analisis untuk melihat perjalanan permainan.
-        </div>
+      {t(
+        !review.length && (
+          <div className="chart-empty">
+            {t("Jalankan analisis untuk melihat perjalanan permainan.")}
+          </div>
+        ),
       )}
       <div className="chart-scrubber">
-        {Array.from({ length: total + 1 }, (_, i) => (
-          <button
-            key={i}
-            aria-label={`Lihat posisi ply ${i}`}
-            title={`Ply ${i}`}
-            onClick={() => onSelect(i)}
-          />
-        ))}
+        {t(
+          Array.from({ length: total + 1 }, (_, i) => (
+            <button
+              key={i}
+              aria-label={t(`Lihat posisi ply ${i}`)}
+              title={t(`Ply ${i}`)}
+              onClick={() => onSelect(i)}
+            />
+          )),
+        )}
       </div>
-      {showMoveIndicator && (
-        <div className="chart-axis">
-          <span>
-            Langkah {Math.ceil(ply / 2)}/{Math.ceil(total / 2)}
-          </span>
-        </div>
+      {t(
+        showMoveIndicator && (
+          <div className="chart-axis">
+            <span>
+              {t("Langkah ")}
+              {t(Math.ceil(ply / 2))}
+              {t("/")}
+              {t(Math.ceil(total / 2))}
+            </span>
+          </div>
+        ),
       )}
     </div>
   );

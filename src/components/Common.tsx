@@ -1,3 +1,6 @@
+// i18n: rendered text
+import { pieceAsset, useAppearance } from "../lib/preferences";
+import { useI18n } from "@/lib/i18n";
 import { Fragment, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import {
@@ -12,6 +15,7 @@ import {
 import { Chess } from "chess.js";
 import { LABELS } from "../lib/chess";
 import type { GameVariation, ReviewMove } from "../lib/chess";
+import { NotationMove } from "./Notation";
 import { formatMoveDuration } from "../lib/move-time";
 import type { BookMove } from "../lib/opening-book";
 
@@ -26,6 +30,8 @@ export function Modal({
   onClose: () => void;
   wide?: boolean;
 }) {
+  const { t } = useI18n();
+
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current;
@@ -47,12 +53,16 @@ export function Modal({
     >
       <div className="modal-inner">
         <div className="modal-heading">
-          <h2 id="modal-title">{title}</h2>
-          <button className="icon-button" aria-label="Tutup" onClick={onClose}>
+          <h2 id="modal-title">{t(title)}</h2>
+          <button
+            className="icon-button"
+            aria-label={t("Tutup")}
+            onClick={onClose}
+          >
             <X size={19} />
           </button>
         </div>
-        {children}
+        {t(children)}
       </div>
     </dialog>
   );
@@ -70,15 +80,17 @@ export function IconButton({
   disabled?: boolean;
   active?: boolean;
 }) {
+  const { t } = useI18n();
+
   return (
     <button
       className={`icon-button ${active ? "active" : ""}`}
-      title={label}
-      aria-label={label}
+      title={t(label)}
+      aria-label={t(label)}
       onClick={onClick}
       disabled={disabled}
     >
-      {children}
+      {t(children)}
     </button>
   );
 }
@@ -87,52 +99,82 @@ export function NavigationControls({
   total,
   onChange,
   onFlip,
+  outsideNotation = false,
+  onReturnToMain,
 }: {
   ply: number;
   total: number;
   onChange: (n: number) => void;
   onFlip?: () => void;
+  outsideNotation?: boolean;
+  onReturnToMain?: () => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="board-controls">
       <span className="move-position">
-        {ply === 0 ? "Posisi awal" : `Langkah ${Math.ceil(ply / 2)}`}
-        <span> / {Math.ceil(total / 2)}</span>
+        {t(
+          outsideNotation ? (
+            "- / -"
+          ) : (
+            <>
+              {t("Langkah ")}
+              {t(Math.ceil(ply / 2))}
+              {t("/")}
+              {t(Math.ceil(total / 2))}
+            </>
+          ),
+        )}
       </span>
       <div className="navigation-buttons">
         <IconButton
-          label="Ke posisi awal"
+          label={t("Ke posisi awal")}
           onClick={() => onChange(0)}
           disabled={ply === 0}
         >
           <ChevronsLeft size={19} />
         </IconButton>
         <IconButton
-          label="Langkah sebelumnya"
+          label={t("Langkah sebelumnya")}
           onClick={() => onChange(Math.max(0, ply - 1))}
           disabled={ply === 0}
         >
           <ChevronLeft size={20} />
         </IconButton>
         <IconButton
-          label="Langkah berikutnya"
+          label={t("Langkah berikutnya")}
           onClick={() => onChange(Math.min(total, ply + 1))}
           disabled={ply === total}
         >
           <ChevronRight size={20} />
         </IconButton>
         <IconButton
-          label="Ke posisi terakhir"
+          label={t("Ke posisi terakhir")}
           onClick={() => onChange(total)}
           disabled={ply === total}
         >
           <ChevronsRight size={19} />
         </IconButton>
       </div>
-      {onFlip && (
-        <IconButton label="Balik papan (F)" onClick={onFlip}>
-          <RotateCw size={16} />
-        </IconButton>
+      {t(
+        outsideNotation && onReturnToMain && (
+          <button
+            className="text-button return-to-main"
+            onClick={onReturnToMain}
+            title={t("Kembali ke langkah terakhir notasi asli")}
+          >
+            <RotateCw size={14} />
+            {t(" Kembali ke notasi")}
+          </button>
+        ),
+      )}
+      {t(
+        onFlip && (
+          <IconButton label={t("Balik papan (F)")} onClick={onFlip}>
+            <RotateCw size={16} />
+          </IconButton>
+        ),
       )}
     </div>
   );
@@ -150,17 +192,22 @@ export function PlayerRow({
   active?: boolean;
   right?: ReactNode;
 }) {
+  const { t } = useI18n();
+  const { pieceTheme } = useAppearance();
+
   return (
     <div className="player-row">
       <span className={`player-avatar ${color}`}>
-        <img src={`/pieces/${color}K.svg`} alt="" />
+        <img src={pieceAsset(color, "K", pieceTheme)} alt={t("")} />
       </span>
       <div className="player-name">
-        <strong>{name}</strong>
-        <span>{subtitle || (color === "w" ? "Buah putih" : "Buah hitam")}</span>
+        <strong>{t(name)}</strong>
+        <span>
+          {t(subtitle || (color === "w" ? "Buah putih" : "Buah hitam"))}
+        </span>
       </div>
       <span className={`player-turn ${active ? "is-active" : ""}`} />
-      {right}
+      {t(right)}
     </div>
   );
 }
@@ -189,6 +236,8 @@ export function MoveList({
   variationPly?: number;
   onVariationChange?: (id: string, ply: number) => void;
 }) {
+  const { t } = useI18n();
+
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const container = ref.current;
@@ -224,139 +273,184 @@ export function MoveList({
       key={branch.id}
     >
       <div className="notation-variation-heading">
-        <span>↳ Variasi {branchIndex + 1}</span>
         <span>
-          {branch.parentId
-            ? "dari Variasi " +
-              (variations.findIndex((item) => item.id === branch.parentId) + 1)
-            : "dari jalur utama"}
+          {t("↳ Variasi ")}
+          {t(branchIndex + 1)}
+        </span>
+        <span>
+          {t(
+            branch.parentId
+              ? "dari Variasi " +
+                  (variations.findIndex((item) => item.id === branch.parentId) +
+                    1)
+              : "dari jalur utama",
+          )}
         </span>
       </div>
       <div className="notation-variation-moves">
-        {branch.moves.slice(branch.forkPly).map((san, i) => {
-          const index = branch.forkPly + i;
-          const number = startNumber + Math.floor((index + offset) / 2);
-          const black = (index + offset) % 2 === 1;
-          const current =
-            activeVariationId === branch.id && variationPly === index + 1;
-          return (
-            <button
-              key={index}
-              className={
-                "move-cell variation-move " + (current ? "current" : "")
-              }
-              aria-current={current ? "step" : undefined}
-              aria-label={
-                "Variasi " +
-                (branchIndex + 1) +
-                ": " +
-                number +
-                (black ? "... " : ". ") +
-                san
-              }
-              onClick={() => onVariationChange?.(branch.id, index + 1)}
-            >
-              <small>
-                {number}
-                {black ? "..." : "."}
-              </small>
-              {san}
-            </button>
-          );
-        })}
+        {t(
+          branch.moves.slice(branch.forkPly).map((san, i) => {
+            const index = branch.forkPly + i;
+            const number = startNumber + Math.floor((index + offset) / 2);
+            const black = (index + offset) % 2 === 1;
+            const current =
+              activeVariationId === branch.id && variationPly === index + 1;
+            return (
+              <button
+                key={index}
+                className={
+                  "move-cell variation-move " + (current ? "current" : "")
+                }
+                aria-current={current ? "step" : undefined}
+                aria-label={t(
+                  "Variasi " +
+                    (branchIndex + 1) +
+                    ": " +
+                    number +
+                    (black ? "... " : ". ") +
+                    san,
+                )}
+                onClick={() => onVariationChange?.(branch.id, index + 1)}
+              >
+                <small>
+                  {t(number)}
+                  {t(black ? "..." : ".")}
+                </small>
+                <NotationMove san={san} color={black ? "b" : "w"} />
+              </button>
+            );
+          }),
+        )}
       </div>
-      {variations.some((child) => child.parentId === branch.id) && (
-        <div className="notation-variation-children">
-          {variations.map((child, childIndex) =>
-            child.parentId === branch.id
-              ? renderVariation(child, childIndex)
-              : null,
-          )}
-        </div>
+      {t(
+        variations.some((child) => child.parentId === branch.id) && (
+          <div className="notation-variation-children">
+            {t(
+              variations.map((child, childIndex) =>
+                child.parentId === branch.id
+                  ? renderVariation(child, childIndex)
+                  : null,
+              ),
+            )}
+          </div>
+        ),
       )}
     </div>
   );
   return (
     <div className="move-list" ref={ref}>
-      {moves.length ? (
-        Array.from({ length: rows }, (_, row) => (
-          <Fragment key={row}>
-            <div className="move-row">
-              <span className="move-number">{startNumber + row}.</span>
-              {[0, 1].map((col) => {
-                const index = row * 2 + col - offset;
-                const item = review.find((r) => r.ply === index + 1);
-                const book = bookMoves[index];
-                const label = book
-                  ? LABELS.book
-                  : item && LABELS[item.annotation];
-                const Cell = onChange ? "button" : "span";
-                return index < 0 || index >= moves.length ? (
-                  <span key={col} />
-                ) : (
-                  <Cell
-                    key={col}
-                    aria-current={ply === index + 1 ? "step" : undefined}
-                    className={`move-cell ${ply === index + 1 ? "current" : ""}`}
-                    onClick={onChange ? () => onChange(index + 1) : undefined}
-                  >
-                    <span>{moves[index]}</span>
-                    {variations.some(
-                      (branch) =>
-                        isRootVariation(branch) && branch.forkPly === index,
-                    ) && (
-                      <span
-                        className="notation-fork"
-                        title="Ada variasi dari posisi ini"
-                        aria-label="Ada variasi"
-                      >
-                        ↳
-                      </span>
-                    )}
-                    {durations[index] !== undefined && (
-                      <span className="move-think-time" title="Waktu berpikir">
-                        {formatMoveDuration(durations[index]!)}
-                      </span>
-                    )}
-                    {label && (
-                      <span
-                        className="move-symbol"
-                        style={{ color: label.color }}
-                        title={
-                          book
-                            ? `Book Move · ${book.name} (${book.eco})`
-                            : label.label
+      {t(
+        moves.length ? (
+          Array.from({ length: rows }, (_, row) => (
+            <Fragment key={row}>
+              <div className="move-row">
+                <span className="move-number">
+                  {t(startNumber + row)}
+                  {t(".")}
+                </span>
+                {t(
+                  [0, 1].map((col) => {
+                    const index = row * 2 + col - offset;
+                    const item = review.find((r) => r.ply === index + 1);
+                    const book = bookMoves[index];
+                    const label = book
+                      ? LABELS.book
+                      : item && LABELS[item.annotation];
+                    const Cell = onChange ? "button" : "span";
+                    return index < 0 || index >= moves.length ? (
+                      <span key={col} />
+                    ) : (
+                      <Cell
+                        key={col}
+                        aria-current={ply === index + 1 ? "step" : undefined}
+                        className={`move-cell ${ply === index + 1 ? "current" : ""}`}
+                        onClick={
+                          onChange ? () => onChange(index + 1) : undefined
                         }
                       >
-                        {book ? (
-                          <BookOpen size={13} aria-label="Book Move" />
-                        ) : (
-                          label.symbol
+                        <NotationMove
+                          san={moves[index]}
+                          color={(index + offset) % 2 ? "b" : "w"}
+                        />
+                        {t(
+                          variations.some(
+                            (branch) =>
+                              isRootVariation(branch) &&
+                              branch.forkPly === index,
+                          ) && (
+                            <span
+                              className="notation-fork"
+                              title={t("Ada variasi dari posisi ini")}
+                              aria-label={t("Ada variasi")}
+                            >
+                              {t("↳")}
+                            </span>
+                          ),
                         )}
-                      </span>
-                    )}
-                  </Cell>
-                );
-              })}
-            </div>
-            {variations.map((branch, branchIndex) =>
-              isRootVariation(branch) &&
-              Math.min(Math.floor((branch.forkPly + offset) / 2), rows - 1) ===
-                row
-                ? renderVariation(branch, branchIndex)
-                : null,
+                        {t(
+                          durations[index] !== undefined && (
+                            <span
+                              className="move-think-time"
+                              title={t("Waktu berpikir")}
+                            >
+                              {t(formatMoveDuration(durations[index]!))}
+                            </span>
+                          ),
+                        )}
+                        {t(
+                          label && (
+                            <span
+                              className="move-symbol"
+                              style={{ color: label.color }}
+                              title={t(
+                                book
+                                  ? `Book Move · ${book.name} (${book.eco})`
+                                  : label.label,
+                              )}
+                            >
+                              {t(
+                                book ? (
+                                  <BookOpen
+                                    size={13}
+                                    aria-label={t("Book Move")}
+                                  />
+                                ) : (
+                                  label.symbol
+                                ),
+                              )}
+                            </span>
+                          ),
+                        )}
+                      </Cell>
+                    );
+                  }),
+                )}
+              </div>
+              {t(
+                variations.map((branch, branchIndex) =>
+                  isRootVariation(branch) &&
+                  Math.min(
+                    Math.floor((branch.forkPly + offset) / 2),
+                    rows - 1,
+                  ) === row
+                    ? renderVariation(branch, branchIndex)
+                    : null,
+                ),
+              )}
+            </Fragment>
+          ))
+        ) : (
+          <div className="empty-inline">
+            {t("Belum ada langkah. Mainkan buah di papan untuk memulai.")}
+            {t(
+              variations.map((branch, branchIndex) =>
+                isRootVariation(branch)
+                  ? renderVariation(branch, branchIndex)
+                  : null,
+              ),
             )}
-          </Fragment>
-        ))
-      ) : (
-        <div className="empty-inline">
-          Belum ada langkah. Mainkan buah di papan untuk memulai.
-          {variations.map((branch, branchIndex) =>
-            isRootVariation(branch)
-              ? renderVariation(branch, branchIndex)
-              : null,
-          )}
-        </div>
+          </div>
+        ),
       )}
     </div>
   );
@@ -368,12 +462,14 @@ export function ProgressRing({
   percent: number;
   size?: number;
 }) {
+  const { t } = useI18n();
+
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 44 44"
-      aria-label={`${percent}% selesai`}
+      aria-label={t(`${percent}% selesai`)}
     >
       <circle
         cx="22"
@@ -396,7 +492,8 @@ export function ProgressRing({
         transform="rotate(-90 22 22)"
       />
       <text x="22" y="26" textAnchor="middle" fontSize="11" fill="currentColor">
-        {percent}%
+        {t(percent)}
+        {t("%")}
       </text>
     </svg>
   );

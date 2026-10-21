@@ -42,6 +42,18 @@ Colin M. L. Burnett (Cburnett), from the Lichess piece set.
 Source: https://github.com/lichess-org/lila/tree/master/public/piece/cburnett
 License: GNU GPL v2 or later, as documented in https://github.com/lichess-org/lila/blob/master/COPYING.md
 
+Additional piece themes are bundled from the same official Lichess repository:
+- Merida by Armando Hernandez Marroquin, GNU GPL v2 or later.
+- Celtic by Maurizio Monge, MIT.
+
+Credits, upstream licensing notes, and license copies are included in public/pieces/ATTRIBUTION.md and each theme directory.
+
+## Lichess puzzles
+
+Puzzle data is fetched on demand from the official Lichess puzzle API.
+Database: https://database.lichess.org/#puzzles
+License: Creative Commons CC0 public domain dedication.
+
 ## Chess content
 
 Opening explanations and exercise text in this app are newly written in Indonesian.

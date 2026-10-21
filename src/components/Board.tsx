@@ -1,4 +1,9 @@
+// i18n: rendered text
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { LABELS } from "../lib/chess";
+import type { Annotation } from "../lib/chess";
+import { useAppearance, pieceAsset } from "../lib/preferences";
 import { Chess } from "chess.js";
 import type { Square } from "chess.js";
 import type { CSSProperties } from "react";
@@ -27,6 +32,7 @@ type Props = {
   selectedSquare?: string;
   theme?: "sage" | "walnut" | "slate";
   compact?: boolean;
+  annotation?: Annotation;
   editMode?: boolean;
   onEditSquare?: (square: string, piece?: string, from?: string) => void;
   onDeleteDropSquare?: (square: string) => void;
@@ -49,10 +55,14 @@ export default function Board({
   selectedSquare,
   theme = "sage",
   compact,
+  annotation,
   editMode = false,
   onEditSquare,
   onDeleteDropSquare,
 }: Props) {
+  const { t } = useI18n();
+
+  const { pieceTheme } = useAppearance();
   const boardRef = useRef<HTMLDivElement>(null);
   const previous = useRef({ fen, flipped });
   const animations = useRef<Animation[]>([]);
@@ -215,8 +225,12 @@ export default function Board({
         ref={boardRef}
         className={`chessboard board-${theme}`}
         onContextMenu={(e) => e.preventDefault()}
-        title="Klik kanan: tandai petak. Klik kanan + tarik: panah. Shift: hijau, Ctrl: merah, Alt: biru. Klik kiri/Esc: hapus."
-        aria-description="Klik kanan untuk menandai petak, tarik klik kanan untuk panah. Keyboard: fokuskan petak, tekan A di petak asal dan tujuan. Escape menghapus anotasi."
+        title={t(
+          "Klik kanan: tandai petak. Klik kanan + tarik: panah. Shift: hijau, Ctrl: merah, Alt: biru. Klik kiri/Esc: hapus.",
+        )}
+        aria-description={t(
+          "Klik kanan untuk menandai petak, tarik klik kanan untuk panah. Keyboard: fokuskan petak, tekan A di petak asal dan tujuan. Escape menghapus anotasi.",
+        )}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             clearMarks();
@@ -281,170 +295,218 @@ export default function Board({
           setDrawing(undefined);
         }}
         role="group"
-        aria-label="Papan catur interaktif"
+        aria-label={t("Papan catur interaktif")}
       >
-        {[...ranks].flatMap((rank, row) =>
-          [...files].map((file, col) => {
-            const square = file + rank;
-            const p = chess.get(square as Square);
-            const dark = (file.charCodeAt(0) - 97 + Number(rank)) % 2 === 1;
-            const isLegal = legal.some((m) => m.to === square);
-            const check =
-              p?.type === "k" && p.color === chess.turn() && chess.isCheck();
-            return (
-              <button
-                key={square}
-                type="button"
-                className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""}`}
-                aria-label={`${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`}
-                data-square={square}
-                onClick={() =>
-                  editMode ? onEditSquare?.(square) : choose(square)
-                }
-                onDragOver={(e) => {
-                  if (editMode || !disabled) {
-                    e.preventDefault();
-                    if (editMode) e.dataTransfer.dropEffect = "move";
-                  }
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (editMode) {
-                    const piece = e.dataTransfer.getData(
-                      "application/x-kuda-piece",
-                    );
-                    const from = e.dataTransfer.getData(
-                      "application/x-kuda-square",
-                    );
-                    onEditSquare?.(
-                      square,
-                      piece || undefined,
-                      from || undefined,
-                    );
-                  } else if (!disabled) {
-                    attempt(e.dataTransfer.getData("text/plain"), square, true);
-                  }
-                }}
-              >
-                {col === 0 && <span className="coordinate rank">{rank}</span>}
-                {row === 7 && <span className="coordinate file">{file}</span>}
-                {p && (
-                  <img
-                    src={`/pieces/${p.color}${p.type.toUpperCase()}.svg`}
-                    alt=""
-                    draggable={
-                      editMode ||
-                      (!disabled && !!onMove && p.color === chess.turn())
-                    }
-                    onDragStart={(e) => {
-                      clearMarks();
-                      if (editMode) {
-                        e.dataTransfer.effectAllowed = "move";
-                        e.dataTransfer.setData(
-                          "application/x-kuda-square",
-                          square,
-                        );
-                      } else {
-                        e.dataTransfer.setData("text/plain", square);
-                        setSelection({ square, fen });
-                      }
-                    }}
-                    onDragEnd={(e) => {
-                      if (editMode && e.dataTransfer.dropEffect === "none")
-                        onDeleteDropSquare?.(square);
-                    }}
-                  />
-                )}
-                {isLegal && (
-                  <span className={p ? "legal-capture" : "legal-dot"} />
-                )}
-              </button>
-            );
-          }),
-        )}
-        {arrows.length > 0 && (
-          <svg className="board-arrow" viewBox="0 0 800 800" aria-hidden="true">
-            {arrows.map((move, index) => (
-              <g key={`${move}-${index}`} opacity={index === 0 ? 1 : 0.42}>
-                <ArrowShape
-                  start={point(move.slice(0, 2))}
-                  end={point(move.slice(2, 4))}
-                />
-              </g>
-            ))}
-          </svg>
-        )}
-        {!compact && (marks.length > 0 || drawing) && (
-          <svg
-            className="board-annotations"
-            viewBox="0 0 800 800"
-            aria-label="Anotasi papan"
-            role="img"
-          >
-            {[...marks, ...(drawing ? [drawing] : [])].map((mark, index) => {
-              const a = point(mark.from);
-              const b = point(mark.to);
-              const knight =
-                Math.abs(a.x - b.x) * Math.abs(a.y - b.y) === 20000;
-              return mark.from === mark.to ? (
-                <circle
-                  key={index}
-                  data-mark={`${mark.from}-${mark.to}`}
-                  cx={a.x}
-                  cy={a.y}
-                  r="42"
-                  fill={mark.color}
-                  fillOpacity="0.24"
-                  stroke={mark.color}
-                  strokeWidth="9"
-                />
-              ) : (
-                <g
-                  key={index}
-                  data-mark={`${mark.from}-${mark.to}`}
-                  color={mark.color}
-                >
-                  <ArrowShape start={a} end={b} knight={knight} />
-                </g>
-              );
-            })}
-          </svg>
-        )}
-        {promotion && (
-          <div
-            className="promotion-picker"
-            role="dialog"
-            aria-label="Pilih promosi"
-          >
-            <p>Promosikan pion</p>
-            <div>
-              {["q", "r", "b", "n"].map((type) => (
+        {t(
+          [...ranks].flatMap((rank, row) =>
+            [...files].map((file, col) => {
+              const square = file + rank;
+              const p = chess.get(square as Square);
+              const dark = (file.charCodeAt(0) - 97 + Number(rank)) % 2 === 1;
+              const isLegal = legal.some((m) => m.to === square);
+              const check =
+                p?.type === "k" && p.color === chess.turn() && chess.isCheck();
+              return (
                 <button
-                  key={type}
-                  aria-label={`Promosi ${NAMES[type]}`}
-                  onClick={() => {
-                    onMove?.(promotion.from, promotion.to, type);
-                    setPromotion(undefined);
-                    setSelection(undefined);
+                  key={square}
+                  type="button"
+                  className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""}`}
+                  aria-label={t(
+                    `${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`,
+                  )}
+                  data-square={square}
+                  onClick={() =>
+                    editMode ? onEditSquare?.(square) : choose(square)
+                  }
+                  onDragOver={(e) => {
+                    if (editMode || !disabled) {
+                      e.preventDefault();
+                      if (editMode) e.dataTransfer.dropEffect = "move";
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (editMode) {
+                      const piece = e.dataTransfer.getData(
+                        "application/x-kuda-piece",
+                      );
+                      const from = e.dataTransfer.getData(
+                        "application/x-kuda-square",
+                      );
+                      onEditSquare?.(
+                        square,
+                        piece || undefined,
+                        from || undefined,
+                      );
+                    } else if (!disabled) {
+                      attempt(
+                        e.dataTransfer.getData("text/plain"),
+                        square,
+                        true,
+                      );
+                    }
                   }}
                 >
-                  <img
-                    src={`/pieces/${chess.turn()}${type.toUpperCase()}.svg`}
-                    alt={NAMES[type]}
-                  />
+                  {t(
+                    col === 0 && (
+                      <span className="coordinate rank">{t(rank)}</span>
+                    ),
+                  )}
+                  {t(
+                    row === 7 && (
+                      <span className="coordinate file">{t(file)}</span>
+                    ),
+                  )}
+                  {t(
+                    p && (
+                      <img
+                        src={pieceAsset(p.color, p.type, pieceTheme)}
+                        alt={t("")}
+                        draggable={
+                          editMode ||
+                          (!disabled && !!onMove && p.color === chess.turn())
+                        }
+                        onDragStart={(e) => {
+                          clearMarks();
+                          if (editMode) {
+                            e.dataTransfer.effectAllowed = "move";
+                            e.dataTransfer.setData(
+                              "application/x-kuda-square",
+                              square,
+                            );
+                          } else {
+                            e.dataTransfer.setData("text/plain", square);
+                            setSelection({ square, fen });
+                          }
+                        }}
+                        onDragEnd={(e) => {
+                          if (editMode && e.dataTransfer.dropEffect === "none")
+                            onDeleteDropSquare?.(square);
+                        }}
+                      />
+                    ),
+                  )}
+                  {t(
+                    annotation && lastMove?.to === square && p && (
+                      <span
+                        className="piece-category-badge"
+                        style={{ background: LABELS[annotation].color }}
+                        title={t(LABELS[annotation].label)}
+                        aria-label={t(LABELS[annotation].label)}
+                      >
+                        {t(LABELS[annotation].symbol)}
+                      </span>
+                    ),
+                  )}
+                  {t(
+                    isLegal && (
+                      <span className={p ? "legal-capture" : "legal-dot"} />
+                    ),
+                  )}
                 </button>
-              ))}
-            </div>
-            <button
-              className="text-button"
-              onClick={() => {
-                draggedMove.current = undefined;
-                setPromotion(undefined);
-              }}
+              );
+            }),
+          ),
+        )}
+        {t(
+          arrows.length > 0 && (
+            <svg
+              className="board-arrow"
+              viewBox="0 0 800 800"
+              aria-hidden="true"
             >
-              Batal
-            </button>
-          </div>
+              {t(
+                arrows.map((move, index) => (
+                  <g key={`${move}-${index}`} opacity={index === 0 ? 1 : 0.42}>
+                    <ArrowShape
+                      start={point(move.slice(0, 2))}
+                      end={point(move.slice(2, 4))}
+                    />
+                  </g>
+                )),
+              )}
+            </svg>
+          ),
+        )}
+        {t(
+          !compact && (marks.length > 0 || drawing) && (
+            <svg
+              className="board-annotations"
+              viewBox="0 0 800 800"
+              aria-label={t("Anotasi papan")}
+              role="img"
+            >
+              {t(
+                [...marks, ...(drawing ? [drawing] : [])].map((mark, index) => {
+                  const a = point(mark.from);
+                  const b = point(mark.to);
+                  const knight =
+                    Math.abs(a.x - b.x) * Math.abs(a.y - b.y) === 20000;
+                  return mark.from === mark.to ? (
+                    <circle
+                      key={index}
+                      data-mark={`${mark.from}-${mark.to}`}
+                      cx={a.x}
+                      cy={a.y}
+                      r="42"
+                      fill={mark.color}
+                      fillOpacity="0.24"
+                      stroke={mark.color}
+                      strokeWidth="9"
+                    />
+                  ) : (
+                    <g
+                      key={index}
+                      data-mark={`${mark.from}-${mark.to}`}
+                      color={mark.color}
+                    >
+                      <ArrowShape start={a} end={b} knight={knight} />
+                    </g>
+                  );
+                }),
+              )}
+            </svg>
+          ),
+        )}
+        {t(
+          promotion && (
+            <div
+              className="promotion-picker"
+              role="dialog"
+              aria-label={t("Pilih promosi")}
+            >
+              <p>{t("Promosikan pion")}</p>
+              <div>
+                {t(
+                  ["q", "r", "b", "n"].map((type) => (
+                    <button
+                      key={type}
+                      aria-label={t(`Promosi ${NAMES[type]}`)}
+                      onClick={() => {
+                        onMove?.(promotion.from, promotion.to, type);
+                        setPromotion(undefined);
+                        setSelection(undefined);
+                      }}
+                    >
+                      <img
+                        src={pieceAsset(chess.turn(), type, pieceTheme)}
+                        alt={t(NAMES[type])}
+                      />
+                    </button>
+                  )),
+                )}
+              </div>
+              <button
+                className="text-button"
+                onClick={() => {
+                  draggedMove.current = undefined;
+                  setPromotion(undefined);
+                }}
+              >
+                {t("Batal")}
+              </button>
+            </div>
+          ),
         )}
       </div>
     </div>
@@ -460,6 +522,8 @@ function ArrowShape({
   end: Point;
   knight?: boolean;
 }) {
+  const { t } = useI18n();
+
   const corner = knight
     ? Math.abs(start.x - end.x) > Math.abs(start.y - end.y)
       ? { x: end.x, y: start.y }
@@ -506,28 +570,32 @@ export function EvalBar({
   active?: boolean;
   pending?: boolean;
 }) {
+  const { t } = useI18n();
+
   const white = Math.max(5, Math.min(95, 50 + 45 * Math.tanh(cp / 450)));
   return (
     <div
       className={`eval-bar ${flipped ? "flipped" : ""}`}
-      aria-label={
+      aria-label={t(
         active
           ? `${pending ? "Evaluasi sebelumnya" : "Evaluasi putih"} ${cp / 100}${pending ? "; menunggu posisi baru" : ""}`
-          : "Belum dianalisis"
-      }
+          : "Belum dianalisis",
+      )}
       aria-busy={pending}
-      title={pending ? "Menunggu evaluasi posisi baru" : undefined}
+      title={t(pending ? "Menunggu evaluasi posisi baru" : undefined)}
       style={{ "--white-height": `${white}%` } as CSSProperties}
     >
       <div className="white-eval" />
       <span className={cp >= 0 ? "positive" : ""}>
-        {active
-          ? mate !== undefined
-            ? `M${Math.abs(mate)}`
-            : Math.abs(cp) >= 1000
-              ? (Math.abs(cp) / 100).toFixed(0)
-              : (Math.abs(cp) / 100).toFixed(1)
-          : "—"}
+        {t(
+          active
+            ? mate !== undefined
+              ? `M${Math.abs(mate)}`
+              : Math.abs(cp) >= 1000
+                ? (Math.abs(cp) / 100).toFixed(0)
+                : (Math.abs(cp) / 100).toFixed(1)
+            : "—",
+        )}
       </span>
     </div>
   );

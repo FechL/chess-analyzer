@@ -1,3 +1,6 @@
+// i18n: rendered text
+import { pieceAsset } from "../lib/preferences";
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
@@ -20,9 +23,15 @@ import {
 } from "lucide-react";
 import Board from "../components/Board";
 import { Modal, NavigationControls, ProgressRing } from "../components/Common";
-import { LESSONS, OPENINGS, PUZZLES } from "../data/content";
+import { LESSONS, OPENINGS } from "../data/content";
 import type { Exercise, Opening } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
+import {
+  cachedPuzzles,
+  consumePuzzle,
+  ensurePuzzles,
+} from "../lib/lichess-puzzles";
+import type { LichessPuzzle, PuzzleDifficulty } from "../lib/lichess-puzzles";
 import type { Settings } from "../App";
 
 export function OpeningsPage({
@@ -32,6 +41,8 @@ export function OpeningsPage({
   settings: Settings;
   onAnalyze: (fen: string, name: string) => void;
 }) {
+  const { t } = useI18n();
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Opening>();
@@ -49,192 +60,222 @@ export function OpeningsPage({
     <div className="page learning-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">OPENING EXPLORER</div>
+          <div className="eyebrow">{t("OPENING EXPLORER")}</div>
           <h1>
-            Langkah pertama.
+            {t("Langkah pertama.")}
             <br />
-            Rencana yang lebih besar<span>.</span>
+            {t("Rencana yang lebih besar")}
+            <span>{t(".")}</span>
           </h1>
-          <p>Jangan hanya menghafal. Temukan alasan di balik setiap langkah.</p>
+          <p>
+            {t(
+              "Jangan hanya menghafal. Temukan alasan di balik setiap langkah.",
+            )}
+          </p>
         </div>
         <div className="learning-counter">
           <GitOpening />
-          <strong>{OPENINGS.length}</strong>
+          <strong>{t(OPENINGS.length)}</strong>
           <span>
-            opening pilihan
+            {t("opening pilihan")}
             <br />
-            untuk repertoarmu
+            {t("untuk repertoarmu")}
           </span>
         </div>
       </div>
       <div className="feature-banner">
-        <div className="feature-chess-icon">♘</div>
+        <div className="feature-chess-icon">{t("♘")}</div>
         <div>
-          <span className="small-label">REKOMENDASI UNTUK MEMULAI</span>
-          <h2>Italian Game. Klasik untuk sebuah alasan.</h2>
+          <span className="small-label">{t("REKOMENDASI UNTUK MEMULAI")}</span>
+          <h2>{t("Italian Game. Klasik untuk sebuah alasan.")}</h2>
           <p>
-            Kontrol pusat, kembangkan buah, dan amankan raja. Semua dalam satu
-            opening.
+            {t(
+              "Kontrol pusat, kembangkan buah, dan amankan raja. Semua dalam satu opening.",
+            )}
           </p>
         </div>
         <button
           className="button primary"
           onClick={() => setSelected(OPENINGS[0])}
         >
-          Pelajari sekarang <ArrowRight size={16} />
+          {t("Pelajari sekarang ")}
+          <ArrowRight size={16} />
         </button>
       </div>
       <div className="catalog-toolbar">
         <div className="segmented">
-          {[
-            ["all", "Semua opening"],
-            ["w", "Untuk putih"],
-            ["b", "Untuk hitam"],
-          ].map(([id, label]) => (
-            <button
-              className={filter === id ? "active" : ""}
-              key={id}
-              onClick={() => setFilter(id)}
-            >
-              {label}
-            </button>
-          ))}
+          {t(
+            [
+              ["all", "Semua opening"],
+              ["w", "Untuk putih"],
+              ["b", "Untuk hitam"],
+            ].map(([id, label]) => (
+              <button
+                className={filter === id ? "active" : ""}
+                key={id}
+                onClick={() => setFilter(id)}
+              >
+                {t(label)}
+              </button>
+            )),
+          )}
         </div>
         <label className="search-input">
           <Search size={16} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari opening atau kode ECO…"
-            aria-label="Cari opening"
+            placeholder={t("Cari opening atau kode ECO…")}
+            aria-label={t("Cari opening")}
           />
         </label>
       </div>
       <div className="opening-grid">
-        {openings.map((o, i) => {
-          const c = new Chess();
-          o.moves.slice(0, 6).forEach((m) => c.move(m));
-          return (
-            <article
-              className="opening-card"
-              key={o.id}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setSelected(o);
-                }
-              }}
-              onClick={() => setSelected(o)}
-            >
-              <div className={`opening-card-art art-${i % 4}`}>
-                <div className="opening-mini-board" inert>
-                  <Board
-                    fen={c.fen()}
-                    flipped={o.side === "b"}
-                    compact
-                    theme={settings.boardTheme}
-                    disabled
-                  />
+        {t(
+          openings.map((o, i) => {
+            const c = new Chess();
+            o.moves.slice(0, 6).forEach((m) => c.move(m));
+            return (
+              <article
+                className="opening-card"
+                key={o.id}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected(o);
+                  }
+                }}
+                onClick={() => setSelected(o)}
+              >
+                <div className={`opening-card-art art-${i % 4}`}>
+                  <div className="opening-mini-board" inert>
+                    <Board
+                      fen={c.fen()}
+                      flipped={o.side === "b"}
+                      compact
+                      theme={settings.boardTheme}
+                      disabled
+                    />
+                  </div>
+                  <span className="eco-label">{t(o.eco)}</span>
+                  {t(
+                    completed.includes(o.id) && (
+                      <span className="complete-badge">
+                        <Check size={13} />
+                        {t(" Dipelajari")}
+                      </span>
+                    ),
+                  )}
                 </div>
-                <span className="eco-label">{o.eco}</span>
-                {completed.includes(o.id) && (
-                  <span className="complete-badge">
-                    <Check size={13} /> Dipelajari
-                  </span>
-                )}
-              </div>
-              <div className="opening-card-content">
-                <div className="opening-card-meta">
-                  <span>{o.side === "w" ? "● Putih" : "● Hitam"}</span>
-                  <span>{o.level}</span>
+                <div className="opening-card-content">
+                  <div className="opening-card-meta">
+                    <span>{t(o.side === "w" ? "● Putih" : "● Hitam")}</span>
+                    <span>{t(o.level)}</span>
+                  </div>
+                  <h3>
+                    {t(o.name)}
+                    <ArrowRight size={18} />
+                  </h3>
+                  <p>{t(o.description)}</p>
+                  <div className="opening-moves">
+                    {t(
+                      o.moves.slice(0, 6).map((m, j) => (
+                        <span key={j}>
+                          {t(j % 2 === 0 ? `${Math.floor(j / 2) + 1}. ` : "")}
+                          {t(m)}
+                        </span>
+                      )),
+                    )}
+                  </div>
                 </div>
-                <h3>
-                  {o.name}
-                  <ArrowRight size={18} />
-                </h3>
-                <p>{o.description}</p>
-                <div className="opening-moves">
-                  {o.moves.slice(0, 6).map((m, j) => (
-                    <span key={j}>
-                      {j % 2 === 0 ? `${Math.floor(j / 2) + 1}. ` : ""}
-                      {m}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          );
-        })}
+              </article>
+            );
+          }),
+        )}
       </div>
-      {!openings.length && (
-        <div className="empty-state">
-          <Search size={32} />
-          <h3>Opening belum ditemukan</h3>
-          <p>Coba nama, kode ECO, atau filter lain.</p>
-        </div>
+      {t(
+        !openings.length && (
+          <div className="empty-state">
+            <Search size={32} />
+            <h3>{t("Opening belum ditemukan")}</h3>
+            <p>{t("Coba nama, kode ECO, atau filter lain.")}</p>
+          </div>
+        ),
       )}
       <p className="content-note">
-        Repertoar lokal terkurasi · Jalur contoh untuk belajar, bukan database
-        statistik pertandingan.
+        {t(
+          "Repertoar lokal terkurasi · Jalur contoh untuk belajar, bukan database statistik pertandingan.",
+        )}
       </p>
-      {selected && (
-        <Modal
-          title={selected.name}
-          onClose={() => setSelected(undefined)}
-          wide
-        >
-          <div className="study-layout">
-            <div>
-              <LineTrainer
-                key={selected.id}
-                fen={DEFAULT_POSITION}
-                moves={selected.moves}
-                color={selected.side}
-                theme={settings.boardTheme}
-                title="Latih urutan opening"
-                onComplete={() => {
-                  const next = [...new Set([...completed, selected.id])];
-                  setCompleted(next);
-                  writeStorage("kuda-openings", next);
-                }}
-                onAnalyze={(fen) => {
-                  onAnalyze(fen, selected.name);
-                  setSelected(undefined);
-                }}
-              />
-            </div>
-            <div className="study-theory">
-              <span className="subtle-pill">
-                {selected.eco} · {selected.category}
-              </span>
-              <h3>Pahami idenya.</h3>
-              <p>{selected.description}</p>
-              <ol>
-                {selected.ideas.map((idea, i) => (
-                  <li key={i}>
-                    <span>{String(i + 1).padStart(2, "0")}</span>
-                    {idea}
-                  </li>
-                ))}
-              </ol>
-              <div className="study-tip">
-                <Lightbulb size={18} />
-                <p>{selected.tip}</p>
+      {t(
+        selected && (
+          <Modal
+            title={t(selected.name)}
+            onClose={() => setSelected(undefined)}
+            wide
+          >
+            <div className="study-layout">
+              <div>
+                <LineTrainer
+                  key={selected.id}
+                  fen={DEFAULT_POSITION}
+                  moves={selected.moves}
+                  color={selected.side}
+                  theme={settings.boardTheme}
+                  title={t("Latih urutan opening")}
+                  onComplete={() => {
+                    const next = [...new Set([...completed, selected.id])];
+                    setCompleted(next);
+                    writeStorage("kuda-openings", next);
+                  }}
+                  onAnalyze={(fen) => {
+                    onAnalyze(fen, selected.name);
+                    setSelected(undefined);
+                  }}
+                />
               </div>
-              <p className="muted">
-                Mainkan buah {selected.side === "w" ? "putih" : "hitam"} pada
-                mode latihan. Lawan membalas otomatis sesuai jalur contoh.
-              </p>
+              <div className="study-theory">
+                <span className="subtle-pill">
+                  {t(selected.eco)}
+                  {t(" · ")}
+                  {t(selected.category)}
+                </span>
+                <h3>{t("Pahami idenya.")}</h3>
+                <p>{t(selected.description)}</p>
+                <ol>
+                  {t(
+                    selected.ideas.map((idea, i) => (
+                      <li key={i}>
+                        <span>{t(String(i + 1).padStart(2, "0"))}</span>
+                        {t(idea)}
+                      </li>
+                    )),
+                  )}
+                </ol>
+                <div className="study-tip">
+                  <Lightbulb size={18} />
+                  <p>{t(selected.tip)}</p>
+                </div>
+                <p className="muted">
+                  {t("Mainkan buah ")}
+                  {t(selected.side === "w" ? "putih" : "hitam")}
+                  {t(
+                    " pada mode latihan. Lawan membalas otomatis sesuai jalur contoh.",
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
-        </Modal>
+          </Modal>
+        ),
       )}
     </div>
   );
 }
 function GitOpening() {
+  const { t } = useI18n();
+
   return (
     <div className="learning-counter-icon">
       <BookOpen size={27} />
@@ -249,6 +290,8 @@ export function AcademyPage({
   settings: Settings;
   onAnalyze: (fen: string, name: string) => void;
 }) {
+  const { t } = useI18n();
+
   const [category, setCategory] = useState("Semua");
   const [selected, setSelected] = useState<Exercise>();
   const [completed, setCompleted] = useState<string[]>(() =>
@@ -267,35 +310,42 @@ export function AcademyPage({
     <div className="page learning-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">AKADEMI KUDA</div>
+          <div className="eyebrow">{t("AKADEMI KUDA")}</div>
           <h1>
-            Pahami satu ide.
+            {t("Pahami satu ide.")}
             <br />
-            Naik satu tingkat<span>.</span>
+            {t("Naik satu tingkat")}
+            <span>{t(".")}</span>
           </h1>
-          <p>Pelajaran singkat. Papan interaktif. Pemahaman yang bertahan.</p>
+          <p>
+            {t("Pelajaran singkat. Papan interaktif. Pemahaman yang bertahan.")}
+          </p>
         </div>
         <div className="academy-progress">
           <ProgressRing percent={percent} size={62} />
           <div>
-            <strong>Perjalanan belajarmu</strong>
+            <strong>{t("Perjalanan belajarmu")}</strong>
             <span>
-              {completed.length} dari {LESSONS.length} pelajaran selesai
+              {t(completed.length)}
+              {t(" dari ")}
+              {t(LESSONS.length)}
+              {t(" pelajaran selesai")}
             </span>
           </div>
         </div>
       </div>
       <div className="academy-feature">
         <div className="academy-feature-copy">
-          <span className="small-label">MULAI DARI FONDASI</span>
+          <span className="small-label">{t("MULAI DARI FONDASI")}</span>
           <h2>
-            Permainan hebat dimulai
+            {t("Permainan hebat dimulai")}
             <br />
-            dari kebiasaan kecil.
+            {t("dari kebiasaan kecil.")}
           </h2>
           <p>
-            Kuasai pusat, aktifkan buah, dan jaga raja. Jadikan tiga prinsip ini
-            bagian dari setiap permainan.
+            {t(
+              "Kuasai pusat, aktifkan buah, dan jaga raja. Jadikan tiga prinsip ini bagian dari setiap permainan.",
+            )}
           </p>
           <button
             className="button primary"
@@ -305,138 +355,163 @@ export function AcademyPage({
               )
             }
           >
-            Lanjutkan belajar <ArrowRight size={16} />
+            {t("Lanjutkan belajar ")}
+            <ArrowRight size={16} />
           </button>
         </div>
         <div className="academy-illustration" aria-hidden="true">
           <div className="illustration-board" />
-          {["wN", "wK", "wB"].map((p, i) => (
-            <img
-              className={`hero-piece piece-${i}`}
-              key={p}
-              src={`/pieces/${p}.svg`}
-              alt=""
-            />
-          ))}
-          <span className="illustration-spark spark-1">✦</span>
-          <span className="illustration-spark spark-2">✦</span>
+          {t(
+            ["wN", "wK", "wB"].map((p, i) => (
+              <img
+                className={`hero-piece piece-${i}`}
+                key={p}
+                src={pieceAsset(p[0], p[1], settings.pieceTheme)}
+                alt={t("")}
+              />
+            )),
+          )}
+          <span className="illustration-spark spark-1">{t("✦")}</span>
+          <span className="illustration-spark spark-2">{t("✦")}</span>
           <span className="illustration-note">
-            <CheckCheck size={15} /> Sedikit latihan, setiap hari.
+            <CheckCheck size={15} />
+            {t(" Sedikit latihan, setiap hari.")}
           </span>
         </div>
       </div>
       <div className="catalog-toolbar">
         <div className="segmented wrap">
-          {categories.map((c) => (
-            <button
-              className={category === c ? "active" : ""}
-              key={c}
-              onClick={() => setCategory(c)}
-            >
-              {c}
-            </button>
-          ))}
+          {t(
+            categories.map((c) => (
+              <button
+                className={category === c ? "active" : ""}
+                key={c}
+                onClick={() => setCategory(c)}
+              >
+                {t(c)}
+              </button>
+            )),
+          )}
         </div>
-        <span className="muted">Belajar dengan ritmemu sendiri</span>
+        <span className="muted">{t("Belajar dengan ritmemu sendiri")}</span>
       </div>
       <div className="lesson-grid">
-        {LESSONS.filter(
-          (l) => category === "Semua" || l.category === category,
-        ).map((l, i) => (
-          <button
-            key={l.id}
-            className="lesson-card"
-            onClick={() => setSelected(l)}
-          >
-            <div className="lesson-top">
-              <span className={`lesson-icon tone-${i % 3}`}>
-                {l.category === "Taktik" ? (
-                  <Target size={24} />
-                ) : l.category === "Endgame" ? (
-                  <Flag size={24} />
-                ) : l.category === "Skakmat" ? (
-                  <Trophy size={24} />
-                ) : (
-                  <GraduationCap size={24} />
+        {t(
+          LESSONS.filter(
+            (l) => category === "Semua" || l.category === category,
+          ).map((l, i) => (
+            <button
+              key={l.id}
+              className="lesson-card"
+              onClick={() => setSelected(l)}
+            >
+              <div className="lesson-top">
+                <span className={`lesson-icon tone-${i % 3}`}>
+                  {t(
+                    l.category === "Taktik" ? (
+                      <Target size={24} />
+                    ) : l.category === "Endgame" ? (
+                      <Flag size={24} />
+                    ) : l.category === "Skakmat" ? (
+                      <Trophy size={24} />
+                    ) : (
+                      <GraduationCap size={24} />
+                    ),
+                  )}
+                </span>
+                {t(
+                  completed.includes(l.id) ? (
+                    <span className="lesson-done">
+                      <Check size={14} />
+                      {t(" Selesai")}
+                    </span>
+                  ) : (
+                    <span className="lesson-number">
+                      {t(String(LESSONS.indexOf(l) + 1).padStart(2, "0"))}
+                    </span>
+                  ),
                 )}
+              </div>
+              <span className="small-label">
+                {t(l.category)}
+                {t(" · ")}
+                {t(l.level)}
               </span>
-              {completed.includes(l.id) ? (
-                <span className="lesson-done">
-                  <Check size={14} /> Selesai
+              <h3>{t(l.title)}</h3>
+              <p>{t(l.description)}</p>
+              <div className="lesson-bottom">
+                <span>
+                  <Clock3 size={13} />
+                  {t(l.minutes)}
+                  {t(" menit")}
                 </span>
-              ) : (
-                <span className="lesson-number">
-                  {String(LESSONS.indexOf(l) + 1).padStart(2, "0")}
+                <span>
+                  {t("Mulai pelajaran ")}
+                  <ArrowRight size={14} />
                 </span>
-              )}
-            </div>
-            <span className="small-label">
-              {l.category} · {l.level}
-            </span>
-            <h3>{l.title}</h3>
-            <p>{l.description}</p>
-            <div className="lesson-bottom">
-              <span>
-                <Clock3 size={13} />
-                {l.minutes} menit
-              </span>
-              <span>
-                Mulai pelajaran <ArrowRight size={14} />
-              </span>
-            </div>
-          </button>
-        ))}
+              </div>
+            </button>
+          )),
+        )}
       </div>
-      {selected && (
-        <Modal
-          title={selected.title}
-          onClose={() => setSelected(undefined)}
-          wide
-        >
-          <div className="study-layout">
-            <LineTrainer
-              key={selected.id}
-              fen={selected.fen}
-              moves={selected.solution}
-              color={selected.fen.split(" ")[1] as "w" | "b"}
-              theme={settings.boardTheme}
-              title={selected.description}
-              hint={selected.hint}
-              explanation={selected.explanation}
-              startTraining
-              onComplete={() => {
-                const next = [...new Set([...completed, selected.id])];
-                setCompleted(next);
-                writeStorage("kuda-lessons", next);
-              }}
-              onAnalyze={(fen) => {
-                onAnalyze(fen, selected.title);
-                setSelected(undefined);
-              }}
-            />
-            <div className="study-theory">
-              <span className="subtle-pill">
-                {selected.category} · {selected.minutes} menit
-              </span>
-              <h3>Ide yang perlu dibawa.</h3>
-              <ol>
-                {selected.theory.map((t, i) => (
-                  <li key={i}>
-                    <span>{String(i + 1).padStart(2, "0")}</span>
-                    {t}
-                  </li>
-                ))}
-              </ol>
-              <div className="study-tip">
-                <Lightbulb size={18} />
-                <p>
-                  Baca posisi, periksa ancaman, lalu coba langkahmu langsung di
-                  papan.
-                </p>
+      {t(
+        selected && (
+          <Modal
+            title={t(selected.title)}
+            onClose={() => setSelected(undefined)}
+            wide
+          >
+            <div className="study-layout">
+              <LineTrainer
+                key={selected.id}
+                fen={selected.fen}
+                moves={selected.solution}
+                color={selected.fen.split(" ")[1] as "w" | "b"}
+                theme={settings.boardTheme}
+                title={t(selected.description)}
+                hint={selected.hint}
+                explanation={selected.explanation}
+                startTraining
+                onComplete={() => {
+                  const next = [...new Set([...completed, selected.id])];
+                  setCompleted(next);
+                  writeStorage("kuda-lessons", next);
+                }}
+                onAnalyze={(fen) => {
+                  onAnalyze(fen, selected.title);
+                  setSelected(undefined);
+                }}
+              />
+              <div className="study-theory">
+                <span className="subtle-pill">
+                  {t(selected.category)}
+                  {t(" · ")}
+                  {t(selected.minutes)}
+                  {t(" menit")}
+                </span>
+                <h3>{t("Ide yang perlu dibawa.")}</h3>
+                <ol>
+                  {t(
+                    selected.theory.map((idea, i) => (
+                      <li key={i}>
+                        <span>{t(String(i + 1).padStart(2, "0"))}</span>
+                        {t(idea)}
+                      </li>
+                    )),
+                  )}
+                </ol>
+                <div className="study-tip">
+                  <Lightbulb size={18} />
+                  <p>
+                    {t(
+                      "Baca posisi, periksa ancaman, lalu coba langkahmu langsung di papan.",
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </Modal>
+          </Modal>
+        ),
       )}
     </div>
   );
@@ -449,110 +524,204 @@ export function PuzzlesPage({
   settings: Settings;
   onAnalyze: (fen: string, name: string) => void;
 }) {
-  const [index, setIndex] = useState(0);
-  const [completed, setCompleted] = useState<string[]>(() =>
-    readStorage("kuda-puzzles", []),
+  const { t } = useI18n();
+
+  const [theme, setTheme] = useState("mix");
+  const [difficulty, setDifficulty] = useState<PuzzleDifficulty>("normal");
+  const [queue, setQueue] = useState<LichessPuzzle[]>(() =>
+    cachedPuzzles("mix", "normal"),
   );
-  const puzzle = PUZZLES[index];
+  const [puzzle, setPuzzle] = useState<LichessPuzzle | undefined>(
+    () => cachedPuzzles("mix", "normal")[0],
+  );
+  const [completed, setCompleted] = useState<string[]>(() =>
+    readStorage("kuda-lichess-completed", []),
+  );
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const requestId = useRef(0);
+  const load = async (next = false) => {
+    const id = ++requestId.current;
+    setBusy(true);
+    setError("");
+    if (next && puzzle) consumePuzzle(theme, difficulty, puzzle.id);
+    try {
+      const available = await ensurePuzzles(theme, difficulty);
+      if (id !== requestId.current) return;
+      setQueue(available);
+      setPuzzle(available[0]);
+      if (!available.length) setError("Belum ada puzzle baru. Coba tema lain.");
+    } catch (e) {
+      if (id === requestId.current) setError((e as Error).message);
+    } finally {
+      if (id === requestId.current) setBusy(false);
+    }
+  };
+  useEffect(() => {
+    const available = cachedPuzzles(theme, difficulty);
+    setPuzzle(available[0]);
+    setQueue(available);
+    void load();
+    return () => {
+      requestId.current++;
+    };
+  }, [theme, difficulty]);
+  const complete = () => {
+    if (!puzzle) return;
+    const next = [...new Set([...completed, puzzle.id])];
+    setCompleted(next);
+    writeStorage("kuda-lichess-completed", next);
+    consumePuzzle(theme, difficulty, puzzle.id);
+    const id = requestId.current;
+    void ensurePuzzles(theme, difficulty)
+      .then((items) => {
+        if (id === requestId.current) setQueue(items);
+      })
+      .catch((e) => {
+        if (id === requestId.current) setError((e as Error).message);
+      });
+  };
   return (
     <div className="page puzzle-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">LATIHAN TAKTIK</div>
-          <h1>
-            Lihat yang tidak terlihat<span>.</span>
-          </h1>
-          <p>Latih mata untuk menemukan peluang dalam satu posisi.</p>
+          <h1>{t("Puzzle")}</h1>
+          <p>{t("Temukan langkah terbaik dari permainan nyata di Lichess.")}</p>
         </div>
         <div className="puzzle-counter">
-          <Target size={23} />
-          <strong>
-            {completed.length}
-            <span>/{PUZZLES.length}</span>
-          </strong>
-          <span>tantangan selesai</span>
+          <Target size={22} />
+          <strong>{t(completed.length)}</strong>
+          <span>{t("puzzle selesai")}</span>
         </div>
       </div>
       <div className="puzzle-layout">
         <section className="puzzle-board-card">
-          <div className="puzzle-title">
-            <span className="subtle-pill">{puzzle.level}</span>
-            <h2>{puzzle.title}</h2>
-            <span>
-              {index + 1} / {PUZZLES.length}
-            </span>
-          </div>
-          <LineTrainer
-            key={puzzle.id}
-            fen={puzzle.fen}
-            moves={puzzle.solution}
-            color={puzzle.fen.split(" ")[1] as "w" | "b"}
-            theme={settings.boardTheme}
-            title={puzzle.description}
-            hint={puzzle.hint}
-            explanation={puzzle.explanation}
-            startTraining
-            puzzleMode
-            onComplete={() => {
-              const next = [...new Set([...completed, puzzle.id])];
-              setCompleted(next);
-              writeStorage("kuda-puzzles", next);
-            }}
-            onAnalyze={(fen) => onAnalyze(fen, puzzle.title)}
-          />
+          {t(
+            puzzle ? (
+              <>
+                <div className="puzzle-title">
+                  <span className="subtle-pill">
+                    {t("Rating ")}
+                    {t(puzzle.rating)}
+                  </span>
+                  <h2>
+                    {t("Puzzle #")}
+                    {t(puzzle.id)}
+                  </h2>
+                  <a href={puzzle.url} target="_blank" rel="noreferrer">
+                    {t("Lichess ↗")}
+                  </a>
+                </div>
+                <LineTrainer
+                  key={puzzle.id}
+                  fen={puzzle.fen}
+                  moves={puzzle.solution}
+                  color={puzzle.fen.split(" ")[1] as "w" | "b"}
+                  theme={settings.boardTheme}
+                  title={t(
+                    "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
+                  )}
+                  hint="Cari langkah yang memaksa balasan lawan."
+                  explanation="Puzzle selesai. Semua langkah solusi sudah ditemukan."
+                  startTraining
+                  puzzleMode
+                  onComplete={complete}
+                  onAnalyze={(fen) =>
+                    onAnalyze(fen, "Puzzle Lichess #" + puzzle.id)
+                  }
+                />
+              </>
+            ) : (
+              <div className="puzzle-loading" role="status">
+                {t(
+                  busy
+                    ? "Mengambil puzzle dari Lichess…"
+                    : "Pilih tema untuk memulai puzzle.",
+                )}
+              </div>
+            ),
+          )}
           <div className="puzzle-navigation">
             <button
-              className="button secondary"
-              disabled={index === 0}
-              onClick={() => setIndex((i) => i - 1)}
-            >
-              <ChevronLeft size={15} /> Sebelumnya
-            </button>
-            <button
               className="button primary"
-              onClick={() => setIndex((i) => (i + 1) % PUZZLES.length)}
+              disabled={busy}
+              onClick={() => void load(true)}
             >
-              Tantangan berikutnya <ArrowRight size={15} />
+              {t("Puzzle berikutnya ")}
+              <ArrowRight size={15} />
             </button>
           </div>
+          {t(
+            error && (
+              <div className="error-message" role="alert">
+                {t(error)}
+                <button
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => void load()}
+                >
+                  {t("Coba lagi")}
+                </button>
+              </div>
+            ),
+          )}
         </section>
         <aside className="puzzle-sidebar">
           <div className="puzzle-sidebar-head">
-            <Sparkles size={19} />
-            <h3>Latihan kecil, dampak besar.</h3>
+            <Target size={22} />
+            <h3>{t("Puzzle Lichess")}</h3>
             <p>
-              Periksa skak, tangkapan, lalu ancaman. Luangkan waktu sebelum
-              menggerakkan buah.
+              {t(
+                "Antrean berisi hingga 5 puzzle dan diisi ulang setelah puzzle selesai.",
+              )}
             </p>
           </div>
-          <span className="section-label">KOLEKSI TANTANGAN</span>
-          {PUZZLES.map((p, i) => (
-            <button
-              key={p.id}
-              className={`puzzle-list-item ${index === i ? "active" : ""}`}
-              onClick={() => setIndex(i)}
+          <div className="puzzle-filter">
+            <label htmlFor="puzzle-theme">{t("Tema puzzle")}</label>
+            <select
+              id="puzzle-theme"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
             >
-              <span>
-                {completed.includes(p.id) ? (
-                  <Check size={16} />
-                ) : (
-                  String(i + 1).padStart(2, "0")
-                )}
-              </span>
-              <div>
-                <strong>{p.title}</strong>
-                <small>{p.category}</small>
-              </div>
-              <ChevronRight size={15} />
-            </button>
-          ))}
-          <div className="study-tip">
-            <BookOpen size={18} />
-            <p>
-              Tantangan di sini disusun untuk belajar pola, tanpa rating
-              kompetitif atau statistik pemain buatan.
-            </p>
+              <option value="mix">{t("Campuran")}</option>
+              <option value="mateIn1">{t("Mat dalam 1 langkah")}</option>
+              <option value="fork">{t("Garpu")}</option>
+              <option value="pin">{t("Ikatan")}</option>
+              <option value="endgame">{t("Endgame")}</option>
+              <option value="sacrifice">{t("Pengorbanan")}</option>
+            </select>
           </div>
+          <div className="puzzle-filter">
+            <label htmlFor="puzzle-difficulty">{t("Kesulitan")}</label>
+            <select
+              id="puzzle-difficulty"
+              value={difficulty}
+              onChange={(e) =>
+                setDifficulty(e.target.value as PuzzleDifficulty)
+              }
+            >
+              <option value="easiest">{t("Sangat mudah")}</option>
+              <option value="easier">{t("Mudah")}</option>
+              <option value="normal">{t("Normal")}</option>
+              <option value="harder">{t("Sulit")}</option>
+              <option value="hardest">{t("Sangat sulit")}</option>
+            </select>
+          </div>
+          <div className="puzzle-queue-count">
+            <strong>
+              {t(queue.length)}
+              {t("/5")}
+            </strong>{" "}
+            <span>{t("puzzle tersimpan")}</span>
+          </div>
+          <a
+            className="puzzle-source"
+            href="https://database.lichess.org/#puzzles"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("Sumber: database puzzle Lichess · CC0 ↗")}
+          </a>
         </aside>
       </div>
     </div>
@@ -584,6 +753,8 @@ export function LineTrainer({
   onComplete: () => void;
   onAnalyze: (fen: string) => void;
 }) {
+  const { t } = useI18n();
+
   const [step, setStep] = useState(0);
   const [training, setTraining] = useState(startTraining);
   const [feedback, setFeedback] = useState("");
@@ -651,35 +822,43 @@ export function LineTrainer({
   };
   return (
     <div className="line-trainer">
-      {!puzzleMode && (
-        <div className="trainer-mode">
-          <button
-            className={!training ? "active" : ""}
-            onClick={() => reset(false)}
-          >
-            <BookOpen size={14} /> Pelajari
-          </button>
-          <button
-            className={training ? "active" : ""}
-            onClick={() => reset(true)}
-          >
-            <Target size={14} /> Latihan
-          </button>
-        </div>
+      {t(
+        !puzzleMode && (
+          <div className="trainer-mode">
+            <button
+              className={!training ? "active" : ""}
+              onClick={() => reset(false)}
+            >
+              <BookOpen size={14} />
+              {t(" Pelajari")}
+            </button>
+            <button
+              className={training ? "active" : ""}
+              onClick={() => reset(true)}
+            >
+              <Target size={14} />
+              {t(" Latihan")}
+            </button>
+          </div>
+        ),
       )}
       <div className="trainer-instruction">
         <span className="status-dot" />
-        {done
-          ? revealed
-            ? "Jawaban ditampilkan"
-            : "Jalur selesai!"
-          : isOpponent
-            ? "Lawan membalas…"
-            : training
-              ? `${color === "w" ? "Putih" : "Hitam"} melangkah`
-              : "Jelajahi urutan langkah"}
+        {t(
+          done
+            ? revealed
+              ? "Jawaban ditampilkan"
+              : "Jalur selesai!"
+            : isOpponent
+              ? "Lawan membalas…"
+              : training
+                ? `${color === "w" ? "Putih" : "Hitam"} melangkah`
+                : "Jelajahi urutan langkah",
+        )}
         <span>
-          {step}/{moves.length}
+          {t(step)}
+          {t("/")}
+          {t(moves.length)}
         </span>
       </div>
       <Board
@@ -690,67 +869,84 @@ export function LineTrainer({
         onMove={training ? attempt : undefined}
         disabled={!training || isOpponent || done}
       />
-      {!training && (
-        <NavigationControls
-          ply={step}
-          total={moves.length}
-          onChange={setStep}
-        />
+      {t(
+        !training && (
+          <NavigationControls
+            ply={step}
+            total={moves.length}
+            onChange={setStep}
+          />
+        ),
       )}
       <div
         className={`exercise-feedback ${done && !revealed ? "success" : ""}`}
         aria-live="polite"
       >
-        {done ? (
-          <>
-            <CheckCheck size={18} />
-            <span>
-              {explanation ||
-                "Kamu sudah mempelajari jalur ini. Ulangi beberapa kali sampai memahami idenya."}
-            </span>
-          </>
-        ) : (
-          feedback || title
+        {t(
+          done ? (
+            <>
+              <CheckCheck size={18} />
+              <span>
+                {t(
+                  explanation ||
+                    "Kamu sudah mempelajari jalur ini. Ulangi beberapa kali sampai memahami idenya.",
+                )}
+              </span>
+            </>
+          ) : (
+            feedback || title
+          ),
         )}
       </div>
-      {!done && training && (
-        <div className="trainer-actions">
-          <button
-            className="text-button"
-            onClick={() => setShowHint((v) => !v)}
-          >
-            <Lightbulb size={15} /> Petunjuk
-          </button>
-          <button
-            className="text-button"
-            onClick={() => {
-              setRevealed(true);
-              setTraining(false);
-              setStep(moves.length);
-            }}
-          >
-            Lihat jawaban
-          </button>
-        </div>
+      {t(
+        !done && training && (
+          <div className="trainer-actions">
+            <button
+              className="text-button"
+              onClick={() => setShowHint((v) => !v)}
+            >
+              <Lightbulb size={15} />
+              {t(" Petunjuk")}
+            </button>
+            <button
+              className="text-button"
+              onClick={() => {
+                setRevealed(true);
+                setTraining(false);
+                setStep(moves.length);
+              }}
+            >
+              {t("Lihat jawaban")}
+            </button>
+          </div>
+        ),
       )}
-      {showHint && !done && (
-        <div className="hint-box">
-          {hint ||
-            `Langkah berikutnya: ${moves[step]}. Ingat ide perkembangan dan kontrol pusat.`}
-        </div>
+      {t(
+        showHint && !done && (
+          <div className="hint-box">
+            {t(
+              hint ||
+                `Langkah berikutnya: ${moves[step]}. Ingat ide perkembangan dan kontrol pusat.`,
+            )}
+          </div>
+        ),
       )}
-      {done && (
-        <div className="trainer-actions">
-          <button className="button secondary" onClick={() => reset(true)}>
-            <RotateCcw size={14} /> Ulangi latihan
-          </button>
-          <button
-            className="text-button"
-            onClick={() => onAnalyze(chess.fen())}
-          >
-            Analisis posisi <ArrowRight size={14} />
-          </button>
-        </div>
+      {t(
+        done && (
+          <div className="trainer-actions">
+            <button className="button secondary" onClick={() => reset(true)}>
+              <RotateCcw size={14} />
+              {t(" Ulangi latihan")}
+            </button>
+            <button
+              className="text-button"
+              onClick={() => onAnalyze(chess.fen())}
+            >
+              {t("Analisis posisi ")}
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        ),
       )}
     </div>
   );

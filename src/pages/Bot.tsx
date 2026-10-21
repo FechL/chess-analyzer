@@ -1,3 +1,5 @@
+// i18n: rendered text
+import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import {
@@ -75,6 +77,8 @@ export default function BotPage({
   analysisFen: string;
   onReview: (game: GameData) => void;
 }) {
+  const { t } = useI18n();
+
   const [chess, setChess] = useState(() => new Chess());
   const [level, setLevel] = useState(0);
   const [side, setSide] = useState("w");
@@ -235,11 +239,16 @@ export default function BotPage({
       <span
         className={`chess-clock ${started && !ended && chess.turn() === color ? "clock-active" : ""}`}
       >
-        {time
-          ? `${Math.floor(seconds / 60)
-              .toString()
-              .padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`
-          : "∞"}
+        {t(
+          time
+            ? `${Math.floor(seconds / 60)
+                .toString()
+                .padStart(
+                  2,
+                  "0",
+                )}:${(seconds % 60).toString().padStart(2, "0")}`
+            : "∞",
+        )}
       </span>
     );
   };
@@ -250,7 +259,7 @@ export default function BotPage({
           <PlayerRow
             name={current.person}
             color={human === "w" ? "b" : "w"}
-            subtitle={thinking ? "Sedang berpikir…" : current.name}
+            subtitle={t(thinking ? "Sedang berpikir…" : current.name)}
             active={thinking}
             right={clock(human === "w" ? "b" : "w")}
           />
@@ -266,9 +275,9 @@ export default function BotPage({
           <PlayerRow
             name="Anda"
             color={human}
-            subtitle={
-              started ? "Nikmati permainannya." : "Siap untuk langkah pertama?"
-            }
+            subtitle={t(
+              started ? "Nikmati permainannya." : "Siap untuk langkah pertama?",
+            )}
             active={started && !ended && chess.turn() === human}
             right={clock(human)}
           />
@@ -278,7 +287,8 @@ export default function BotPage({
               disabled={!started || !history.length}
               onClick={undo}
             >
-              <Undo2 size={15} /> Ulang langkah
+              <Undo2 size={15} />
+              {t(" Ulang langkah")}
             </button>
             <button
               className="button secondary"
@@ -291,108 +301,127 @@ export default function BotPage({
               }
               onClick={getHint}
             >
-              <Lightbulb size={15} /> Petunjuk
+              <Lightbulb size={15} />
+              {t(" Petunjuk")}
             </button>
             <button
               className="button subtle"
               disabled={!started || ended}
               onClick={() => setConfirmResign(true)}
             >
-              <Flag size={15} /> Menyerah
+              <Flag size={15} />
+              {t(" Menyerah")}
             </button>
           </div>
-          {hint && (
-            <div className="hint-box" aria-live="polite">
-              <Lightbulb size={16} />
-              {hint}
-            </div>
+          {t(
+            hint && (
+              <div className="hint-box" aria-live="polite">
+                <Lightbulb size={16} />
+                {t(hint)}
+              </div>
+            ),
           )}
-          {started && (
-            <div
-              className={`bot-game-status ${ended ? "finished" : ""}`}
-              aria-live="polite"
-            >
-              {ended ? (
-                <TrophyIcon />
-              ) : thinking ? (
-                <LoaderCircle size={17} className="spin" />
-              ) : (
-                <span className="status-dot" />
-              )}
-              <span>{outcome || gameStatus(chess)}</span>
-              {ended && (
-                <button className="text-button" onClick={review}>
-                  Ulas permainan <ArrowRight size={14} />
-                </button>
-              )}
-            </div>
+          {t(
+            started && (
+              <div
+                className={`bot-game-status ${ended ? "finished" : ""}`}
+                aria-live="polite"
+              >
+                {t(
+                  ended ? (
+                    <TrophyIcon />
+                  ) : thinking ? (
+                    <LoaderCircle size={17} className="spin" />
+                  ) : (
+                    <span className="status-dot" />
+                  ),
+                )}
+                <span>{t(outcome || gameStatus(chess))}</span>
+                {t(
+                  ended && (
+                    <button className="text-button" onClick={review}>
+                      {t("Ulas permainan ")}
+                      <ArrowRight size={14} />
+                    </button>
+                  ),
+                )}
+              </div>
+            ),
           )}
         </section>
         <aside className="bot-config">
           <div className="bot-engine-status">
             <span className="subtle-pill">
-              <CpuIcon /> Stockfish lokal
+              <CpuIcon />
+              {t(" Stockfish lokal")}
             </span>
           </div>
           <div className="bot-persona">
             <div className={`bot-avatar avatar-${level}`}>
               <img
                 src={`/pieces/${level % 2 === 0 ? "wN" : "bN"}.svg`}
-                alt=""
+                alt={t("")}
               />
               <span className="status-dot" />
             </div>
-            <span className="small-label">TEMAN LATIHANMU</span>
-            <h2>{current.person}</h2>
-            <p>{current.description}</p>
+            <span className="small-label">{t("TEMAN LATIHANMU")}</span>
+            <h2>{t(current.person)}</h2>
+            <p>{t(current.description)}</p>
           </div>
           <div className="config-group">
-            <label>Pilih tantangan</label>
+            <label>{t("Pilih tantangan")}</label>
             <div className="bot-levels">
-              {LEVELS.map((l) => (
-                <button
-                  key={l.id}
-                  className={level === l.id ? "active" : ""}
-                  disabled={started && !ended}
-                  onClick={() => setLevel(l.id)}
-                >
-                  <span>{l.id + 1}</span>
-                  <div>
-                    <strong>{l.person}</strong>
-                    <small>{l.name}</small>
-                  </div>
-                  {level === l.id && <CheckIcon />}
-                </button>
-              ))}
+              {t(
+                LEVELS.map((l) => (
+                  <button
+                    key={l.id}
+                    className={level === l.id ? "active" : ""}
+                    disabled={started && !ended}
+                    onClick={() => setLevel(l.id)}
+                  >
+                    <span>{t(l.id + 1)}</span>
+                    <div>
+                      <strong>{t(l.person)}</strong>
+                      <small>{t(l.name)}</small>
+                    </div>
+                    {t(level === l.id && <CheckIcon />)}
+                  </button>
+                )),
+              )}
             </div>
           </div>
           <div className="config-group">
-            <label>Main sebagai</label>
+            <label>{t("Main sebagai")}</label>
             <div className="color-choices">
-              {[
-                ["w", "Putih"],
-                ["random", "Acak"],
-                ["b", "Hitam"],
-              ].map(([id, label]) => (
-                <button
-                  className={side === id ? "active" : ""}
-                  key={id}
-                  disabled={started && !ended}
-                  onClick={() => setSide(id)}
-                >
-                  {id === "random" ? (
-                    <Swords size={19} />
-                  ) : (
-                    <img src={`/pieces/${id}K.svg`} alt="" />
-                  )}
-                  {label}
-                </button>
-              ))}
+              {t(
+                [
+                  ["w", "Putih"],
+                  ["random", "Acak"],
+                  ["b", "Hitam"],
+                ].map(([id, label]) => (
+                  <button
+                    className={side === id ? "active" : ""}
+                    key={id}
+                    disabled={started && !ended}
+                    onClick={() => setSide(id)}
+                  >
+                    {t(
+                      id === "random" ? (
+                        <Swords size={19} />
+                      ) : (
+                        <img src={`/pieces/${id}K.svg`} alt={t("")} />
+                      ),
+                    )}
+                    {t(label)}
+                  </button>
+                )),
+              )}
             </div>
           </div>
           <div className="config-group">
             <label htmlFor="bot-time">
-              <Clock3 size={14} /> Waktu permainan
+              <Clock3 size={14} />
+              {t(" Waktu permainan")}
             </label>
             <select
               id="bot-time"
@@ -400,9 +429,9 @@ export default function BotPage({
               disabled={started && !ended}
               onChange={(e) => setTime(Number(e.target.value))}
             >
-              <option value={0}>Tanpa batas · latihan santai</option>
-              <option value={5}>5 menit per pemain</option>
-              <option value={10}>10 menit per pemain</option>
+              <option value={0}>{t("Tanpa batas · latihan santai")}</option>
+              <option value={5}>{t("5 menit per pemain")}</option>
+              <option value={10}>{t("10 menit per pemain")}</option>
             </select>
           </div>
           <label className="checkbox-label">
@@ -411,104 +440,125 @@ export default function BotPage({
               checked={fromPosition}
               disabled={started && !ended}
               onChange={(e) => setFromPosition(e.target.checked)}
-            />{" "}
-            Mulai dari posisi analisis terakhir
+            />
+            {t(" ")}
+            {t("Mulai dari posisi analisis terakhir")}
           </label>
-          {(error || engineError) && (
-            <div className="error-message">{error || engineError}</div>
+          {t(
+            (error || engineError) && (
+              <div className="error-message">{t(error || engineError)}</div>
+            ),
           )}
           <button
             className="button primary full"
             disabled={status !== "ready"}
             onClick={start}
           >
-            {status === "loading" ? (
-              <LoaderCircle className="spin" size={16} />
-            ) : started ? (
-              <RotateCcw size={16} />
-            ) : (
-              <Play size={16} />
-            )}{" "}
-            {status === "loading"
-              ? "Menyiapkan Stockfish…"
-              : started
-                ? "Mulai ulang permainan"
-                : "Mulai permainan"}
+            {t(
+              status === "loading" ? (
+                <LoaderCircle className="spin" size={16} />
+              ) : started ? (
+                <RotateCcw size={16} />
+              ) : (
+                <Play size={16} />
+              ),
+            )}
+            {t(" ")}
+            {t(
+              status === "loading"
+                ? "Menyiapkan Stockfish…"
+                : started
+                  ? "Mulai ulang permainan"
+                  : "Mulai permainan",
+            )}
           </button>
-          {started && (
-            <button
-              className="text-button full"
-              onClick={() => {
-                request.current++;
-                engine.current?.stop();
-                setStarted(false);
-                setThinking(false);
-                setOutcome("");
-              }}
-            >
-              Ubah pengaturan permainan
-            </button>
+          {t(
+            started && (
+              <button
+                className="text-button full"
+                onClick={() => {
+                  request.current++;
+                  engine.current?.stop();
+                  setStarted(false);
+                  setThinking(false);
+                  setOutcome("");
+                }}
+              >
+                {t("Ubah pengaturan permainan")}
+              </button>
+            ),
           )}
           <p className="bot-note">
-            <Shield size={14} /> Level adalah preset latihan, bukan rating Elo
-            terkalibrasi. Jam pada mode latihan dapat dipulihkan dengan memulai
-            ulang.
+            <Shield size={14} />
+            {t(
+              " Level adalah preset latihan, bukan rating Elo terkalibrasi. Jam pada mode latihan dapat dipulihkan dengan memulai ulang.",
+            )}
           </p>
-          {history.length > 0 && (
-            <div className="bot-notation">
-              <div className="notation-heading">
-                <span>Langkah permainan</span>
-                <button className="text-button" onClick={review}>
-                  Analisis <ArrowRight size={12} />
-                </button>
+          {t(
+            history.length > 0 && (
+              <div className="bot-notation">
+                <div className="notation-heading">
+                  <span>{t("Langkah permainan")}</span>
+                  <button className="text-button" onClick={review}>
+                    {t("Analisis ")}
+                    <ArrowRight size={12} />
+                  </button>
+                </div>
+                <MoveList
+                  moves={history.map((m) => m.san)}
+                  ply={history.length}
+                  startFen={history[0].before}
+                />
               </div>
-              <MoveList
-                moves={history.map((m) => m.san)}
-                ply={history.length}
-                startFen={history[0].before}
-              />
-            </div>
+            ),
           )}
         </aside>
       </div>
-      {confirmResign && (
-        <Modal
-          title="Akhiri permainan ini?"
-          onClose={() => setConfirmResign(false)}
-        >
-          <p className="modal-description">
-            Anda dapat langsung mengulas permainan dan belajar dari posisi yang
-            terlewat.
-          </p>
-          <div className="modal-actions">
-            <button
-              className="button secondary"
-              onClick={() => setConfirmResign(false)}
-            >
-              Lanjut bermain
-            </button>
-            <button
-              className="button primary"
-              onClick={() => {
-                request.current++;
-                engine.current?.stop();
-                setThinking(false);
-                setOutcome("Anda menyerah. Bot menang.");
-                setConfirmResign(false);
-              }}
-            >
-              Menyerah
-            </button>
-          </div>
-        </Modal>
+      {t(
+        confirmResign && (
+          <Modal
+            title={t("Akhiri permainan ini?")}
+            onClose={() => setConfirmResign(false)}
+          >
+            <p className="modal-description">
+              {t(
+                "Anda dapat langsung mengulas permainan dan belajar dari posisi yang terlewat.",
+              )}
+            </p>
+            <div className="modal-actions">
+              <button
+                className="button secondary"
+                onClick={() => setConfirmResign(false)}
+              >
+                {t("Lanjut bermain")}
+              </button>
+              <button
+                className="button primary"
+                onClick={() => {
+                  request.current++;
+                  engine.current?.stop();
+                  setThinking(false);
+                  setOutcome("Anda menyerah. Bot menang.");
+                  setConfirmResign(false);
+                }}
+              >
+                {t("Menyerah")}
+              </button>
+            </div>
+          </Modal>
+        ),
       )}
     </div>
   );
 }
 function CpuIcon() {
+  const { t } = useI18n();
+
   return <Bot size={14} />;
 }
 function CheckIcon() {
+  const { t } = useI18n();
+
   return (
     <svg
       width="16"
@@ -523,5 +573,7 @@ function CheckIcon() {
   );
 }
 function TrophyIcon() {
+  const { t } = useI18n();
+
   return <Sparkles size={18} />;
 }

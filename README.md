@@ -1,6 +1,6 @@
 # Kuda Chess Studio
 
-Aplikasi catur localhost berbahasa Indonesia dengan komponen **ObsidianUI Dashboard Shell**, React, TypeScript, Tailwind CSS v4, chess.js, dan **Stockfish 19 lite WebAssembly**.
+Aplikasi catur localhost dengan pilihan bahasa Indonesia/Inggris, komponen **ObsidianUI Dashboard Shell**, React, TypeScript, Tailwind CSS v4, chess.js, dan **Stockfish 19 lite WebAssembly**.
 
 ## Menjalankan
 
@@ -27,7 +27,9 @@ npm run prepare:engine
 - **Lawan bot:** empat preset Stockfish, putih/hitam/acak, waktu tanpa batas/5/10 menit, mulai dari posisi analisis, petunjuk, undo, menyerah, dan pindah ke analisis.
 - **Opening explorer:** 12 opening, pencarian, filter warna, penjelasan strategi, langkah contoh, dan latihan dengan balasan otomatis.
 - **Akademi:** sembilan pelajaran interaktif tentang pusat, perkembangan, rokade, fork, pin, skakmat baris belakang, promosi, en passant, dan kombinasi Morphy.
-- **Taktik:** enam tantangan dengan petunjuk, jawaban, umpan balik, dan progres.
+- **Puzzle Lichess:** puzzle permainan nyata dari API resmi Lichess, filter tema dan tingkat kesulitan, rating, petunjuk, solusi, dan progres. Maksimal lima puzzle disimpan per kombinasi filter dan diisi ulang saat puzzle digunakan; pengambilan puzzle baru memerlukan internet, tanpa akun atau API key.
+- **Tampilan:** mode terang (default) atau gelap, tema buah Classic/Merida/Celtic, notasi huruf/gambar/keduanya, dan bahasa Indonesia/Inggris untuk seluruh antarmuka. Ikon kategori langkah pada buah dapat diaktifkan di tab Opsi.
+- **Navigasi variasi:** penghitung menjadi `- / -` ketika keluar dari notasi asli, dengan tombol untuk kembali ke langkah terakhir notasi asli.
 - **Koleksi:** simpan, cari, buka, hapus permainan dengan konfirmasi, ekspor PGN, serta catatan posisi yang bisa diekspor.
 - Preferensi papan, sesi analisis, ulasan terakhir, koleksi, catatan, dan progres tersimpan di browser.
 

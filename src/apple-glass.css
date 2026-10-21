@@ -2492,3 +2492,358 @@ textarea::placeholder {
 .move-think-time:last-child {
   margin-right: 0;
 }
+
+.piece-category-badge {
+  position: absolute;
+  top: 2%;
+  right: 2%;
+  z-index: 8;
+  width: 25%;
+  height: 25%;
+  min-width: 14px;
+  min-height: 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-size: clamp(10px, 1.05vw, 16px);
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid #ffffffb0;
+  box-shadow: 0 1px 4px #182a4944;
+  pointer-events: none;
+}
+.board-turn-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0 2px 7px;
+}
+.board-controls .return-to-main {
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.notation-san {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+.notation-piece {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.notation-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+}
+.piece-theme-options {
+  display: flex;
+  gap: 8px;
+}
+.piece-theme-options button {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff80;
+  color: var(--muted);
+  cursor: pointer;
+}
+.piece-theme-options button.active {
+  border-color: #6a9edf;
+  background: #e0ecfd;
+}
+.piece-theme-options img {
+  width: 38px;
+  height: 38px;
+}
+.puzzle-filter {
+  display: grid;
+  gap: 8px;
+  margin: 0 20px 18px;
+}
+.puzzle-filter label {
+  font-size: 12px;
+  color: var(--muted);
+}
+.puzzle-queue-count {
+  margin: 20px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.puzzle-source {
+  display: block;
+  margin: 20px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--green);
+}
+.puzzle-loading {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  padding: 25px;
+}
+
+:root[data-color-mode="dark"] {
+  color-scheme: dark;
+  --ink: #dce5f1;
+  --muted: #9daec4;
+  --line: #758ca32d;
+  --paper: #1d2939cc;
+  --surface: #1b2635;
+  --cream: #243246;
+  --glass-border: #6c7d923b;
+  --glass-shadow: inset 0 1px 0 #b5c6e315, 0 12px 32px -12px #0008;
+  background: #101925;
+}
+[data-color-mode="dark"] body {
+  background:
+    radial-gradient(ellipse at 0 0, #203751, transparent 60%),
+    radial-gradient(ellipse at 100% 0, #302b45, transparent 50%), #111b29;
+  color: var(--ink);
+}
+[data-color-mode="dark"] .kuda-shell {
+  background: linear-gradient(125deg, #18273de0, #172333aa);
+}
+[data-color-mode="dark"] .kuda-shell > section {
+  background: #12203133;
+}
+[data-color-mode="dark"] .kuda-shell > section > header {
+  background: linear-gradient(#26354bd9, #1b2b40cc);
+  border-color: var(--line);
+}
+[data-color-mode="dark"] .kuda-shell aside {
+  background-color: #182536d9;
+}
+[data-color-mode="dark"]
+  :is(
+    .analysis-panel,
+    .eval-chart-card,
+    .modal,
+    .bot-settings,
+    .bot-setup,
+    .bot-board-card,
+    .opening-board-card,
+    .opening-detail,
+    .opening-list,
+    .lesson-card,
+    .lesson-detail,
+    .lesson-board-card,
+    .puzzle-board-card,
+    .puzzle-sidebar,
+    .library-card,
+    .help-sources,
+    .study-tip,
+    .saved-game-card,
+    .stat-card,
+    .empty-library
+  ) {
+  background: linear-gradient(140deg, #26354bdc, #1c2a3edb);
+  border-color: var(--line);
+  box-shadow: var(--glass-shadow);
+  color: var(--ink);
+}
+[data-color-mode="dark"] .analysis-sidebar .panel-tabs {
+  background: #233249;
+}
+[data-color-mode="dark"]
+  :is(
+    .panel-tabs > button.active,
+    .move-cell.current,
+    .notation-variation-moves .variation-move.current
+  ) {
+  background: #43587599;
+  color: #eef5ff;
+  box-shadow: inset 0 1px 0 #9db3d226;
+}
+[data-color-mode="dark"]
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    .game-title-block strong,
+    .line-heading h3,
+    .engine-chip strong,
+    .section-label,
+    .modal h2,
+    .player-name strong
+  ) {
+  color: #dce8f8;
+}
+[data-color-mode="dark"]
+  :is(
+    p,
+    .modal-description,
+    .notes-panel p,
+    .game-title-block span,
+    .piece-editor p,
+    .move-cell,
+    .move-number,
+    .variation-depth,
+    .chart-axis,
+    .board-under,
+    .breadcrumb,
+    .engine-chip,
+    .engine-chip > span,
+    .notation-variation-heading,
+    .settings-section > label,
+    .engine-options label,
+    .field-label,
+    .puzzle-title h2,
+    .saved-note
+  ) {
+  color: #9eb0c9;
+}
+[data-color-mode="dark"]
+  :is(input:not([type="checkbox"]):not([type="range"]), select, textarea) {
+  background: #172538;
+  border-color: #52668080;
+  color: #dce8f8;
+  box-shadow: inset 0 1px 3px #0003;
+}
+[data-color-mode="dark"]
+  :is(
+    .button.secondary,
+    .board-theme-options > button,
+    .piece-theme-options button,
+    .piece-editor-group button,
+    .icon-button,
+    .online-game-item
+  ) {
+  background: linear-gradient(#344760, #273950);
+  border-color: #5e73904d;
+  color: #c7d8ef;
+  box-shadow:
+    inset 0 1px 0 #ffffff15,
+    0 2px 4px #0002;
+}
+[data-color-mode="dark"] .button.primary {
+  color: white;
+}
+[data-color-mode="dark"] .chessboard-wrap {
+  background: #344252;
+  border-color: #60778d5c;
+}
+[data-color-mode="dark"] .eval-bar {
+  border-color: #5c728a44;
+}
+[data-color-mode="dark"] .notation-variation {
+  background: #36465c66;
+  border-color: #6b7f99;
+}
+[data-color-mode="dark"] .notation-variation.is-active {
+  background: #43567188;
+}
+[data-color-mode="dark"] .notation-variation-moves .variation-move {
+  color: #bdcce0;
+}
+[data-color-mode="dark"] .game-player time {
+  background: #142235cc;
+  color: #d4e4f7;
+  border-color: #526c8b80;
+}
+[data-color-mode="dark"]
+  :is(.engine-status, .notation-heading, .board-controls, .settings-section) {
+  border-color: #6e85a22b;
+}
+[data-color-mode="dark"] .engine-line:hover,
+[data-color-mode="dark"] .move-cell:hover {
+  background: #56729833;
+}
+[data-color-mode="dark"] .coach-card {
+  background: #23384bd9;
+  border-color: #57779155;
+}
+[data-color-mode="dark"] .modal-overlay {
+  background: #030a15a8;
+}
+[data-color-mode="dark"] .move-think-time {
+  color: #92a7c1;
+}
+
+[data-color-mode="dark"] .kuda-shell > aside {
+  background: linear-gradient(145deg, #1d2d42ee, #17263aee);
+  border-right-color: #6c829d2d;
+}
+[data-color-mode="dark"]
+  .kuda-shell
+  > aside
+  > div:first-child
+  > div:first-child
+  .text-sm {
+  color: #dce8f8;
+  text-shadow: none;
+}
+[data-color-mode="dark"] .sidebar-learning {
+  background: linear-gradient(#30435aab, #253951aa);
+  border-color: #7890b044;
+  box-shadow: inset 0 1px 0 #d8e7fb12;
+}
+[data-color-mode="dark"] .sidebar-learning h3 {
+  color: #afc4e0;
+  text-shadow: none;
+}
+[data-color-mode="dark"] .panel-tabs > button:not(.icon-button) {
+  color: #a3b8d3;
+}
+[data-color-mode="dark"] .notation-heading {
+  background: #2c405ae0;
+  color: #c0d2eb;
+}
+[data-color-mode="dark"] .notation-heading > span:last-child {
+  color: #a7bbd7;
+}
+[data-color-mode="dark"] .accuracy-scores strong {
+  color: #d5e5fb;
+}
+[data-color-mode="dark"]
+  :is(
+    .accuracy-scores strong small,
+    .accuracy-scores > div > span:nth-child(2),
+    .classification-summary small,
+    .card-heading h3,
+    .card-heading > span
+  ) {
+  color: #9fb6d5;
+}
+[data-color-mode="dark"]
+  :is(
+    .panel-tabs .icon-button,
+    .header-help,
+    .text-button,
+    .card-heading > div,
+    .line-heading h3,
+    .engine-line p,
+    .engine-line-meta strong,
+    .section-label,
+    .review-overview-heading .section-label
+  ) {
+  color: #a9c1e0;
+}
+[data-color-mode="dark"] .kuda-shell aside button:not([aria-current="page"]) {
+  color: #9db3d0;
+}
+[data-color-mode="dark"] .kuda-shell aside [aria-current="page"] {
+  color: #fff;
+}
+[data-color-mode="dark"] .kuda-shell [role="dialog"][aria-label] {
+  background: #1d2d42ed;
+}

@@ -94,15 +94,6 @@ body {
 .breadcrumb > svg {
   color: #6b7c95;
 }
-.header-local {
-  color: #8795a9;
-  font-size: 11px;
-  letter-spacing: 1.4px;
-}
-.header-local .status-dot {
-  background: #68b891;
-  box-shadow: 0 0 0 3px rgb(106 184 145 / 10%);
-}
 .header-help {
   color: #5d708b;
 }

@@ -151,15 +151,6 @@ textarea::placeholder {
 .breadcrumb > svg {
   color: #b4baaf;
 }
-.header-local {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  letter-spacing: 1.4px;
-  color: #7d887b;
-  margin-right: 14px;
-}
 .profile-avatar {
   height: 32px;
   width: 32px;
@@ -3211,11 +3202,6 @@ select {
   .library-grid {
     grid-template-columns: 1fr;
   }
-  .header-local {
-    font-size: 12px;
-    letter-spacing: 1px;
-    margin-right: 5px;
-  }
   .study-layout {
     gap: 23px;
   }
@@ -3260,9 +3246,6 @@ select {
   }
   .intro-actions .button > svg {
     width: 12px;
-  }
-  .header-local {
-    display: none;
   }
   .breadcrumb {
     font-size: 15px;

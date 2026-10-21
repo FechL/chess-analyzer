@@ -225,9 +225,6 @@ export default function App() {
         }
         headerActions={
           <>
-            <span className="header-local">
-              <span className="status-dot" /> WORKSPACE LOKAL
-            </span>
             <button
               className="icon-button header-help"
               aria-label="Buka panduan"

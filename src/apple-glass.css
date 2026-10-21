@@ -2134,8 +2134,12 @@ textarea::placeholder {
   background: linear-gradient(#fff, #eff5ff);
   box-shadow: 0 2px 6px rgb(58 86 129 / 12%);
 }
-.online-search-row { display: flex; gap: 10px; }
-.online-import-input, .online-month select {
+.online-search-row {
+  display: flex;
+  gap: 10px;
+}
+.online-import-input,
+.online-month select {
   min-width: 0;
   border: 1px solid #d2deee;
   border-radius: 9px;
@@ -2144,17 +2148,81 @@ textarea::placeholder {
   color: #536c8c;
   font-size: 13px;
 }
-.online-import-input { flex: 1; width: 100%; }
-.online-month { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: #607797; font-size: 12px; }
-.online-month select { flex: 1; }
-.online-import-status { color: #607797; font-size: 12px; line-height: 1.7; margin: 16px 0 10px; }
-.online-game-list { max-height: 310px; overflow-y: auto; scrollbar-width: thin; border: 1px solid #dbe5f2; border-radius: 12px; }
-.online-game-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; text-align: left; border-bottom: 1px solid #e1e9f5; color: #5b7392; }
-.online-game-item:last-child { border-bottom: 0; }
-.online-game-item:hover:not(:disabled) { background: rgb(223 235 252 / 65%); }
-.online-game-players { display: grid; gap: 4px; flex: 1; min-width: 0; font-size: 12px; }
-.online-game-players strong, .online-game-players > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.online-game-meta { display: grid; gap: 4px; text-align: right; flex-shrink: 0; font-size: 11px; }
-.online-game-meta > span { font-size: 10px; }
-.online-load-more { display: flex; margin: 14px auto 0; font-size: 12px; }
-.online-import-note { color: #778aa5; font-size: 11px; line-height: 1.7; margin-top: 18px; }
+.online-import-input {
+  flex: 1;
+  width: 100%;
+}
+.online-month {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: #607797;
+  font-size: 12px;
+}
+.online-month select {
+  flex: 1;
+}
+.online-import-status {
+  color: #607797;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 16px 0 10px;
+}
+.online-game-list {
+  max-height: 310px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  border: 1px solid #dbe5f2;
+  border-radius: 12px;
+}
+.online-game-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e1e9f5;
+  color: #5b7392;
+}
+.online-game-item:last-child {
+  border-bottom: 0;
+}
+.online-game-item:hover:not(:disabled) {
+  background: rgb(223 235 252 / 65%);
+}
+.online-game-players {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+.online-game-players strong,
+.online-game-players > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.online-game-meta {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.online-game-meta > span {
+  font-size: 10px;
+}
+.online-load-more {
+  display: flex;
+  margin: 14px auto 0;
+  font-size: 12px;
+}
+.online-import-note {
+  color: #778aa5;
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 18px;
+}

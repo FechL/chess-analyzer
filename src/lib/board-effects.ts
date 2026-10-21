@@ -57,6 +57,17 @@ export function boardTransition(
 }
 
 export type Mark = { from: string; to: string; color: string };
+export function isAllowedArrow(from: string, to: string): boolean {
+  if (from.length !== 2 || to.length !== 2) return false;
+  const dx = Math.abs(from.charCodeAt(0) - to.charCodeAt(0));
+  const dy = Math.abs(Number(from[1]) - Number(to[1]));
+  return (
+    (dx === 0 && dy > 0) ||
+    (dy === 0 && dx > 0) ||
+    (dx === 1 && dy === 2) ||
+    (dx === 2 && dy === 1)
+  );
+}
 export function toggleMark(marks: Mark[], mark: Mark): Mark[] {
   const same = (item: Mark) =>
     item.from === mark.from && item.to === mark.to && item.color === mark.color;

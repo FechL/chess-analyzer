@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { Chess } from "chess.js";
-import { annotationColor, boardTransition, toggleMark } from "./board-effects";
+import {
+  annotationColor,
+  boardTransition,
+  isAllowedArrow,
+  toggleMark,
+} from "./board-effects";
 
 describe("board feedback for legal position changes", () => {
   it("animates forward and backward without depending on a PGN history", () => {
@@ -81,5 +86,26 @@ describe("board annotation toggles", () => {
         annotationColor({ ...keys, altKey: true }),
       ]).size,
     ).toBe(4);
+  });
+});
+
+describe("allowed annotation arrows", () => {
+  it("allows horizontal, vertical, and knight-shaped arrows only", () => {
+    for (const [from, to] of [
+      ["a1", "h1"],
+      ["d2", "d8"],
+      ["b1", "c3"],
+      ["g8", "e7"],
+    ]) {
+      expect(isAllowedArrow(from, to)).toBe(true);
+    }
+    for (const [from, to] of [
+      ["a1", "a1"],
+      ["a1", "b2"],
+      ["a1", "c4"],
+      ["b1", "d3"],
+    ]) {
+      expect(isAllowedArrow(from, to)).toBe(false);
+    }
   });
 });

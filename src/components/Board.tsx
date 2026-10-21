@@ -4,6 +4,7 @@ import type { Square } from "chess.js";
 import type { CSSProperties } from "react";
 import {
   annotationColor,
+  isAllowedArrow,
   boardTransition,
   toggleMark,
 } from "../lib/board-effects";
@@ -207,7 +208,8 @@ export default function Board({
           e.stopPropagation();
           const anchor = keyboardAnchor.current;
           if (anchor) {
-            setMarks((items) => toggleMark(items, { ...anchor, to: square }));
+            if (isAllowedArrow(anchor.from, square))
+              setMarks((items) => toggleMark(items, { ...anchor, to: square }));
             keyboardAnchor.current = undefined;
             setDrawing(undefined);
           } else {
@@ -233,13 +235,17 @@ export default function Board({
         onPointerMove={(e) => {
           if (!gesture.current) return;
           const square = squareAt(e.clientX, e.clientY);
-          setDrawing(square ? { ...gesture.current, to: square } : undefined);
+          setDrawing(
+            square && isAllowedArrow(gesture.current.from, square)
+              ? { ...gesture.current, to: square }
+              : undefined,
+          );
         }}
         onPointerUp={(e) => {
           const mark = gesture.current;
           if (!mark || e.button !== 2) return;
           const square = squareAt(e.clientX, e.clientY);
-          if (square)
+          if (square && isAllowedArrow(mark.from, square))
             setMarks((items) => toggleMark(items, { ...mark, to: square }));
           gesture.current = undefined;
           setDrawing(undefined);

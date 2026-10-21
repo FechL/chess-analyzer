@@ -27,6 +27,9 @@ type Props = {
   selectedSquare?: string;
   theme?: "sage" | "walnut" | "slate";
   compact?: boolean;
+  editMode?: boolean;
+  onEditSquare?: (square: string, piece?: string, from?: string) => void;
+  onDeleteDropSquare?: (square: string) => void;
 };
 const NAMES: Record<string, string> = {
   p: "pion",
@@ -46,6 +49,9 @@ export default function Board({
   selectedSquare,
   theme = "sage",
   compact,
+  editMode = false,
+  onEditSquare,
+  onDeleteDropSquare,
 }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const previous = useRef({ fen, flipped });
@@ -187,7 +193,24 @@ export default function Board({
     (move) => move.length >= 4,
   );
   return (
-    <div className={`chessboard-wrap ${compact ? "compact" : ""}`}>
+    <div
+      className={`chessboard-wrap ${compact ? "compact" : ""}`}
+      onDragOver={(e) => {
+        if (editMode) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }
+      }}
+      onDrop={(e) => {
+        if (!editMode || (e.target as HTMLElement).closest("[data-square]"))
+          return;
+        const from = e.dataTransfer.getData("application/x-kuda-square");
+        if (from) {
+          e.preventDefault();
+          onDeleteDropSquare?.(from);
+        }
+      }}
+    >
       <div
         ref={boardRef}
         className={`chessboard board-${theme}`}
@@ -275,14 +298,32 @@ export default function Board({
                 className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""}`}
                 aria-label={`${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`}
                 data-square={square}
-                onClick={() => choose(square)}
+                onClick={() =>
+                  editMode ? onEditSquare?.(square) : choose(square)
+                }
                 onDragOver={(e) => {
-                  if (!disabled) e.preventDefault();
+                  if (editMode || !disabled) {
+                    e.preventDefault();
+                    if (editMode) e.dataTransfer.dropEffect = "move";
+                  }
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
-                  if (!disabled)
+                  if (editMode) {
+                    const piece = e.dataTransfer.getData(
+                      "application/x-kuda-piece",
+                    );
+                    const from = e.dataTransfer.getData(
+                      "application/x-kuda-square",
+                    );
+                    onEditSquare?.(
+                      square,
+                      piece || undefined,
+                      from || undefined,
+                    );
+                  } else if (!disabled) {
                     attempt(e.dataTransfer.getData("text/plain"), square, true);
+                  }
                 }}
               >
                 {col === 0 && <span className="coordinate rank">{rank}</span>}
@@ -292,12 +333,25 @@ export default function Board({
                     src={`/pieces/${p.color}${p.type.toUpperCase()}.svg`}
                     alt=""
                     draggable={
-                      !disabled && !!onMove && p.color === chess.turn()
+                      editMode ||
+                      (!disabled && !!onMove && p.color === chess.turn())
                     }
                     onDragStart={(e) => {
                       clearMarks();
-                      e.dataTransfer.setData("text/plain", square);
-                      setSelection({ square, fen });
+                      if (editMode) {
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData(
+                          "application/x-kuda-square",
+                          square,
+                        );
+                      } else {
+                        e.dataTransfer.setData("text/plain", square);
+                        setSelection({ square, fen });
+                      }
+                    }}
+                    onDragEnd={(e) => {
+                      if (editMode && e.dataTransfer.dropEffect === "none")
+                        onDeleteDropSquare?.(square);
                     }}
                   />
                 )}

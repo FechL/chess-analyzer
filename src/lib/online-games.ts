@@ -101,6 +101,7 @@ export async function chessMonth(
     if (item.rules !== "chess" || typeof item.pgn !== "string") continue;
     try {
       const game = parseGame(item.pgn);
+      game.source = "Chess.com";
       if (!game.moves.length || game.result === "*") continue;
       games.push({
         id: item.url,
@@ -123,7 +124,7 @@ export async function lichessGames(
   const params = new URLSearchParams({
     max: "20",
     pgnInJson: "true",
-    clocks: "false",
+    clocks: "true",
     evals: "false",
     ongoing: "false",
     finished: "true",
@@ -144,6 +145,7 @@ export async function lichessGames(
     if (item.variant !== "standard" || typeof item.pgn !== "string") continue;
     try {
       const game = parseGame(item.pgn);
+      game.source = "Lichess";
       if (!game.moves.length || game.result === "*") continue;
       games.push({
         id: item.id,

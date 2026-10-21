@@ -16,8 +16,10 @@ import {
   Maximize2,
   MessageSquareText,
   Play,
+  Plus,
   RotateCcw,
   TrendingUp,
+  Trash2,
   WandSparkles,
 } from "lucide-react";
 import Board, { EvalBar } from "../components/Board";
@@ -46,17 +48,73 @@ import {
 } from "../lib/chess";
 import type { Evaluation, GameData, ReviewMove } from "../lib/chess";
 import { findBookMove } from "../lib/opening-book";
-import { mergeReview, retainReview, reviewSegments } from "../lib/review";
+import {
+  mergePositionReview,
+  retainReview,
+  reviewSegments,
+} from "../lib/review";
 import type { Settings } from "../App";
 
+function updatePositionFen(
+  fen: string,
+  square: string,
+  piece?: string,
+  from?: string,
+) {
+  const fields = fen.split(" ");
+  const rows = fields[0].split("/").map((row) => {
+    const cells: string[] = [];
+    for (const token of row)
+      /\d/.test(token)
+        ? cells.push(...Array(Number(token)).fill(""))
+        : cells.push(token);
+    return cells;
+  });
+  const at = (sq: string) => [8 - Number(sq[1]), sq.charCodeAt(0) - 97];
+  const [r, c] = at(square);
+  const current = rows[r][c];
+  if (current.toLowerCase() === "k") return undefined;
+  if (from) {
+    const [fr, fc] = at(from);
+    const moving = rows[fr][fc];
+    if (!moving || (current.toLowerCase() === "k" && current !== moving))
+      return undefined;
+    rows[fr][fc] = "";
+    rows[r][c] = moving;
+  } else if (piece === "delete") rows[r][c] = "";
+  else if (piece) rows[r][c] = piece;
+  const placement = rows
+    .map((cells) => {
+      let result = "",
+        empty = 0;
+      for (const cell of cells) {
+        if (!cell) empty++;
+        else {
+          if (empty) result += empty;
+          result += cell;
+          empty = 0;
+        }
+      }
+      if (empty) result += empty;
+      return result;
+    })
+    .join("/");
+  return [placement, ...fields.slice(1)].join(" ");
+}
+
 export default function Analysis({
-  game,
-  setGame,
+  game: mainGame,
+  setGame: setMainGame,
   settings,
   onSettingsChange,
   onSave,
   onImport,
   onPositionChange,
+  onNewGame,
+  customEditing,
+  onCustomEditingChange,
+  autoReviewOnLoad,
+  onAutoReviewStarted,
 }: {
   game: GameData;
   setGame: (game: GameData) => void;
@@ -65,23 +123,45 @@ export default function Analysis({
   onSave: () => void;
   onImport: () => void;
   onPositionChange: (fen: string) => void;
+  onNewGame: () => void;
+  autoReviewOnLoad: boolean;
+  onAutoReviewStarted: () => void;
+  customEditing: boolean;
+  onCustomEditingChange: (editing: boolean) => void;
 }) {
-  const [ply, setPly] = useState(Math.min(14, game.moves.length));
+  const [activeVariationId, setActiveVariationId] = useState<string>();
+  const activeVariation = mainGame.variations?.find(
+    (item) => item.id === activeVariationId,
+  );
+  const game = useMemo(
+    () =>
+      activeVariation
+        ? {
+            ...mainGame,
+            moves: activeVariation.moves,
+            moveTimes: mainGame.moveTimes?.slice(0, activeVariation.forkPly),
+            result: "*",
+          }
+        : mainGame,
+    [mainGame, activeVariation],
+  );
+  const setGame = setMainGame;
+  const [ply, setPly] = useState(game.moves.length);
   const [flipped, setFlipped] = useState(false);
   const [tab, setTab] = useState("review");
+  const [editorPiece, setEditorPiece] = useState<string>();
+  const [editorSquare, setEditorSquare] = useState<string>();
   const [evaluation, setEvaluation] = useState<Evaluation>();
-  const [busy, setBusy] = useState(false);
   const [review, setReview] = useState<ReviewMove[]>(() => {
     const cached = readStorage<{ pgn: string; items: ReviewMove[] }>(
       "kuda-last-review",
       { pgn: "", items: [] },
     );
-    return cached.pgn === toPgn(game) ? cached.items : [];
+    return cached.pgn === toPgn(mainGame) ? cached.items : [];
   });
   const [reviewing, setReviewing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
-  const [branches, setBranches] = useState<GameData[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>(() =>
     readStorage("kuda-notes", {}),
@@ -89,6 +169,7 @@ export default function Analysis({
   const { engine, status, error: engineError } = useEngine(settings.engine);
   const reviewEngine = useRef<LocalEngine | null>(null);
   const reviewId = useRef(0);
+  const autoReviewStarted = useRef(false);
   const evaluationCache = useRef(new Map<string, Evaluation>());
   const history = useMemo(() => historyOf(game), [game]);
   const position = useMemo(() => positionAt(game, ply), [game, ply]);
@@ -97,9 +178,13 @@ export default function Analysis({
     onPositionChange(fen);
   }, [fen, onPositionChange]);
   useEffect(() => {
+    if (customEditing) setTab("editor");
+    else if (tab === "editor") setTab("review");
+  }, [customEditing]);
+  useEffect(() => {
     if (review.length)
-      writeStorage("kuda-last-review", { pgn: toPgn(game), items: review });
-  }, [game, review]);
+      writeStorage("kuda-last-review", { pgn: toPgn(mainGame), items: review });
+  }, [mainGame, review]);
   const bookMoves = useMemo(
     () =>
       history.map((move) =>
@@ -109,12 +194,12 @@ export default function Analysis({
   );
   const displayReview = useMemo(
     () =>
-      review.map((item) =>
+      retainReview(review, history).map((item) =>
         bookMoves[item.ply - 1]
           ? { ...item, annotation: "book" as const }
           : item,
       ),
-    [review, bookMoves],
+    [review, bookMoves, history],
   );
   const currentMove = history[ply - 1];
   const currentBook = bookMoves[ply - 1];
@@ -122,8 +207,8 @@ export default function Analysis({
   const result = evaluation?.fen === fen ? evaluation : undefined;
 
   useEffect(() => {
-    setBusy(false);
     if (
+      customEditing ||
       !settings.liveEngine ||
       status !== "ready" ||
       !engine.current ||
@@ -140,7 +225,6 @@ export default function Analysis({
         );
     };
     const timer = setTimeout(async () => {
-      setBusy(true);
       setError("");
       try {
         let before = currentMove
@@ -167,12 +251,10 @@ export default function Analysis({
         setEvaluation(after);
         if (currentMove && before) {
           const item = annotate(before, after, currentMove, ply);
-          setReview((items) => mergeReview(retainReview(items, history), item));
+          setReview((items) => mergePositionReview(items, item));
         }
       } catch (e) {
         if (active) setError((e as Error).message);
-      } finally {
-        if (active) setBusy(false);
       }
     }, 80);
     return () => {
@@ -182,6 +264,7 @@ export default function Analysis({
     };
   }, [
     fen,
+    customEditing,
     currentMove,
     ply,
     history,
@@ -240,27 +323,134 @@ export default function Analysis({
         setPly(ply + 1);
         return true;
       }
-      if (ply < game.moves.length) setBranches((b) => [game, ...b].slice(0, 8));
       stopReview();
-      setReview((items) => retainReview(items, history.slice(0, ply)));
-      setGame({
-        ...game,
-        moves: [...game.moves.slice(0, ply), m.san],
-        result: c.isCheckmate()
-          ? c.turn() === "w"
-            ? "0-1"
-            : "1-0"
-          : c.isDraw()
-            ? "1/2-1/2"
-            : "*",
-        event: game.event,
-      });
+      const moves = [...game.moves.slice(0, ply), m.san];
+      if (activeVariation && ply === game.moves.length) {
+        setMainGame({
+          ...mainGame,
+          variations: mainGame.variations?.map((item) =>
+            item.id === activeVariation.id ? { ...item, moves } : item,
+          ),
+        });
+      } else if (
+        activeVariation ||
+        ply < game.moves.length ||
+        (!["Bebas", "Kustom"].includes(mainGame.source || "") &&
+          mainGame.moves.length > 0)
+      ) {
+        const existing = mainGame.variations?.find(
+          (item) =>
+            item.forkPly === ply &&
+            item.moves.slice(0, ply + 1).join(" ") === moves.join(" "),
+        );
+        if (existing) setActiveVariationId(existing.id);
+        else {
+          const id = crypto.randomUUID();
+          setMainGame({
+            ...mainGame,
+            variations: [
+              ...(mainGame.variations || []),
+              { id, moves, forkPly: ply, parentId: activeVariation?.id },
+            ],
+          });
+          setActiveVariationId(id);
+        }
+      } else {
+        setMainGame({
+          ...mainGame,
+          moves,
+          moveTimes: game.moveTimes?.slice(0, ply),
+          result: c.isCheckmate()
+            ? c.turn() === "w"
+              ? "0-1"
+              : "1-0"
+            : c.isDraw()
+              ? "1/2-1/2"
+              : "*",
+        });
+      }
       setPly(ply + 1);
       return true;
     } catch {
       return false;
     }
   }
+  const editSquare = (square: string, droppedPiece?: string, from?: string) => {
+    const c = new Chess(game.startFen);
+    const destination = c.get(square as import("chess.js").Square);
+    if (destination?.type === "k") return;
+    let nextFen: string | undefined;
+    if (droppedPiece || editorPiece) {
+      nextFen = updatePositionFen(
+        game.startFen,
+        square,
+        droppedPiece || editorPiece,
+      );
+      setEditorPiece(undefined);
+      setEditorSquare(undefined);
+    } else if (from || editorSquare) {
+      nextFen = updatePositionFen(
+        game.startFen,
+        square,
+        undefined,
+        from || editorSquare,
+      );
+      setEditorSquare(undefined);
+    } else if (destination) {
+      setEditorSquare(square);
+      return;
+    } else return;
+    if (nextFen) {
+      setGame({
+        ...game,
+        startFen: nextFen,
+        moves: [],
+        moveTimes: undefined,
+        result: "*",
+      });
+      setPly(0);
+    }
+  };
+  const deleteEditorSquare = () => {
+    if (!editorSquare) return;
+    const nextFen = updatePositionFen(game.startFen, editorSquare, "delete");
+    if (nextFen)
+      setGame({
+        ...game,
+        startFen: nextFen,
+        moves: [],
+        moveTimes: undefined,
+        result: "*",
+      });
+    setEditorSquare(undefined);
+    setPly(0);
+  };
+  const deleteDraggedPiece = (square: string) => {
+    const nextFen = updatePositionFen(game.startFen, square, "delete");
+    if (nextFen)
+      setGame({
+        ...game,
+        startFen: nextFen,
+        moves: [],
+        moveTimes: undefined,
+        result: "*",
+      });
+    setEditorSquare(undefined);
+    setPly(0);
+  };
+  const resetEditor = () => {
+    setGame({
+      ...game,
+      startFen: new Chess().fen(),
+      moves: [],
+      moveTimes: undefined,
+      result: "*",
+      event: "Analisis Bebas (Kustom)",
+    });
+    setEditorPiece(undefined);
+    setEditorSquare(undefined);
+    setPly(0);
+  };
   async function runReview() {
     if (reviewing) {
       stopReview();
@@ -277,7 +467,6 @@ export default function Analysis({
     reviewEngine.current = instance;
     setReviewing(true);
     setProgress(0);
-    setReview([]);
     setError("");
     engine.current?.stop();
     try {
@@ -290,7 +479,7 @@ export default function Analysis({
         if (id !== reviewId.current) return;
         evaluationCache.current.set(after.fen, after);
         items.push(annotate(before, after, history[i], i + 1));
-        setReview([...items]);
+        setReview((bank) => items.reduce(mergePositionReview, bank));
         setProgress(Math.round(((i + 1) / history.length) * 100));
         before = after;
       }
@@ -304,8 +493,36 @@ export default function Analysis({
       }
     }
   }
+  useEffect(() => {
+    if (
+      !autoReviewOnLoad ||
+      autoReviewStarted.current ||
+      customEditing ||
+      status !== "ready"
+    )
+      return;
+    autoReviewStarted.current = true;
+    onAutoReviewStarted();
+    void runReview();
+  }, [autoReviewOnLoad, customEditing, status]);
+  const playerClock = (color: "w" | "b") => {
+    for (let i = Math.min(ply, history.length) - 1; i >= 0; i--) {
+      if (history[i].color === color && game.moveTimes?.[i])
+        return game.moveTimes[i];
+    }
+    return "—";
+  };
+  const mainHistory = historyOf(mainGame);
+  const mainBookMoves = mainHistory.map((move) =>
+    findBookMove(move.before, move.from + move.to + (move.promotion || "")),
+  );
+  const mainReview = retainReview(review, mainHistory).map((item) =>
+    mainBookMoves[item.ply - 1]
+      ? { ...item, annotation: "book" as const }
+      : item,
+  );
   const accuracy = (color: "w" | "b") => {
-    const items = review.filter((r) => r.color === color);
+    const items = mainReview.filter((r) => r.color === color);
     return items.length
       ? (items.reduce((s, r) => s + r.accuracy, 0) / items.length).toFixed(1)
       : "—";
@@ -324,7 +541,7 @@ export default function Analysis({
   )
     .map((key) => ({
       key,
-      count: displayReview.filter((item) => item.annotation === key).length,
+      count: mainReview.filter((item) => item.annotation === key).length,
     }))
     .filter(({ count }) => count > 0);
   const coachText = currentBook
@@ -346,44 +563,77 @@ export default function Analysis({
           : currentMove
             ? "Stockfish sedang menilai langkah ini secara otomatis…"
             : "Mainkan langkah untuk melihat penilaian otomatis.";
+  const notationProps = {
+    moves: mainGame.moves,
+    ply: activeVariation && ply > activeVariation.forkPly ? -1 : ply,
+    onChange: (nextPly: number) => {
+      stopReview();
+      setActiveVariationId(undefined);
+      setPly(nextPly);
+    },
+    review: mainReview,
+    bookMoves: mainHistory.map((move) =>
+      findBookMove(move.before, move.from + move.to + (move.promotion || "")),
+    ),
+    startFen: mainGame.startFen,
+    variations: mainGame.variations || [],
+    activeVariationId,
+    variationPly: ply,
+    onVariationChange: (id: string, nextPly: number) => {
+      stopReview();
+      setActiveVariationId(id);
+      setPly(nextPly);
+    },
+  };
   return (
     <div className="page analysis-page">
       <div className="workspace-toolbar">
-        <div className="live-move-rating" role="status" aria-live="polite">
-          {currentMove && (
-            <>
-              <span
-                style={{
-                  color: currentBook
-                    ? LABELS.book.color
-                    : currentReview
-                      ? LABELS[currentReview.annotation].color
-                      : undefined,
-                }}
-              >
-                {currentBook ? (
-                  <BookOpen size={17} />
-                ) : currentReview ? (
-                  LABELS[currentReview.annotation].symbol
-                ) : (
-                  <LoaderCircle size={16} className="spin" />
-                )}
-              </span>
-              <strong>
-                {currentBook
-                  ? "Book Move"
-                  : currentReview
-                    ? LABELS[currentReview.annotation].label
-                    : status === "error" || error
-                      ? "Penilaian tidak tersedia"
-                      : "Menilai langkah…"}
-              </strong>
-              <span>{currentMove.san}</span>
-            </>
+        <div className="game-title-block">
+          <strong>
+            {game.source === "Bebas" || game.source === "Kustom"
+              ? game.source === "Kustom" || game.event.includes("Kustom")
+                ? "Analisis Bebas (Kustom)"
+                : "Analisis Bebas"
+              : "Impor " + (game.source || "PGN")}
+          </strong>
+          {!customEditing && (
+            <div className="game-players">
+              {(["w", "b"] as const).map((color) => {
+                const name = color === "w" ? game.white : game.black;
+                const elo = color === "w" ? game.whiteElo : game.blackElo;
+                return (
+                  <span className="game-player" key={color}>
+                    <span
+                      className={"player-color player-color-" + color}
+                      aria-hidden="true"
+                    />
+                    <strong>{color === "w" ? "Putih" : "Hitam"}</strong>
+                    <span>
+                      {name}
+                      {elo ? " (" + elo + ")" : ""}
+                    </span>
+                    {game.moveTimes?.some(Boolean) && (
+                      <time
+                        aria-label={
+                          "Sisa waktu " + (color === "w" ? "putih" : "hitam")
+                        }
+                      >
+                        {playerClock(color)}
+                      </time>
+                    )}
+                  </span>
+                );
+              })}
+            </div>
           )}
         </div>
-        <button className="button secondary" onClick={onSave}>
-          <Bookmark size={16} /> Simpan
+        {!customEditing && (
+          <button className="button secondary" onClick={onSave}>
+            <Bookmark size={16} /> Simpan
+          </button>
+        )}
+        <button className="button secondary" onClick={onNewGame}>
+          <Plus size={15} /> New Game
         </button>
         <button className="button primary" onClick={onImport}>
           <ArrowDownToLine size={16} /> Impor permainan
@@ -404,6 +654,10 @@ export default function Analysis({
                 fen={fen}
                 flipped={flipped}
                 onMove={playMove}
+                disabled={customEditing}
+                editMode={customEditing}
+                onEditSquare={editSquare}
+                onDeleteDropSquare={deleteDraggedPiece}
                 lastMove={currentMove}
                 arrow={
                   settings.showArrows
@@ -427,12 +681,15 @@ export default function Analysis({
           <div className="analysis-sidebar-content">
             <aside className="analysis-panel">
               <div className="panel-tabs">
-                {[
-                  ["review", "Ulasan"],
-                  ["engine", "Engine"],
-                  ["notes", "Catatan"],
-                  ["options", "Opsi"],
-                ].map(([value, label]) => (
+                {(customEditing
+                  ? [["editor", "Atur buah"]]
+                  : [
+                      ["review", "Ulasan"],
+                      ["engine", "Engine"],
+                      ["notes", "Catatan"],
+                      ["options", "Opsi"],
+                    ]
+                ).map(([value, label]) => (
                   <button
                     className={tab === value ? "active" : ""}
                     key={value}
@@ -449,34 +706,28 @@ export default function Analysis({
                   <CircleHelp size={15} />
                 </IconButton>
               </div>
-              <div className="engine-status">
-                <div className="engine-chip">
-                  <Cpu size={15} />
-                  <strong>Stockfish 19</strong>
-                  <span>{settings.engine}</span>
+              {!customEditing && (
+                <div className="engine-status">
+                  <div className="engine-chip">
+                    <Cpu size={15} />
+                    <strong>Stockfish 19</strong>
+                    <span>{settings.engine}</span>
+                  </div>
+                  <button
+                    className="text-button engine-settings-link"
+                    onClick={() => setTab("options")}
+                  >
+                    Ganti engine <ArrowRight size={13} />
+                  </button>
                 </div>
-                <span
-                  className={`local-state ${status === "error" ? "is-error" : ""}`}
-                >
-                  <span className="status-dot" />
-                  {status === "loading"
-                    ? "Memuat…"
-                    : status === "error"
-                      ? "Gagal dimuat"
-                      : !settings.liveEngine
-                        ? "Live nonaktif"
-                        : busy
-                          ? "Menganalisis"
-                          : "Lokal aktif"}
-                </span>
-              </div>
-              {(error || engineError) && (
+              )}
+              {!customEditing && (error || engineError) && (
                 <div className="error-message" role="alert">
                   {error || engineError}
                   <button onClick={() => setError("")}>×</button>
                 </div>
               )}
-              {tab === "review" && (
+              {tab === "review" && !customEditing && (
                 <>
                   <div className="review-overview">
                     <div className="review-overview-heading">
@@ -555,14 +806,7 @@ export default function Analysis({
                     <span>Notasi permainan</span>
                     <span>{game.moves.length} ply</span>
                   </div>
-                  <MoveList
-                    moves={game.moves}
-                    ply={ply}
-                    onChange={setPly}
-                    review={displayReview}
-                    bookMoves={bookMoves}
-                    startFen={game.startFen}
-                  />
+                  <MoveList {...notationProps} />
                   <div className="coach-card">
                     <div className="coach-label">
                       <span className="coach-avatar">
@@ -589,7 +833,7 @@ export default function Analysis({
                   </div>
                 </>
               )}
-              {tab === "engine" && (
+              {tab === "engine" && !customEditing && (
                 <div className="engine-details">
                   <div className="line-heading">
                     <h3>Variasi terbaik</h3>
@@ -631,17 +875,99 @@ export default function Analysis({
                     <span>Notasi permainan</span>
                     <span>{game.moves.length} ply</span>
                   </div>
-                  <MoveList
-                    moves={game.moves}
-                    ply={ply}
-                    onChange={setPly}
-                    review={displayReview}
-                    bookMoves={bookMoves}
-                    startFen={game.startFen}
-                  />
+                  <MoveList {...notationProps} />
                 </div>
               )}
-              {tab === "options" && (
+              {customEditing && (
+                <div className="piece-editor">
+                  <p>Pilih buah lalu klik petak, atau seret buah ke papan.</p>
+                  {["w", "b"].map((color) => (
+                    <div className="piece-editor-group" key={color}>
+                      <strong>{color === "w" ? "Putih" : "Hitam"}</strong>
+                      <div>
+                        {["q", "r", "b", "n", "p"].map((type) => {
+                          const code =
+                            color === "w" ? type.toUpperCase() : type;
+                          const names: Record<string, string> = {
+                            q: "Menteri",
+                            r: "Benteng",
+                            b: "Gajah",
+                            n: "Kuda",
+                            p: "Pion",
+                          };
+                          return (
+                            <button
+                              key={code}
+                              aria-label={
+                                (color === "w" ? "Putih " : "Hitam ") +
+                                names[type]
+                              }
+                              className={editorPiece === code ? "active" : ""}
+                              draggable
+                              onDragStart={(e) =>
+                                e.dataTransfer.setData(
+                                  "application/x-kuda-piece",
+                                  code,
+                                )
+                              }
+                              onClick={() => {
+                                setEditorPiece(code);
+                                setEditorSquare(undefined);
+                              }}
+                            >
+                              <img
+                                src={
+                                  "/pieces/" +
+                                  color +
+                                  type.toUpperCase() +
+                                  ".svg"
+                                }
+                                alt=""
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  <p>
+                    {editorSquare
+                      ? "Petak " + editorSquare + " dipilih"
+                      : editorPiece
+                        ? "Buah siap diletakkan"
+                        : "Pilih petak berisi buah untuk menghapusnya"}
+                  </p>
+                  <div className="piece-editor-actions">
+                    <button
+                      className="button secondary"
+                      disabled={
+                        !editorSquare ||
+                        new Chess(game.startFen).get(
+                          editorSquare as import("chess.js").Square,
+                        )?.type === "k"
+                      }
+                      onClick={deleteEditorSquare}
+                    >
+                      <Trash2 size={15} /> Hapus buah
+                    </button>
+                    <button className="button secondary" onClick={resetEditor}>
+                      <RotateCcw size={15} /> Reset
+                    </button>
+                  </div>
+                  <button
+                    className="button primary"
+                    onClick={() => {
+                      onCustomEditingChange(false);
+                      setEditorPiece(undefined);
+                      setEditorSquare(undefined);
+                      setTab("review");
+                    }}
+                  >
+                    Selesai mengatur
+                  </button>
+                </div>
+              )}
+              {tab === "options" && !customEditing && (
                 <div className="engine-options">
                   <div className="settings-section">
                     <label htmlFor="engine-choice">Pilih engine</label>
@@ -766,7 +1092,7 @@ export default function Analysis({
                   </div>
                 </div>
               )}
-              {tab === "notes" && (
+              {tab === "notes" && !customEditing && (
                 <div className="notes-panel">
                   <MessageSquareText size={27} />
                   <h3>Ide yang layak diingat.</h3>
@@ -813,10 +1139,10 @@ export default function Analysis({
                 <span>Evaluasi dari sudut putih</span>
               </div>
               <EvaluationChart
-                review={displayReview}
-                total={game.moves.length}
-                ply={ply}
-                onSelect={setPly}
+                review={mainReview}
+                total={mainGame.moves.length}
+                ply={activeVariation ? activeVariation.forkPly : ply}
+                onSelect={notationProps.onChange}
               />
             </section>
           </div>
@@ -844,21 +1170,18 @@ export default function Analysis({
             </button>
           </div>
         </div>
-        {branches.length > 0 && (
+        {activeVariation && (
           <div className="variation-notice">
             <GitBranch size={15} />
             <span>Anda menjelajahi variasi baru.</span>
             <button
               onClick={() => {
-                const previous = branches[0];
-                setBranches((b) => b.slice(1));
                 stopReview();
-                setReview([]);
-                setGame(previous);
-                setPly(Math.min(ply, previous.moves.length));
+                setActiveVariationId(undefined);
+                setPly(Math.min(ply, mainGame.moves.length));
               }}
             >
-              Kembali ke jalur sebelumnya
+              Kembali ke jalur utama
             </button>
           </div>
         )}

@@ -1,6 +1,12 @@
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import type { Move } from "chess.js";
 
+export type GameVariation = {
+  id: string;
+  moves: string[];
+  forkPly: number;
+  parentId?: string;
+};
 export type GameData = {
   startFen: string;
   moves: string[];
@@ -8,6 +14,11 @@ export type GameData = {
   black: string;
   event: string;
   result: string;
+  source?: string;
+  whiteElo?: string;
+  blackElo?: string;
+  moveTimes?: string[];
+  variations?: GameVariation[];
 };
 export type EngineLine = {
   depth: number;
@@ -25,7 +36,15 @@ export type Evaluation = {
   mate?: number;
 };
 export type Annotation =
-  "book" | "brilliant" | "best" | "excellent" | "good" | "miss" | "inaccuracy" | "mistake" | "blunder";
+  | "book"
+  | "brilliant"
+  | "best"
+  | "excellent"
+  | "good"
+  | "miss"
+  | "inaccuracy"
+  | "mistake"
+  | "blunder";
 export type ReviewMove = {
   ply: number;
   san: string;
@@ -71,8 +90,12 @@ export function parseGame(input: string): GameData {
       black: "Hitam",
       event: "Posisi kustom",
       result: "*",
+      source: "FEN",
     };
   }
+  const clocks = [...text.matchAll(/\[%clk\s+([^\]]+)\]/g)].map(
+    (match) => match[1],
+  );
   chess.loadPgn(text);
   const headers = chess.getHeaders();
   const history = chess.history({ verbose: true });
@@ -83,6 +106,10 @@ export function parseGame(input: string): GameData {
     black: headers.Black || "Hitam",
     event: headers.Event || "Permainan impor",
     result: headers.Result || "*",
+    source: "PGN",
+    whiteElo: headers.WhiteElo,
+    blackElo: headers.BlackElo,
+    moveTimes: clocks.length ? clocks : undefined,
   };
 }
 export function emptyGame(): GameData {
@@ -93,6 +120,7 @@ export function emptyGame(): GameData {
     black: "Hitam",
     event: "Analisis bebas",
     result: "*",
+    source: "Bebas",
   };
 }
 export function positionAt(game: GameData, ply: number): Chess {
@@ -114,6 +142,8 @@ export function toPgn(game: GameData): string {
     game.black,
     "Result",
     game.result,
+    ...(game.whiteElo ? ["WhiteElo", game.whiteElo] : []),
+    ...(game.blackElo ? ["BlackElo", game.blackElo] : []),
   );
   return c.pgn();
 }
@@ -185,9 +215,11 @@ function isBrilliantSacrifice(move: Move, after: Evaluation): boolean {
         to: uci.slice(2, 4),
         promotion: uci[4],
       });
-      if (i === 0 && (
-        reply.to !== move.to || !reply.captured || reply.captured === "p"
-      )) return false;
+      if (
+        i === 0 &&
+        (reply.to !== move.to || !reply.captured || reply.captured === "p")
+      )
+        return false;
     }
   } catch {
     return false;
@@ -209,26 +241,33 @@ export function annotate(
   );
   const isBest =
     before.bestmove === move.from + move.to + (move.promotion ?? "");
-  const brilliant = isBest && loss <= 1 && before.depth >= 12 && after.depth >= 12
-    && isBrilliantSacrifice(move, after);
-  const missedOpportunity = !isBest && loss > 3
-    && before.depth >= 12 && after.depth >= 12
-    && isMissedOpportunity(before, after, move);
+  const brilliant =
+    isBest &&
+    loss <= 1 &&
+    before.depth >= 12 &&
+    after.depth >= 12 &&
+    isBrilliantSacrifice(move, after);
+  const missedOpportunity =
+    !isBest &&
+    loss > 3 &&
+    before.depth >= 12 &&
+    after.depth >= 12 &&
+    isMissedOpportunity(before, after, move);
   const annotation: Annotation = brilliant
     ? "brilliant"
     : isBest
-    ? "best"
-    : missedOpportunity
-      ? "miss"
-    : loss <= 1
-      ? "excellent"
-      : loss <= 3
-        ? "good"
-        : loss <= 8
-          ? "inaccuracy"
-          : loss <= 16
-            ? "mistake"
-            : "blunder";
+      ? "best"
+      : missedOpportunity
+        ? "miss"
+        : loss <= 1
+          ? "excellent"
+          : loss <= 3
+            ? "good"
+            : loss <= 8
+              ? "inaccuracy"
+              : loss <= 16
+                ? "mistake"
+                : "blunder";
   return {
     ply,
     san: move.san,

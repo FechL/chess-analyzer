@@ -56,6 +56,7 @@ export type Settings = {
   liveEngine: boolean;
   engineDepth: number;
   showArrows: boolean;
+  autoAnalyzeImported: boolean;
 };
 type SavedGame = { id: string; date: string; game: GameData };
 const TITLES: Record<string, string> = {
@@ -74,6 +75,7 @@ const DEFAULT_SETTINGS: Settings = {
   liveEngine: true,
   engineDepth: 0,
   showArrows: true,
+  autoAnalyzeImported: true,
 };
 function restoreGame() {
   try {
@@ -93,7 +95,7 @@ export default function App() {
   const [game, setGame] = useState<GameData>(restoreGame);
   const [analysisFen, setAnalysisFen] = useState(() => {
     const g = restoreGame();
-    return positionAt(g, Math.min(14, g.moves.length)).fen();
+    return positionAt(g, g.moves.length).fen();
   });
   const [revision, setRevision] = useState(0);
   const [settings, setSettings] = useState<Settings>(() => ({
@@ -104,8 +106,10 @@ export default function App() {
     readStorage("kuda-library", []),
   );
   const [modal, setModal] = useState<
-    "import" | "settings" | "help" | undefined
+    "import" | "new-game" | "settings" | "help" | undefined
   >();
+  const [customEditing, setCustomEditing] = useState(false);
+  const [autoReviewOnLoad, setAutoReviewOnLoad] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [completed, setCompleted] = useState<string[]>(() =>
@@ -151,9 +155,16 @@ export default function App() {
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(""), 3500);
   };
-  const load = (g: GameData) => {
+  const load = (g: GameData, editCustom = false) => {
     setGame(g);
-    setAnalysisFen(positionAt(g, Math.min(14, g.moves.length)).fen());
+    setCustomEditing(editCustom);
+    setAutoReviewOnLoad(
+      !editCustom &&
+        !["Bebas", "Kustom"].includes(g.source || "") &&
+        settings.autoAnalyzeImported &&
+        g.moves.length > 0,
+    );
+    setAnalysisFen(positionAt(g, g.moves.length).fen());
     setRevision((r) => r + 1);
     navigate("analysis");
     setModal(undefined);
@@ -295,6 +306,11 @@ export default function App() {
             onSettingsChange={setSettings}
             onSave={save}
             onImport={() => setModal("import")}
+            onNewGame={() => setModal("new-game")}
+            autoReviewOnLoad={autoReviewOnLoad}
+            onAutoReviewStarted={() => setAutoReviewOnLoad(false)}
+            customEditing={customEditing}
+            onCustomEditingChange={setCustomEditing}
             onPositionChange={setAnalysisFen}
           />
         )}
@@ -326,11 +342,41 @@ export default function App() {
           />
         )}
       </DashboardShell>
+      {modal === "new-game" && (
+        <Modal title="Mulai permainan baru" onClose={() => setModal(undefined)}>
+          <p className="modal-description">
+            Pilih papan awal untuk ruang analisis bebas.
+          </p>
+          <div className="new-game-options">
+            <button
+              className="button secondary"
+              onClick={() => {
+                const g = emptyGame();
+                g.source = "Bebas";
+                load(g);
+              }}
+            >
+              <Plus size={16} /> Dari posisi awal
+            </button>
+            <button
+              className="button primary"
+              onClick={() => {
+                const g = emptyGame();
+                g.event = "Analisis Bebas (Kustom)";
+                g.source = "Kustom";
+                load(g, true);
+              }}
+            >
+              <Grid2X2 size={16} /> Atur buah sendiri
+            </button>
+          </div>
+        </Modal>
+      )}
       {modal === "import" && (
         <ImportModal
           onClose={() => setModal(undefined)}
+          saved={saved}
           onLoad={load}
-          onNew={() => load(emptyGame())}
         />
       )}
       {modal === "settings" && (
@@ -360,6 +406,22 @@ export default function App() {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="settings-section">
+            <label className="board-sound-setting">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={settings.autoAnalyzeImported}
+                onChange={(e) =>
+                  setSettings((s) => ({
+                    ...s,
+                    autoAnalyzeImported: e.target.checked,
+                  }))
+                }
+              />
+              Analisis otomatis saat impor
+            </label>
           </div>
           <div className="settings-section">
             <label className="board-sound-setting">
@@ -540,13 +602,15 @@ export default function App() {
 function ImportModal({
   onClose,
   onLoad,
-  onNew,
+  saved,
 }: {
   onClose: () => void;
   onLoad: (g: GameData) => void;
-  onNew: () => void;
+  saved: SavedGame[];
 }) {
-  const [source, setSource] = useState<"local" | OnlineSource>("local");
+  const [source, setSource] = useState<"local" | "collection" | OnlineSource>(
+    "local",
+  );
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const file = useRef<HTMLInputElement>(null);
@@ -581,6 +645,7 @@ function ImportModal({
             ["chesscom", "Chess.com"],
             ["lichess", "Lichess"],
             ["url", "Tautan PGN"],
+            ["collection", "Koleksi"],
           ] as const
         ).map(([value, label]) => (
           <button
@@ -593,7 +658,35 @@ function ImportModal({
           </button>
         ))}
       </div>
-      {source !== "local" ? (
+      {source === "collection" ? (
+        <div className="saved-import-list">
+          {saved.length ? (
+            saved.map((item) => (
+              <button
+                key={item.id}
+                className="online-game-item"
+                onClick={() => onLoad({ ...item.game, source: "Koleksi" })}
+              >
+                <span className="online-game-players">
+                  <strong>{item.game.event}</strong>
+                  <span>
+                    {item.game.white} vs {item.game.black}
+                  </span>
+                </span>
+                <span className="online-game-meta">
+                  <strong>{item.game.result}</strong>
+                  <span>{new Date(item.date).toLocaleDateString("id-ID")}</span>
+                </span>
+                <ArrowRight size={15} />
+              </button>
+            ))
+          ) : (
+            <p className="online-import-status">
+              Belum ada permainan tersimpan.
+            </p>
+          )}
+        </div>
+      ) : source !== "local" ? (
         <OnlineImport key={source} source={source} onLoad={onLoad} />
       ) : (
         <>
@@ -649,9 +742,6 @@ function ImportModal({
             </div>
           )}
           <div className="modal-actions">
-            <button className="button secondary" onClick={onNew}>
-              <Plus size={15} /> Papan baru
-            </button>
             <button
               className="button primary"
               onClick={load}

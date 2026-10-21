@@ -30,3 +30,16 @@ export function reviewSegments(review: ReviewMove[]) {
   }
   return { values, segments };
 }
+
+// Keep evaluations for alternate continuations at the same ply.
+export function mergePositionReview(items: ReviewMove[], item: ReviewMove) {
+  return [
+    ...items.filter(
+      (r) =>
+        r.ply !== item.ply ||
+        r.before.fen !== item.before.fen ||
+        r.after.fen !== item.after.fen,
+    ),
+    item,
+  ];
+}

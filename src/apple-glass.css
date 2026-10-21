@@ -2269,7 +2269,193 @@ textarea::placeholder {
   box-shadow: 0 1px 3px #34466344;
   transition: transform 120ms ease;
 }
-.board-sound-setting input[type="checkbox"]:checked { background: #438be8; border-color: #367dd7; }
-.board-sound-setting input[type="checkbox"]:checked::after { transform: translateX(14px); }
-.board-sound-setting input[type="checkbox"]:focus-visible { outline: 2px solid #438be8; outline-offset: 3px; }
-.engine-options .settings-section { padding-block: 18px; }
+.board-sound-setting input[type="checkbox"]:checked {
+  background: #438be8;
+  border-color: #367dd7;
+}
+.board-sound-setting input[type="checkbox"]:checked::after {
+  transform: translateX(14px);
+}
+.board-sound-setting input[type="checkbox"]:focus-visible {
+  outline: 2px solid #438be8;
+  outline-offset: 3px;
+}
+.engine-options .settings-section {
+  padding-block: 18px;
+}
+
+.game-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 140px;
+  margin-right: auto;
+}
+.game-title-block strong {
+  color: #263a55;
+  font-size: 15px;
+}
+.game-title-block span {
+  color: #72839b;
+  font-size: 11px;
+}
+.new-game-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.piece-editor {
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px 22px;
+}
+.piece-editor > p {
+  margin: 0;
+  color: #71829b;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.piece-editor-group {
+  display: grid;
+  gap: 7px;
+}
+.piece-editor-group > strong {
+  color: #607695;
+  font-size: 12px;
+}
+.piece-editor-group > div {
+  display: flex;
+  gap: 6px;
+}
+.piece-editor-group button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 4px;
+  border: 1px solid #dce5f1;
+  border-radius: 10px;
+  background: linear-gradient(#fff, #f1f5fb);
+  cursor: grab;
+}
+.piece-editor-group button.active {
+  border-color: #5896e5;
+  box-shadow: 0 0 0 2px #5896e533;
+}
+.piece-editor-group img {
+  width: 32px;
+  height: 32px;
+}
+.piece-editor-actions {
+  display: flex;
+  gap: 8px;
+}
+.piece-editor-actions .button {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 9px;
+}
+.saved-import-list {
+  display: grid;
+  gap: 8px;
+  max-height: 54vh;
+  overflow: auto;
+}
+@media (max-width: 720px) {
+  .game-title-block {
+    flex-basis: 100%;
+  }
+  .workspace-toolbar {
+    flex-wrap: wrap;
+  }
+  .new-game-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+}
+.game-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.game-title-block .game-player > strong {
+  font-size: 10px;
+  color: #61738b;
+  font-weight: 600;
+}
+.game-player time {
+  color: #354f73;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 5px;
+  border: 1px solid #d6e0ee;
+  border-radius: 5px;
+  background: #ffffffa8;
+}
+.game-title-block .player-color {
+  width: 8px;
+  height: 8px;
+  border: 1px solid #a6b4c5;
+  border-radius: 50%;
+}
+.player-color-w {
+  background: #fff;
+}
+.player-color-b {
+  background: #34445c;
+}
+.engine-settings-link {
+  white-space: nowrap;
+}
+
+.notation-fork {
+  color: #8b6bc4;
+  font-size: 13px;
+  margin-left: 4px;
+}
+.notation-variation {
+  grid-column: 1 / -1;
+  border-left: 3px solid #b5a0d4;
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-radius: 0 9px 9px 0;
+  background: #eee9f677;
+}
+.notation-variation.is-active {
+  border-color: #8e6cc4;
+  background: #e8e0f5bb;
+}
+.notation-variation-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 6px;
+  color: #80629f;
+  font-size: 10px;
+}
+.notation-variation-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.notation-variation-moves .variation-move {
+  color: #745394;
+  padding: 5px 7px;
+  min-height: 30px;
+  display: inline-flex;
+  gap: 4px;
+}
+.variation-move small {
+  opacity: 0.65;
+  font-size: 10px;
+}
+.notation-variation-moves .variation-move.current {
+  background: #d4c4ed;
+  color: #503278;
+}

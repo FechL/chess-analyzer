@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { Chess } from "chess.js";
 import { annotate } from "./chess";
 import type { Evaluation } from "./chess";
-import { mergeReview, retainReview, reviewSegments } from "./review";
+import {
+  mergePositionReview,
+  mergeReview,
+  retainReview,
+  reviewSegments,
+} from "./review";
 const evaluation = (fen: string, cp: number, bestmove = ""): Evaluation => ({
   fen,
   cp,
@@ -60,5 +65,30 @@ describe("incremental move review", () => {
       { ...items[1], before: { ...items[1].before, cp: 999 } },
     ]);
     expect(values.get(1)).toBe(items[0].after.cp);
+  });
+});
+
+describe("reviews across variations", () => {
+  it("keeps both continuations at the same ply and restores their own ratings", () => {
+    const { items } = game();
+    const branch = new Chess();
+    branch.move("e4");
+    const move = branch.move("c5");
+    const alternative = annotate(
+      evaluation(move.before, 10),
+      evaluation(move.after, 20),
+      move,
+      2,
+    );
+    const bank = mergePositionReview(items, alternative);
+    expect(bank).toHaveLength(items.length + 1);
+    expect(retainReview(bank, branch.history({ verbose: true }))).toEqual([
+      items[0],
+      alternative,
+    ]);
+    const updated = mergePositionReview(bank, { ...alternative, accuracy: 90 });
+    expect(updated).toHaveLength(bank.length);
+    expect(updated).toContain(items[1]);
+    expect(updated.at(-1)?.accuracy).toBe(90);
   });
 });

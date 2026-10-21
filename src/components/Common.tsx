@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Chess } from "chess.js";
 import { LABELS } from "../lib/chess";
-import type { ReviewMove } from "../lib/chess";
+import type { GameVariation, ReviewMove } from "../lib/chess";
 import type { BookMove } from "../lib/opening-book";
 
 export function Modal({
@@ -170,6 +170,10 @@ export function MoveList({
   review = [],
   bookMoves = [],
   startFen,
+  variations = [],
+  activeVariationId,
+  variationPly,
+  onVariationChange,
 }: {
   moves: string[];
   ply: number;
@@ -177,6 +181,10 @@ export function MoveList({
   review?: ReviewMove[];
   bookMoves?: (BookMove | undefined)[];
   startFen: string;
+  variations?: GameVariation[];
+  activeVariationId?: string;
+  variationPly?: number;
+  onVariationChange?: (id: string, ply: number) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -194,7 +202,7 @@ export function MoveList({
         top: bottom - container.clientHeight,
         behavior: "smooth",
       });
-  }, [ply]);
+  }, [ply, variationPly, activeVariationId]);
   const c = new Chess(startFen);
   const startNumber = Number(startFen.split(" ")[5]);
   const offset = c.turn() === "b" ? 1 : 0;
@@ -223,6 +231,15 @@ export function MoveList({
                   onClick={onChange ? () => onChange(index + 1) : undefined}
                 >
                   <span>{moves[index]}</span>
+                  {variations.some((branch) => branch.forkPly === index) && (
+                    <span
+                      className="notation-fork"
+                      title="Ada variasi dari posisi ini"
+                      aria-label="Ada variasi"
+                    >
+                      ↳
+                    </span>
+                  )}
                   {label && (
                     <span
                       className="move-symbol"
@@ -250,6 +267,59 @@ export function MoveList({
           Belum ada langkah. Mainkan buah di papan untuk memulai.
         </div>
       )}
+      {variations.map((branch, branchIndex) => (
+        <div
+          className={
+            "notation-variation " +
+            (activeVariationId === branch.id ? "is-active" : "")
+          }
+          key={branch.id}
+        >
+          <div className="notation-variation-heading">
+            <span>↳ Variasi {branchIndex + 1}</span>
+            <span>
+              {branch.parentId
+                ? "dari Variasi " +
+                  (variations.findIndex((item) => item.id === branch.parentId) +
+                    1)
+                : "dari jalur utama"}
+            </span>
+          </div>
+          <div className="notation-variation-moves">
+            {branch.moves.slice(branch.forkPly).map((san, i) => {
+              const index = branch.forkPly + i;
+              const number = startNumber + Math.floor((index + offset) / 2);
+              const black = (index + offset) % 2 === 1;
+              const current =
+                activeVariationId === branch.id && variationPly === index + 1;
+              return (
+                <button
+                  key={index}
+                  className={
+                    "move-cell variation-move " + (current ? "current" : "")
+                  }
+                  aria-current={current ? "step" : undefined}
+                  aria-label={
+                    "Variasi " +
+                    (branchIndex + 1) +
+                    ": " +
+                    number +
+                    (black ? "... " : ". ") +
+                    san
+                  }
+                  onClick={() => onVariationChange?.(branch.id, index + 1)}
+                >
+                  <small>
+                    {number}
+                    {black ? "..." : "."}
+                  </small>
+                  {san}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

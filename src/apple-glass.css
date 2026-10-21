@@ -1756,13 +1756,8 @@ textarea::placeholder {
   color: #556e8f;
 }
 
-@media (min-width: 1101px) and (max-height: 850px) {
-  .analysis-page .player-row {
-    height: 43px;
-  }
-  .analysis-page .eval-bar {
-    margin-block: 43px;
-  }
+.analysis-page .eval-bar {
+  margin-block: 0;
 }
 @media (max-width: 1200px) {
   .page {

@@ -27,7 +27,6 @@ import {
   Modal,
   MoveList,
   NavigationControls,
-  PlayerRow,
 } from "../components/Common";
 import { DashboardButton } from "../components/block/dashboard-shell";
 import { useEngine } from "../hooks/useEngine";
@@ -278,16 +277,6 @@ export default function Analysis({
               active={!!result}
             />
             <div className="board-main">
-              <PlayerRow
-                name={flipped ? game.white : game.black}
-                color={flipped ? "w" : "b"}
-                active={position.turn() === (flipped ? "w" : "b")}
-                right={
-                  <span className="player-side">
-                    {flipped ? "PUTIH" : "HITAM"}
-                  </span>
-                }
-              />
               <Board
                 fen={fen}
                 flipped={flipped}
@@ -297,16 +286,6 @@ export default function Analysis({
                   showArrow && tab === "engine" ? result?.bestmove : undefined
                 }
                 theme={settings.boardTheme}
-              />
-              <PlayerRow
-                name={flipped ? game.black : game.white}
-                color={flipped ? "b" : "w"}
-                active={position.turn() === (flipped ? "b" : "w")}
-                right={
-                  <span className="player-side">
-                    {flipped ? "HITAM" : "PUTIH"}
-                  </span>
-                }
               />
             </div>
           </div>

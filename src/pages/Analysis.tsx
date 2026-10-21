@@ -706,7 +706,7 @@ export default function Analysis({
                   <CircleHelp size={15} />
                 </IconButton>
               </div>
-              {!customEditing && (
+              {!customEditing && (tab === "review" || tab === "engine") && (
                 <div className="engine-status">
                   <div className="engine-chip">
                     <Cpu size={15} />
@@ -804,7 +804,16 @@ export default function Analysis({
                   </div>
                   <div className="notation-heading">
                     <span>Notasi permainan</span>
-                    <span>{game.moves.length} ply</span>
+                    <span>
+                      {mainGame.moves.length} ply
+                      {activeVariation
+                        ? " · Variasi " +
+                          ((mainGame.variations?.findIndex(
+                            (item) => item.id === activeVariation.id,
+                          ) ?? 0) +
+                            1)
+                        : ""}
+                    </span>
                   </div>
                   <MoveList {...notationProps} />
                   <div className="coach-card">
@@ -873,7 +882,16 @@ export default function Analysis({
                   )}
                   <div className="notation-heading">
                     <span>Notasi permainan</span>
-                    <span>{game.moves.length} ply</span>
+                    <span>
+                      {mainGame.moves.length} ply
+                      {activeVariation
+                        ? " · Variasi " +
+                          ((mainGame.variations?.findIndex(
+                            (item) => item.id === activeVariation.id,
+                          ) ?? 0) +
+                            1)
+                        : ""}
+                    </span>
                   </div>
                   <MoveList {...notationProps} />
                 </div>
@@ -987,11 +1005,6 @@ export default function Analysis({
                       <option value="lite">Stockfish 19 Lite</option>
                       <option value="full">Stockfish 19 Full</option>
                     </select>
-                    <p>
-                      {settings.engine === "lite"
-                        ? "Ringan untuk analisis sehari-hari."
-                        : "Model lebih besar, sekitar 95 MB saat pertama dimuat."}
-                    </p>
                   </div>
                   <div className="settings-section">
                     <label className="board-sound-setting">
@@ -1048,11 +1061,6 @@ export default function Analysis({
                         })
                       }
                     />
-                    <p>
-                      Analisis posisi berhenti saat batas waktu atau depth
-                      tercapai. Ulasan seluruh permainan memakai 350 ms per
-                      posisi.
-                    </p>
                   </div>
                   <div className="settings-section">
                     <label className="board-sound-setting">
@@ -1069,7 +1077,6 @@ export default function Analysis({
                       />
                       Tampilkan panah engine
                     </label>
-                    <p>Berlaku di semua tab analisis.</p>
                   </div>
                   <div className="settings-section">
                     <label htmlFor="variation-count">Jumlah variasi</label>
@@ -1136,12 +1143,13 @@ export default function Analysis({
                   <TrendingUp size={16} />
                   <h3>Alur permainan</h3>
                 </div>
-                <span>Evaluasi dari sudut putih</span>
+                {activeVariation && <span>Keluar dari notasi</span>}
               </div>
               <EvaluationChart
                 review={mainReview}
                 total={mainGame.moves.length}
-                ply={activeVariation ? activeVariation.forkPly : ply}
+                ply={ply}
+                showMoveIndicator={!activeVariation}
                 onSelect={notationProps.onChange}
               />
             </section>
@@ -1250,12 +1258,14 @@ function EvaluationChart({
   review,
   total,
   ply,
+  showMoveIndicator = true,
   onSelect,
 }: {
   review: ReviewMove[];
   total: number;
   ply: number;
   onSelect: (n: number) => void;
+  showMoveIndicator?: boolean;
 }) {
   const { values, segments } = reviewSegments(review);
   const x = (i: number) => 10 + (i / Math.max(1, total)) * 780;
@@ -1301,14 +1311,16 @@ function EvaluationChart({
             </g>
           );
         })}
-        <line
-          x1={x(ply)}
-          x2={x(ply)}
-          y1="9"
-          y2="99"
-          stroke="#9da799"
-          strokeDasharray="3 3"
-        />
+        {showMoveIndicator && (
+          <line
+            x1={x(ply)}
+            x2={x(ply)}
+            y1="9"
+            y2="99"
+            stroke="#9da799"
+            strokeDasharray="3 3"
+          />
+        )}
         {review
           .filter((item) =>
             [
@@ -1351,10 +1363,13 @@ function EvaluationChart({
           />
         ))}
       </div>
-      <div className="chart-axis">
-        <span>Awal permainan</span>
-        <span>Langkah {Math.ceil(total / 2)}</span>
-      </div>
+      {showMoveIndicator && (
+        <div className="chart-axis">
+          <span>
+            Langkah {Math.ceil(ply / 2)}/{Math.ceil(total / 2)}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

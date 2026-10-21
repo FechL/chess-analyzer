@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import {
   X,
@@ -207,119 +207,149 @@ export function MoveList({
   const startNumber = Number(startFen.split(" ")[5]);
   const offset = c.turn() === "b" ? 1 : 0;
   const rows = Math.ceil((moves.length + offset) / 2);
+  const isRootVariation = (branch: GameVariation) =>
+    !branch.parentId || !variations.some((item) => item.id === branch.parentId);
+  const renderVariation = (
+    branch: GameVariation,
+    branchIndex: number,
+  ): ReactNode => (
+    <div
+      className={
+        "notation-variation " +
+        (activeVariationId === branch.id ? "is-active" : "")
+      }
+      key={branch.id}
+    >
+      <div className="notation-variation-heading">
+        <span>↳ Variasi {branchIndex + 1}</span>
+        <span>
+          {branch.parentId
+            ? "dari Variasi " +
+              (variations.findIndex((item) => item.id === branch.parentId) + 1)
+            : "dari jalur utama"}
+        </span>
+      </div>
+      <div className="notation-variation-moves">
+        {branch.moves.slice(branch.forkPly).map((san, i) => {
+          const index = branch.forkPly + i;
+          const number = startNumber + Math.floor((index + offset) / 2);
+          const black = (index + offset) % 2 === 1;
+          const current =
+            activeVariationId === branch.id && variationPly === index + 1;
+          return (
+            <button
+              key={index}
+              className={
+                "move-cell variation-move " + (current ? "current" : "")
+              }
+              aria-current={current ? "step" : undefined}
+              aria-label={
+                "Variasi " +
+                (branchIndex + 1) +
+                ": " +
+                number +
+                (black ? "... " : ". ") +
+                san
+              }
+              onClick={() => onVariationChange?.(branch.id, index + 1)}
+            >
+              <small>
+                {number}
+                {black ? "..." : "."}
+              </small>
+              {san}
+            </button>
+          );
+        })}
+      </div>
+      {variations.some((child) => child.parentId === branch.id) && (
+        <div className="notation-variation-children">
+          {variations.map((child, childIndex) =>
+            child.parentId === branch.id
+              ? renderVariation(child, childIndex)
+              : null,
+          )}
+        </div>
+      )}
+    </div>
+  );
   return (
     <div className="move-list" ref={ref}>
       {moves.length ? (
         Array.from({ length: rows }, (_, row) => (
-          <div className="move-row" key={row}>
-            <span className="move-number">{startNumber + row}.</span>
-            {[0, 1].map((col) => {
-              const index = row * 2 + col - offset;
-              const item = review.find((r) => r.ply === index + 1);
-              const book = bookMoves[index];
-              const label = book
-                ? LABELS.book
-                : item && LABELS[item.annotation];
-              const Cell = onChange ? "button" : "span";
-              return index < 0 || index >= moves.length ? (
-                <span key={col} />
-              ) : (
-                <Cell
-                  key={col}
-                  aria-current={ply === index + 1 ? "step" : undefined}
-                  className={`move-cell ${ply === index + 1 ? "current" : ""}`}
-                  onClick={onChange ? () => onChange(index + 1) : undefined}
-                >
-                  <span>{moves[index]}</span>
-                  {variations.some((branch) => branch.forkPly === index) && (
-                    <span
-                      className="notation-fork"
-                      title="Ada variasi dari posisi ini"
-                      aria-label="Ada variasi"
-                    >
-                      ↳
-                    </span>
-                  )}
-                  {label && (
-                    <span
-                      className="move-symbol"
-                      style={{ color: label.color }}
-                      title={
-                        book
-                          ? `Book Move · ${book.name} (${book.eco})`
-                          : label.label
-                      }
-                    >
-                      {book ? (
-                        <BookOpen size={13} aria-label="Book Move" />
-                      ) : (
-                        label.symbol
-                      )}
-                    </span>
-                  )}
-                </Cell>
-              );
-            })}
-          </div>
+          <Fragment key={row}>
+            <div className="move-row">
+              <span className="move-number">{startNumber + row}.</span>
+              {[0, 1].map((col) => {
+                const index = row * 2 + col - offset;
+                const item = review.find((r) => r.ply === index + 1);
+                const book = bookMoves[index];
+                const label = book
+                  ? LABELS.book
+                  : item && LABELS[item.annotation];
+                const Cell = onChange ? "button" : "span";
+                return index < 0 || index >= moves.length ? (
+                  <span key={col} />
+                ) : (
+                  <Cell
+                    key={col}
+                    aria-current={ply === index + 1 ? "step" : undefined}
+                    className={`move-cell ${ply === index + 1 ? "current" : ""}`}
+                    onClick={onChange ? () => onChange(index + 1) : undefined}
+                  >
+                    <span>{moves[index]}</span>
+                    {variations.some(
+                      (branch) =>
+                        isRootVariation(branch) && branch.forkPly === index,
+                    ) && (
+                      <span
+                        className="notation-fork"
+                        title="Ada variasi dari posisi ini"
+                        aria-label="Ada variasi"
+                      >
+                        ↳
+                      </span>
+                    )}
+                    {label && (
+                      <span
+                        className="move-symbol"
+                        style={{ color: label.color }}
+                        title={
+                          book
+                            ? `Book Move · ${book.name} (${book.eco})`
+                            : label.label
+                        }
+                      >
+                        {book ? (
+                          <BookOpen size={13} aria-label="Book Move" />
+                        ) : (
+                          label.symbol
+                        )}
+                      </span>
+                    )}
+                  </Cell>
+                );
+              })}
+            </div>
+            {variations.map((branch, branchIndex) =>
+              isRootVariation(branch) &&
+              Math.min(Math.floor((branch.forkPly + offset) / 2), rows - 1) ===
+                row
+                ? renderVariation(branch, branchIndex)
+                : null,
+            )}
+          </Fragment>
         ))
       ) : (
         <div className="empty-inline">
           Belum ada langkah. Mainkan buah di papan untuk memulai.
+          {variations.map((branch, branchIndex) =>
+            isRootVariation(branch)
+              ? renderVariation(branch, branchIndex)
+              : null,
+          )}
         </div>
       )}
-      {variations.map((branch, branchIndex) => (
-        <div
-          className={
-            "notation-variation " +
-            (activeVariationId === branch.id ? "is-active" : "")
-          }
-          key={branch.id}
-        >
-          <div className="notation-variation-heading">
-            <span>↳ Variasi {branchIndex + 1}</span>
-            <span>
-              {branch.parentId
-                ? "dari Variasi " +
-                  (variations.findIndex((item) => item.id === branch.parentId) +
-                    1)
-                : "dari jalur utama"}
-            </span>
-          </div>
-          <div className="notation-variation-moves">
-            {branch.moves.slice(branch.forkPly).map((san, i) => {
-              const index = branch.forkPly + i;
-              const number = startNumber + Math.floor((index + offset) / 2);
-              const black = (index + offset) % 2 === 1;
-              const current =
-                activeVariationId === branch.id && variationPly === index + 1;
-              return (
-                <button
-                  key={index}
-                  className={
-                    "move-cell variation-move " + (current ? "current" : "")
-                  }
-                  aria-current={current ? "step" : undefined}
-                  aria-label={
-                    "Variasi " +
-                    (branchIndex + 1) +
-                    ": " +
-                    number +
-                    (black ? "... " : ". ") +
-                    san
-                  }
-                  onClick={() => onVariationChange?.(branch.id, index + 1)}
-                >
-                  <small>
-                    {number}
-                    {black ? "..." : "."}
-                  </small>
-                  {san}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

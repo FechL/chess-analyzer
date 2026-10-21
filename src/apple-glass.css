@@ -956,6 +956,7 @@ kbd {
 }
 .chart-empty,
 .chart-axis {
+  justify-content: flex-end;
   color: #667b97;
   font-size: 11px;
 }
@@ -2282,6 +2283,7 @@ textarea::placeholder {
 }
 .engine-options .settings-section {
   padding-block: 18px;
+  border-bottom: 0;
 }
 
 .game-title-block {
@@ -2414,21 +2416,21 @@ textarea::placeholder {
 }
 
 .notation-fork {
-  color: #8b6bc4;
+  color: #78838e;
   font-size: 13px;
   margin-left: 4px;
 }
 .notation-variation {
   grid-column: 1 / -1;
-  border-left: 3px solid #b5a0d4;
+  border-left: 3px solid #b5bdc6;
   margin: 8px 0;
   padding: 8px 10px;
   border-radius: 0 9px 9px 0;
-  background: #eee9f677;
+  background: #e9edf177;
 }
 .notation-variation.is-active {
-  border-color: #8e6cc4;
-  background: #e8e0f5bb;
+  border-color: #818e9c;
+  background: #e3e8edbb;
 }
 .notation-variation-heading {
   display: flex;
@@ -2436,7 +2438,7 @@ textarea::placeholder {
   justify-content: space-between;
   gap: 4px;
   margin-bottom: 6px;
-  color: #80629f;
+  color: #687480;
   font-size: 10px;
 }
 .notation-variation-moves {
@@ -2445,7 +2447,7 @@ textarea::placeholder {
   gap: 4px;
 }
 .notation-variation-moves .variation-move {
-  color: #745394;
+  color: #596774;
   padding: 5px 7px;
   min-height: 30px;
   display: inline-flex;
@@ -2456,6 +2458,14 @@ textarea::placeholder {
   font-size: 10px;
 }
 .notation-variation-moves .variation-move.current {
-  background: #d4c4ed;
-  color: #503278;
+  background: #cbd4dd;
+  color: #344451;
+}
+
+.notation-variation-children {
+  padding-left: 10px;
+  margin-top: 6px;
+}
+.notation-variation-children > .notation-variation:last-child {
+  margin-bottom: 0;
 }

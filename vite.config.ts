@@ -10,6 +10,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          "opening-book": [
+            fileURLToPath(
+              new URL("./src/data/opening-book.json", import.meta.url),
+            ),
+          ],
           "chess-rules": ["chess.js"],
           "obsidian-ui": [
             "motion/react",

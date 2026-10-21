@@ -99,6 +99,69 @@ describe("engine parsing and review scoring", () => {
     expect(formatEval(-125)).toBe("−1.25");
     expect(emptyGame().moves).toEqual([]);
   });
+  it("recognizes the Opera Game queen sacrifice as brilliant", () => {
+    const moves = historyOf(parseGame(SAMPLE_PGN));
+    const move = moves[30];
+    const before: Evaluation = {
+      fen: move.before, lines: [], bestmove: "b3b8", depth: 16,
+      cp: 10000, mate: 2,
+    };
+    const after: Evaluation = {
+      ...before, fen: move.after, bestmove: "d7b8", mate: 1,
+      lines: [{ depth: 16, cp: 10000, mate: 1, multipv: 1,
+        pv: ["d7b8", "d1d8"] }],
+    };
+    expect(annotate(before, after, move, 31).annotation).toBe("brilliant");
+    expect(annotate(before, { ...after, cp: -500, mate: undefined }, move, 31)
+      .annotation).not.toBe("brilliant");
+    expect(annotate(before, { ...after, depth: 8 }, move, 31)
+      .annotation).toBe("best");
+    expect(annotate(before, { ...after, lines: [] }, move, 31)
+      .annotation).toBe("best");
+  });
+  it("does not call an ordinary bishop-for-knight exchange brilliant", () => {
+    const move = historyOf(parseGame(
+      "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6",
+    )).at(-1)!;
+    const before: Evaluation = {
+      fen: move.before, lines: [], bestmove: "b5c6", depth: 16, cp: 0,
+    };
+    const after: Evaluation = {
+      ...before, fen: move.after, bestmove: "d7c6",
+      lines: [{ depth: 16, cp: 0, multipv: 1,
+        pv: ["d7c6", "e1g1", "c8g4", "d2d3"] }],
+    };
+    expect(annotate(before, after, move, 7).annotation).toBe("best");
+  });
+  it("detects missed winning captures for either side", () => {
+    for (const [fen, played, bestmove, cp] of [
+      ["6k1/7p/8/q7/8/8/3B3P/6K1 w - - 0 1", "h3", "d2a5", 500],
+      ["6k1/3b3p/8/8/Q7/8/7P/6K1 b - - 0 1", "h6", "d7a4", -500],
+    ] as const) {
+      const move = new Chess(fen).move(played);
+      const before: Evaluation = { fen, bestmove, cp, depth: 16, lines: [] };
+      const after: Evaluation = { ...before, fen: move.after, cp: 0 };
+      const result = annotate(before, after, move, 1);
+      expect(result.annotation).toBe("miss");
+      expect(result.accuracy).toBeLessThan(100);
+      expect(annotate(before, { ...after, depth: 8 }, move, 1).annotation)
+        .toBe("blunder");
+      expect(annotate(before, { ...after, cp: cp > 0 ? 300 : -300 }, move, 1)
+        .annotation).not.toBe("miss");
+    }
+  });
+  it("distinguishes missed tactical equality from an ordinary bad move", () => {
+    const position = new Chess("6k1/7p/8/q7/8/8/3B3P/6K1 w - - 0 1");
+    const fen = position.fen();
+    const move = position.move("h3");
+    const before: Evaluation = {
+      fen, bestmove: "d2a5", cp: 0, depth: 16, lines: [],
+    };
+    const after: Evaluation = { ...before, fen: move.after, cp: -400 };
+    expect(annotate(before, after, move, 1).annotation).toBe("miss");
+    expect(annotate({ ...before, bestmove: "d2c3" }, after, move, 1)
+      .annotation).toBe("blunder");
+  });
 });
 describe("all published learning content", () => {
   for (const opening of OPENINGS)

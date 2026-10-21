@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import {
   X,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -11,6 +12,7 @@ import {
 import { Chess } from "chess.js";
 import { LABELS } from "../lib/chess";
 import type { ReviewMove } from "../lib/chess";
+import type { BookMove } from "../lib/opening-book";
 
 export function Modal({
   title,
@@ -166,12 +168,14 @@ export function MoveList({
   ply,
   onChange,
   review = [],
+  bookMoves = [],
   startFen,
 }: {
   moves: string[];
   ply: number;
   onChange?: (n: number) => void;
   review?: ReviewMove[];
+  bookMoves?: (BookMove | undefined)[];
   startFen: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -204,7 +208,10 @@ export function MoveList({
             {[0, 1].map((col) => {
               const index = row * 2 + col - offset;
               const item = review.find((r) => r.ply === index + 1);
-              const label = item && LABELS[item.annotation];
+              const book = bookMoves[index];
+              const label = book
+                ? LABELS.book
+                : item && LABELS[item.annotation];
               const Cell = onChange ? "button" : "span";
               return index < 0 || index >= moves.length ? (
                 <span key={col} />
@@ -220,9 +227,17 @@ export function MoveList({
                     <span
                       className="move-symbol"
                       style={{ color: label.color }}
-                      title={label.label}
+                      title={
+                        book
+                          ? `Book Move · ${book.name} (${book.eco})`
+                          : label.label
+                      }
                     >
-                      {label.symbol}
+                      {book ? (
+                        <BookOpen size={13} aria-label="Book Move" />
+                      ) : (
+                        label.symbol
+                      )}
                     </span>
                   )}
                 </Cell>

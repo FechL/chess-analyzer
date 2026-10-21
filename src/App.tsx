@@ -3,7 +3,6 @@ import {
   ArrowDownToLine,
   ArrowRight,
   BookOpen,
-  Bookmark,
   Check,
   ChevronRight,
   CircleHelp,
@@ -29,9 +28,12 @@ import {
 } from "lucide-react";
 import { DashboardShell } from "./components/block/dashboard-shell";
 import Analysis from "./pages/Analysis";
+import { setBoardSound, useBoardSound } from "./lib/board-sound";
 import BotPage from "./pages/Bot";
 import { AcademyPage, OpeningsPage, PuzzlesPage } from "./pages/Learn";
 import { Modal, ProgressRing } from "./components/Common";
+import OnlineImport from "./components/OnlineImport";
+import type { OnlineSource } from "./components/OnlineImport";
 import {
   downloadFile,
   emptyGame,
@@ -74,6 +76,7 @@ function restoreGame() {
   }
 }
 export default function App() {
+  const boardSound = useBoardSound();
   const [page, setPage] = useState(() =>
     TITLES[location.hash.slice(1)] ? location.hash.slice(1) : "analysis",
   );
@@ -226,28 +229,6 @@ export default function App() {
         }
         headerActions={
           <>
-            {page === "analysis" && (
-              <div className="header-game-actions">
-                <button
-                  className="button secondary"
-                  onClick={save}
-                  aria-label="Simpan permainan"
-                  title="Simpan permainan"
-                >
-                  <Bookmark size={16} />
-                  <span className="header-action-label">Simpan</span>
-                </button>
-                <button
-                  className="button primary"
-                  onClick={() => setModal("import")}
-                  aria-label="Impor permainan"
-                  title="Impor permainan"
-                >
-                  <ArrowDownToLine size={16} />
-                  <span className="header-action-label">Impor permainan</span>
-                </button>
-              </div>
-            )}
             <button
               className="icon-button header-help"
               aria-label="Buka panduan"
@@ -301,7 +282,8 @@ export default function App() {
             game={game}
             setGame={setGame}
             settings={settings}
-            onOpening={() => navigate("openings")}
+            onSave={save}
+            onImport={() => setModal("import")}
             onPositionChange={setAnalysisFen}
           />
         )}
@@ -409,6 +391,20 @@ export default function App() {
               <option value={2}>2 variasi</option>
               <option value={3}>3 variasi · jelajahi alternatif</option>
             </select>
+          </div>
+          <div className="settings-section">
+            <label className="board-sound-setting">
+              <input
+                type="checkbox"
+                checked={boardSound}
+                onChange={(e) => setBoardSound(e.target.checked)}
+              />
+              Suara permainan
+            </label>
+            <p>
+              Suara langkah, tangkapan, rokade, skak, dan akhir permainan.
+              Animasi langkah cepat: 120 ms.
+            </p>
           </div>
           <div className="settings-engine">
             <Cpu size={19} />
@@ -589,6 +585,7 @@ function ImportModal({
   onLoad: (g: GameData) => void;
   onNew: () => void;
 }) {
+  const [source, setSource] = useState<"local" | OnlineSource>("local");
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const file = useRef<HTMLInputElement>(null);
@@ -612,66 +609,98 @@ function ImportModal({
   };
   return (
     <Modal title="Bawa permainanmu ke sini." onClose={onClose}>
-      <p className="modal-description">
-        Tempel satu permainan PGN atau posisi FEN. Semua diproses di perangkat
-        Anda.
-      </p>
-      <label className="field-label" htmlFor="game-import">
-        PGN atau FEN
-      </label>
-      <textarea
-        id="game-import"
-        className="import-textarea"
-        autoFocus
-        value={input}
-        onChange={(e) => {
-          setInput(e.target.value);
-          setError("");
-        }}
-        placeholder={
-          '[White "Nama Anda"]\n[Black "Lawan"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4…'
-        }
-        rows={9}
-      />
-      <input
-        className="sr-only"
-        ref={file}
-        type="file"
-        accept=".pgn,.fen,.txt"
-        aria-label="Berkas permainan"
-        onChange={(e) => readFile(e.target.files?.[0])}
-      />
-      <div className="import-options">
-        <button className="text-button" onClick={() => file.current?.click()}>
-          <Upload size={14} /> Unggah berkas
-        </button>
-        <button
-          className="text-button"
-          onClick={() => {
-            setInput(SAMPLE_PGN);
-            setError("");
-          }}
-        >
-          Gunakan contoh Opera Game
-        </button>
+      <div
+        className="import-source-options"
+        role="group"
+        aria-label="Sumber permainan"
+      >
+        {(
+          [
+            ["local", "PGN / FEN"],
+            ["chesscom", "Chess.com"],
+            ["lichess", "Lichess"],
+            ["url", "Tautan PGN"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            aria-pressed={source === value}
+            className={source === value ? "active" : ""}
+            onClick={() => setSource(value)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
-      {error && (
-        <div className="error-message" role="alert">
-          {error}
-        </div>
+      {source !== "local" ? (
+        <OnlineImport key={source} source={source} onLoad={onLoad} />
+      ) : (
+        <>
+          <p className="modal-description">
+            Tempel satu permainan PGN atau posisi FEN. Semua diproses di
+            perangkat Anda.
+          </p>
+          <label className="field-label" htmlFor="game-import">
+            PGN atau FEN
+          </label>
+          <textarea
+            id="game-import"
+            className="import-textarea"
+            autoFocus
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setError("");
+            }}
+            placeholder={
+              '[White "Nama Anda"]\n[Black "Lawan"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4…'
+            }
+            rows={9}
+          />
+          <input
+            className="sr-only"
+            ref={file}
+            type="file"
+            accept=".pgn,.fen,.txt"
+            aria-label="Berkas permainan"
+            onChange={(e) => readFile(e.target.files?.[0])}
+          />
+          <div className="import-options">
+            <button
+              className="text-button"
+              onClick={() => file.current?.click()}
+            >
+              <Upload size={14} /> Unggah berkas
+            </button>
+            <button
+              className="text-button"
+              onClick={() => {
+                setInput(SAMPLE_PGN);
+                setError("");
+              }}
+            >
+              Gunakan contoh Opera Game
+            </button>
+          </div>
+          {error && (
+            <div className="error-message" role="alert">
+              {error}
+            </div>
+          )}
+          <div className="modal-actions">
+            <button className="button secondary" onClick={onNew}>
+              <Plus size={15} /> Papan baru
+            </button>
+            <button
+              className="button primary"
+              onClick={load}
+              disabled={!input.trim()}
+            >
+              Buka analisis <ArrowRight size={15} />
+            </button>
+          </div>
+        </>
       )}
-      <div className="modal-actions">
-        <button className="button secondary" onClick={onNew}>
-          <Plus size={15} /> Papan baru
-        </button>
-        <button
-          className="button primary"
-          onClick={load}
-          disabled={!input.trim()}
-        >
-          Buka analisis <ArrowRight size={15} />
-        </button>
-      </div>
     </Modal>
   );
 }

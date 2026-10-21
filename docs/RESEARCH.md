@@ -37,3 +37,9 @@ Pilihan utama engine diberi label Terbaik. Untuk langkah lain, ambang penurunan 
 [ObsidianUI Dashboard Shell](https://www.obsidianui.dev/docs/dashboard-shell) dipasang dari [registry resmi](https://www.obsidianui.dev/r/dashboard-shell.json), beserta stylesheet dan dependensi Radix/Motion. Digunakan untuk shell aplikasi, navigasi, drawer mobile, fokus keyboard, dan sidebar yang bisa diubah ukurannya.
 
 Tema khusus: material kaca buram dengan blur dan highlight, latar biru/lilac lembut, aksen biru, serta tipografi sistem bergaya Apple. Tombol memakai gradasi, bayangan inset, dan respons tekan; papan memakai bingkai bertepi bevel dan bayangan bidak untuk sentuhan skeuomorfik ringan. Warna papan walnut dan slate tersedia. Papan, grafik, lesson runner, dan komponen khusus catur ditulis untuk aplikasi ini.
+
+## Opening book
+
+Book Move uses a local snapshot of [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings), retrieved 2026-10-21: 3,865 named lines and 8,192 position/move pairs. Data is [CC0](licenses/lichess-openings-CC0.txt). Every prefix of a named opening is indexed, including side to move, castling rights and legal en-passant availability; counters are ignored. This supports transpositions and imported FEN positions. Unlisted moves are not classified as mistakes merely because they are outside the book. Engine accuracy is unchanged.
+
+To regenerate `src/data/opening-book.json`, download the repository's `a.tsv` through `e.tsv` into a directory and run `node scripts/prepare-opening-book.mjs <directory>`. Runtime needs no external API.

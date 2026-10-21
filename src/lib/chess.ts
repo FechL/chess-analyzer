@@ -25,7 +25,7 @@ export type Evaluation = {
   mate?: number;
 };
 export type Annotation =
-  "best" | "excellent" | "good" | "inaccuracy" | "mistake" | "blunder";
+  "book" | "brilliant" | "best" | "excellent" | "good" | "miss" | "inaccuracy" | "mistake" | "blunder";
 export type ReviewMove = {
   ply: number;
   san: string;
@@ -41,9 +41,12 @@ export const LABELS: Record<
   Annotation,
   { label: string; symbol: string; color: string }
 > = {
+  book: { label: "Book Move", symbol: "▤", color: "#a57b48" },
+  brilliant: { label: "Brilian", symbol: "!!", color: "#2ca6b0" },
   best: { label: "Terbaik", symbol: "★", color: "#478a68" },
-  excellent: { label: "Sangat baik", symbol: "✓", color: "#73a289" },
+  excellent: { label: "Sangat baik", symbol: "✦", color: "#73a289" },
   good: { label: "Baik", symbol: "✓", color: "#8d9a83" },
+  miss: { label: "Peluang terlewat", symbol: "⊘", color: "#d28b55" },
   inaccuracy: { label: "Kurang tepat", symbol: "?!", color: "#c39b48" },
   mistake: { label: "Kesalahan", symbol: "?", color: "#df8b4e" },
   blunder: { label: "Blunder", symbol: "??", color: "#cc6464" },
@@ -164,6 +167,35 @@ export function winPercent(cp: number): number {
     100 / (1 + Math.exp(-0.00368208 * Math.max(-10000, Math.min(10000, cp))))
   );
 }
+
+// Conservative local heuristic: the best move offers a non-pawn piece,
+// and the engine continuation accepts it without an immediate material recovery.
+function isBrilliantSacrifice(move: Move, after: Evaluation): boolean {
+  const sign = move.color === "w" ? 1 : -1;
+  if (after.cp * sign < -50 || after.fen !== move.after) return false;
+  const pv = after.lines.find((line) => line.multipv === 1)?.pv ?? [];
+  if (!pv.length) return false;
+  const position = new Chess(move.after);
+  const initialMaterial = material(move.before) * sign;
+  try {
+    for (let i = 0; i < Math.min(pv.length, 4); i++) {
+      const uci = pv[i];
+      const reply = position.move({
+        from: uci.slice(0, 2),
+        to: uci.slice(2, 4),
+        promotion: uci[4],
+      });
+      if (i === 0 && (
+        reply.to !== move.to || !reply.captured || reply.captured === "p"
+      )) return false;
+    }
+  } catch {
+    return false;
+  }
+  if (pv.length < 4 && !position.isCheckmate()) return false;
+  return initialMaterial - material(position.fen()) * sign >= 2;
+}
+
 export function annotate(
   before: Evaluation,
   after: Evaluation,
@@ -177,8 +209,17 @@ export function annotate(
   );
   const isBest =
     before.bestmove === move.from + move.to + (move.promotion ?? "");
-  const annotation: Annotation = isBest
+  const brilliant = isBest && loss <= 1 && before.depth >= 12 && after.depth >= 12
+    && isBrilliantSacrifice(move, after);
+  const missedOpportunity = !isBest && loss > 3
+    && before.depth >= 12 && after.depth >= 12
+    && isMissedOpportunity(before, after, move);
+  const annotation: Annotation = brilliant
+    ? "brilliant"
+    : isBest
     ? "best"
+    : missedOpportunity
+      ? "miss"
     : loss <= 1
       ? "excellent"
       : loss <= 3
@@ -203,6 +244,32 @@ export function annotate(
     after,
   };
 }
+
+function isMissedOpportunity(
+  before: Evaluation,
+  after: Evaluation,
+  move: Move,
+): boolean {
+  const sign = move.color === "w" ? 1 : -1;
+  const initial = before.cp * sign;
+  const remaining = after.cp * sign;
+  const lostWin = initial >= 200 && remaining < 100;
+  const lostEquality = initial >= -50 && initial <= 50 && remaining <= -200;
+  if (!lostWin && !lostEquality) return false;
+  // Require a concrete forcing opportunity, rather than labeling every drop a miss.
+  try {
+    const position = new Chess(move.before);
+    const best = position.move({
+      from: before.bestmove.slice(0, 2),
+      to: before.bestmove.slice(2, 4),
+      promotion: before.bestmove[4],
+    });
+    return best.isCapture() || position.isCheck();
+  } catch {
+    return false;
+  }
+}
+
 export function material(fen: string) {
   const values: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
   let white = 0,

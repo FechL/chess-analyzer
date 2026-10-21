@@ -4,3 +4,4 @@ dist/
 public/engine/*.wasm
 public/engine/*.js
 .DS_Store
+notes.txt

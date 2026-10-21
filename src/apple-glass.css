@@ -328,35 +328,24 @@ body {
 .intro-actions {
   padding-top: 17px;
 }
-.workspace-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 8px;
-}
 .page.analysis-page,
 .page.bot-page {
   padding-top: 12px;
 }
-.workspace-toolbar > .game-heading {
-  justify-content: flex-start;
-  gap: 12px;
-  min-width: 0;
-  margin: 0 auto 0 29px;
-}
-.workspace-toolbar .game-heading h2 {
-  overflow-wrap: anywhere;
-}
-.workspace-toolbar > .intro-actions {
-  flex-direction: row;
+.header-game-actions {
+  display: flex;
   align-items: center;
-  gap: 9px;
-  width: auto;
-  max-width: 100%;
-  margin-left: auto;
-  padding-top: 0;
+  gap: 8px;
+}
+@media (max-width: 760px) {
+  .header-game-actions .header-action-label {
+    display: none;
+  }
+  .header-game-actions .button {
+    width: 32px;
+    min-height: 32px;
+    padding: 0;
+  }
 }
 .small-label,
 .section-label {

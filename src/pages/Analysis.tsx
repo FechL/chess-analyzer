@@ -3,7 +3,6 @@ import { Chess } from "chess.js";
 import {
   ArrowDownToLine,
   ArrowRight,
-  Bookmark,
   Check,
   ChevronDown,
   CircleHelp,
@@ -55,16 +54,12 @@ export default function Analysis({
   game,
   setGame,
   settings,
-  onSave,
-  onImport,
   onOpening,
   onPositionChange,
 }: {
   game: GameData;
   setGame: (game: GameData) => void;
   settings: Settings;
-  onSave: () => void;
-  onImport: () => void;
   onOpening: () => void;
   onPositionChange: (fen: string) => void;
 }) {
@@ -273,31 +268,6 @@ export default function Analysis({
         : "Jalankan ulasan untuk menemukan momen penting dan mempelajari alternatif yang lebih baik.";
   return (
     <div className="page analysis-page">
-      <div className="workspace-toolbar">
-        <div className="game-heading">
-          <div>
-            <span className="small-label">
-              {game.event.includes("Opera")
-                ? "PERMAINAN KLASIK"
-                : "PERMAINAN AKTIF"}
-            </span>
-            <h2>
-              {game.event.includes("Opera") ? "The Opera Game" : game.event}
-            </h2>
-          </div>
-          <span className="subtle-pill">
-            {game.result === "*" ? "Analisis bebas" : game.result}
-          </span>
-        </div>
-        <div className="intro-actions">
-          <button className="button secondary" onClick={onSave}>
-            <Bookmark size={16} /> Simpan
-          </button>
-          <button className="button primary" onClick={onImport}>
-            <ArrowDownToLine size={16} /> Impor permainan
-          </button>
-        </div>
-      </div>
       <div className="analysis-grid">
         <section className="board-section">
           <div className="board-and-eval">

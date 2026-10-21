@@ -3,6 +3,7 @@ import {
   ArrowDownToLine,
   ArrowRight,
   BookOpen,
+  Bookmark,
   Check,
   ChevronRight,
   CircleHelp,
@@ -225,6 +226,28 @@ export default function App() {
         }
         headerActions={
           <>
+            {page === "analysis" && (
+              <div className="header-game-actions">
+                <button
+                  className="button secondary"
+                  onClick={save}
+                  aria-label="Simpan permainan"
+                  title="Simpan permainan"
+                >
+                  <Bookmark size={16} />
+                  <span className="header-action-label">Simpan</span>
+                </button>
+                <button
+                  className="button primary"
+                  onClick={() => setModal("import")}
+                  aria-label="Impor permainan"
+                  title="Impor permainan"
+                >
+                  <ArrowDownToLine size={16} />
+                  <span className="header-action-label">Impor permainan</span>
+                </button>
+              </div>
+            )}
             <button
               className="icon-button header-help"
               aria-label="Buka panduan"
@@ -278,8 +301,6 @@ export default function App() {
             game={game}
             setGame={setGame}
             settings={settings}
-            onSave={save}
-            onImport={() => setModal("import")}
             onOpening={() => navigate("openings")}
             onPositionChange={setAnalysisFen}
           />

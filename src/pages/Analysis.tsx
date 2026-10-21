@@ -53,6 +53,7 @@ export default function Analysis({
   game,
   setGame,
   settings,
+  onSettingsChange,
   onSave,
   onImport,
   onPositionChange,
@@ -60,6 +61,7 @@ export default function Analysis({
   game: GameData;
   setGame: (game: GameData) => void;
   settings: Settings;
+  onSettingsChange: (settings: Settings) => void;
   onSave: () => void;
   onImport: () => void;
   onPositionChange: (fen: string) => void;
@@ -79,13 +81,12 @@ export default function Analysis({
   const [reviewing, setReviewing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
-  const [showArrow, setShowArrow] = useState(true);
   const [branches, setBranches] = useState<GameData[]>([]);
   const [showInfo, setShowInfo] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>(() =>
     readStorage("kuda-notes", {}),
   );
-  const { engine, status, error: engineError } = useEngine();
+  const { engine, status, error: engineError } = useEngine(settings.engine);
   const reviewEngine = useRef<LocalEngine | null>(null);
   const reviewId = useRef(0);
   const evaluationCache = useRef(new Map<string, Evaluation>());
@@ -121,7 +122,14 @@ export default function Analysis({
   const result = evaluation?.fen === fen ? evaluation : undefined;
 
   useEffect(() => {
-    if (status !== "ready" || !engine.current || reviewing) return;
+    setBusy(false);
+    if (
+      !settings.liveEngine ||
+      status !== "ready" ||
+      !engine.current ||
+      reviewing
+    )
+      return;
     let active = true;
     const instance = engine.current;
     const remember = (value: Evaluation) => {
@@ -149,6 +157,7 @@ export default function Analysis({
         const after = await instance.analyze(fen, {
           ms: settings.analysisMs,
           multiPV: settings.multiPV,
+          depth: settings.engineDepth,
           onInfo: (value) => {
             if (active) setEvaluation(value);
           },
@@ -179,6 +188,9 @@ export default function Analysis({
     status,
     settings.analysisMs,
     settings.multiPV,
+    settings.engineDepth,
+    settings.liveEngine,
+    settings.engine,
     engine,
     reviewing,
   ]);
@@ -261,7 +273,7 @@ export default function Analysis({
       return;
     }
     const id = ++reviewId.current;
-    const instance = new LocalEngine();
+    const instance = new LocalEngine(settings.engine);
     reviewEngine.current = instance;
     setReviewing(true);
     setProgress(0);
@@ -299,11 +311,22 @@ export default function Analysis({
       : "—";
   };
   const classificationCounts = (
-    ["brilliant", "best", "excellent", "good", "miss", "inaccuracy", "mistake", "blunder"] as const
-  ).map((key) => ({
-    key,
-    count: displayReview.filter((item) => item.annotation === key).length,
-  })).filter(({ count }) => count > 0);
+    [
+      "brilliant",
+      "best",
+      "excellent",
+      "good",
+      "miss",
+      "inaccuracy",
+      "mistake",
+      "blunder",
+    ] as const
+  )
+    .map((key) => ({
+      key,
+      count: displayReview.filter((item) => item.annotation === key).length,
+    }))
+    .filter(({ count }) => count > 0);
   const coachText = currentBook
     ? `${currentMove.san} adalah Book Move dalam ${currentBook.name} (${currentBook.eco}).`
     : currentReview
@@ -311,9 +334,11 @@ export default function Analysis({
         ? `${currentReview.san} adalah langkah Brilian: pengorbanan material yang tetap kuat menurut Stockfish. Lihat variasi engine untuk memahami kelanjutannya.`
         : currentReview.annotation === "miss"
           ? `${currentReview.san} melewatkan peluang taktis untuk ${currentReview.before.cp * (currentReview.color === "w" ? 1 : -1) >= 200 ? "meraih keunggulan menang" : "mempertahankan keseimbangan"}. Pertimbangkan ${currentReview.bestSan}, lalu periksa kelanjutannya pada variasi engine.`
-        : ["blunder", "mistake", "inaccuracy"].includes(currentReview.annotation)
-        ? `${currentReview.san} menurunkan estimasi peluang menang ${currentReview.loss.toFixed(1)} poin persentase. Pertimbangkan ${currentReview.bestSan}, lalu lihat variasi engine untuk memahami respons lawan.`
-        : `${currentReview.san} ${currentReview.annotation === "best" ? "sesuai pilihan utama Stockfish" : "mempertahankan posisi dengan baik"}. ${currentMove?.isCapture() ? "Langkah ini menangkap buah lawan." : currentMove?.isKingsideCastle() || currentMove?.isQueensideCastle() ? "Rokade mengamankan raja dan mengaktifkan benteng." : "Lanjutkan dengan memeriksa ancaman lawan dan aktivitas buah."}`
+          : ["blunder", "mistake", "inaccuracy"].includes(
+                currentReview.annotation,
+              )
+            ? `${currentReview.san} menurunkan estimasi peluang menang ${currentReview.loss.toFixed(1)} poin persentase. Pertimbangkan ${currentReview.bestSan}, lalu lihat variasi engine untuk memahami respons lawan.`
+            : `${currentReview.san} ${currentReview.annotation === "best" ? "sesuai pilihan utama Stockfish" : "mempertahankan posisi dengan baik"}. ${currentMove?.isCapture() ? "Langkah ini menangkap buah lawan." : currentMove?.isKingsideCastle() || currentMove?.isQueensideCastle() ? "Rokade mengamankan raja dan mengaktifkan benteng." : "Lanjutkan dengan memeriksa ancaman lawan dan aktivitas buah."}`
       : position.isCheckmate()
         ? gameStatus(position)
         : result?.lines[0]
@@ -381,8 +406,10 @@ export default function Analysis({
                 onMove={playMove}
                 lastMove={currentMove}
                 arrow={
-                  showArrow && tab === "engine"
-                    ? result?.lines.slice(0, 3).map((line) => line.pv[0])
+                  settings.showArrows
+                    ? result?.lines
+                        .slice(0, settings.multiPV)
+                        .map((line) => line.pv[0])
                     : undefined
                 }
                 theme={settings.boardTheme}
@@ -404,6 +431,7 @@ export default function Analysis({
                   ["review", "Ulasan"],
                   ["engine", "Engine"],
                   ["notes", "Catatan"],
+                  ["options", "Opsi"],
                 ].map(([value, label]) => (
                   <button
                     className={tab === value ? "active" : ""}
@@ -425,7 +453,7 @@ export default function Analysis({
                 <div className="engine-chip">
                   <Cpu size={15} />
                   <strong>Stockfish 19</strong>
-                  <span>lite</span>
+                  <span>{settings.engine}</span>
                 </div>
                 <span
                   className={`local-state ${status === "error" ? "is-error" : ""}`}
@@ -435,9 +463,11 @@ export default function Analysis({
                     ? "Memuat…"
                     : status === "error"
                       ? "Gagal dimuat"
-                      : busy
-                        ? "Menganalisis"
-                        : "Lokal aktif"}
+                      : !settings.liveEngine
+                        ? "Live nonaktif"
+                        : busy
+                          ? "Menganalisis"
+                          : "Lokal aktif"}
                 </span>
               </div>
               {(error || engineError) && (
@@ -503,8 +533,12 @@ export default function Analysis({
                       </div>
                     )}
                     {classificationCounts.length > 0 && (
-                      <div className="classification-summary" tabIndex={0}
-                        role="region" aria-label="Ringkasan penilaian langkah">
+                      <div
+                        className="classification-summary"
+                        tabIndex={0}
+                        role="region"
+                        aria-label="Ringkasan penilaian langkah"
+                      >
                         {classificationCounts.map(({ key, count }) => (
                           <div key={key}>
                             <span style={{ color: LABELS[key].color }}>
@@ -559,12 +593,6 @@ export default function Analysis({
                 <div className="engine-details">
                   <div className="line-heading">
                     <h3>Variasi terbaik</h3>
-                    <button
-                      className={`text-button ${showArrow ? "green" : ""}`}
-                      onClick={() => setShowArrow((v) => !v)}
-                    >
-                      {showArrow ? "Sembunyikan" : "Tampilkan"} panah
-                    </button>
                   </div>
                   {result?.lines.length ? (
                     result.lines.map((line, i) => (
@@ -594,7 +622,9 @@ export default function Analysis({
                     <div className="empty-inline">
                       {position.isGameOver()
                         ? gameStatus(position)
-                        : "Engine sedang menyiapkan variasi…"}
+                        : !settings.liveEngine
+                          ? "Aktifkan live engine di tab Opsi untuk menganalisis posisi."
+                          : "Engine sedang menyiapkan variasi…"}
                     </div>
                   )}
                   <div className="notation-heading">
@@ -609,6 +639,131 @@ export default function Analysis({
                     bookMoves={bookMoves}
                     startFen={game.startFen}
                   />
+                </div>
+              )}
+              {tab === "options" && (
+                <div className="engine-options">
+                  <div className="settings-section">
+                    <label htmlFor="engine-choice">Pilih engine</label>
+                    <select
+                      id="engine-choice"
+                      value={settings.engine}
+                      onChange={(e) => {
+                        stopReview();
+                        setEvaluation(undefined);
+                        evaluationCache.current.clear();
+                        onSettingsChange({
+                          ...settings,
+                          engine: e.target.value as Settings["engine"],
+                        });
+                      }}
+                    >
+                      <option value="lite">Stockfish 19 Lite</option>
+                      <option value="full">Stockfish 19 Full</option>
+                    </select>
+                    <p>
+                      {settings.engine === "lite"
+                        ? "Ringan untuk analisis sehari-hari."
+                        : "Model lebih besar, sekitar 95 MB saat pertama dimuat."}
+                    </p>
+                  </div>
+                  <div className="settings-section">
+                    <label className="board-sound-setting">
+                      <input
+                        type="checkbox"
+                        role="switch"
+                        checked={settings.liveEngine}
+                        onChange={(e) =>
+                          onSettingsChange({
+                            ...settings,
+                            liveEngine: e.target.checked,
+                          })
+                        }
+                      />
+                      Live engine
+                    </label>
+                  </div>
+                  <div className="settings-section">
+                    <label htmlFor="engine-depth">Batas depth</label>
+                    <select
+                      id="engine-depth"
+                      value={settings.engineDepth}
+                      onChange={(e) =>
+                        onSettingsChange({
+                          ...settings,
+                          engineDepth: Number(e.target.value),
+                        })
+                      }
+                    >
+                      <option value={0}>Otomatis · mengikuti waktu</option>
+                      {[8, 12, 16, 20, 24, 30].map((depth) => (
+                        <option key={depth} value={depth}>
+                          Depth {depth}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="settings-section">
+                    <label htmlFor="analysis-time">
+                      Waktu analisis{" "}
+                      <strong>{settings.analysisMs / 1000} detik</strong>
+                    </label>
+                    <input
+                      id="analysis-time"
+                      type="range"
+                      min="200"
+                      max="10000"
+                      step="100"
+                      value={settings.analysisMs}
+                      onChange={(e) =>
+                        onSettingsChange({
+                          ...settings,
+                          analysisMs: Number(e.target.value),
+                        })
+                      }
+                    />
+                    <p>
+                      Analisis posisi berhenti saat batas waktu atau depth
+                      tercapai. Ulasan seluruh permainan memakai 350 ms per
+                      posisi.
+                    </p>
+                  </div>
+                  <div className="settings-section">
+                    <label className="board-sound-setting">
+                      <input
+                        type="checkbox"
+                        role="switch"
+                        checked={settings.showArrows}
+                        onChange={(e) =>
+                          onSettingsChange({
+                            ...settings,
+                            showArrows: e.target.checked,
+                          })
+                        }
+                      />
+                      Tampilkan panah engine
+                    </label>
+                    <p>Berlaku di semua tab analisis.</p>
+                  </div>
+                  <div className="settings-section">
+                    <label htmlFor="variation-count">Jumlah variasi</label>
+                    <select
+                      id="variation-count"
+                      value={settings.multiPV}
+                      onChange={(e) =>
+                        onSettingsChange({
+                          ...settings,
+                          multiPV: Number(e.target.value),
+                        })
+                      }
+                    >
+                      {[1, 2, 3].map((count) => (
+                        <option key={count} value={count}>
+                          {count} variasi
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               )}
               {tab === "notes" && (
@@ -726,11 +881,11 @@ export default function Analysis({
             </p>
             <p>
               Peluang terlewat menandai kesempatan taktis berupa tangkapan atau
-              skak yang diabaikan: keunggulan minimal +2 turun di bawah +1,
-              atau posisi sekitar seimbang (−0,5 sampai +0,5) turun ke −2
-              atau lebih buruk, dari sudut pemain yang melangkah. Kedua evaluasi
-              memerlukan depth minimal 12. Skor akurasi tetap dihitung dari
-              penurunan peluang menang.
+              skak yang diabaikan: keunggulan minimal +2 turun di bawah +1, atau
+              posisi sekitar seimbang (−0,5 sampai +0,5) turun ke −2 atau lebih
+              buruk, dari sudut pemain yang melangkah. Kedua evaluasi memerlukan
+              depth minimal 12. Skor akurasi tetap dihitung dari penurunan
+              peluang menang.
             </p>
             <p>
               Brilian memakai aturan lokal: pilihan utama engine pada depth
@@ -747,7 +902,7 @@ export default function Analysis({
             <p>
               Ulasan cepat memakai 350 ms per posisi. Posisi rumit atau
               pengorbanan mungkin membutuhkan pencarian lebih lama. Buka tab
-              Engine dan naikkan waktu pada Pengaturan untuk memeriksanya.
+              Opsi dan naikkan waktu analisis untuk memeriksanya.
             </p>
             <p>
               Stockfish lite memakai jaringan yang lebih kecil daripada versi
@@ -833,8 +988,14 @@ function EvaluationChart({
         />
         {review
           .filter((item) =>
-            ["best", "brilliant", "inaccuracy", "mistake", "blunder", "miss"]
-              .includes(item.annotation),
+            [
+              "best",
+              "brilliant",
+              "inaccuracy",
+              "mistake",
+              "blunder",
+              "miss",
+            ].includes(item.annotation),
           )
           .map((item) => (
             <circle

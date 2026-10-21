@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LocalEngine } from "../lib/engine";
-export function useEngine() {
+export function useEngine(variant: "lite" | "full" = "lite") {
   const engine = useRef<LocalEngine | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
@@ -8,7 +8,9 @@ export function useEngine() {
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    const instance = new LocalEngine();
+    setStatus("loading");
+    setError("");
+    const instance = new LocalEngine(variant);
     engine.current = instance;
     instance.ready
       .then(() => {
@@ -25,6 +27,6 @@ export function useEngine() {
       instance.destroy();
       if (engine.current === instance) engine.current = null;
     };
-  }, []);
+  }, [variant]);
   return { engine, status, error };
 }

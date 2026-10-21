@@ -60,6 +60,20 @@ describe("Stockfish UCI lifecycle", () => {
     expect(result.lines).toHaveLength(2);
     expect(result.bestmove).toBe("e2e4");
   });
+  it("uses the selected engine build and combines depth with the time limit", async () => {
+    const engine = new LocalEngine("full");
+    instances.push(engine);
+    const worker = WorkerStub.instances.at(-1)!;
+    expect(worker.url).toBe("/engine/stockfish-full.js");
+    worker.emit("uciok");
+    worker.emit("readyok");
+    const pending = engine.analyze(DEFAULT_POSITION, { ms: 2000, depth: 12 });
+    await flush();
+    expect(worker.messages.at(-1)).toBe("go movetime 2000 depth 12");
+    worker.emit("info depth 12 multipv 1 score cp 31 pv e2e4");
+    worker.emit("bestmove e2e4");
+    expect((await pending).depth).toBe(12);
+  });
   it("serializes searches so a response cannot be assigned to a different position", async () => {
     const { engine, worker } = await ready();
     const first = engine.analyze(DEFAULT_POSITION, { ms: 200 });

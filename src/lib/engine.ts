@@ -18,14 +18,16 @@ export class LocalEngine {
   private initTimer: ReturnType<typeof setTimeout>;
   private dead = false;
   ready: Promise<void>;
-  constructor() {
+  constructor(variant: "lite" | "full" = "lite") {
     this.ready = new Promise((resolve, reject) => {
       this.readyResolve = resolve;
       this.readyReject = reject;
     });
     // Attach a handler immediately: teardown during React StrictMode must not cause an unhandled rejection.
     this.ready.catch(() => {});
-    this.worker = new Worker("/engine/stockfish.js");
+    this.worker = new Worker(
+      variant === "full" ? "/engine/stockfish-full.js" : "/engine/stockfish.js",
+    );
     this.worker.onmessage = (e) => this.handle(String(e.data));
     this.worker.onerror = () =>
       this.fail(
@@ -88,6 +90,7 @@ export class LocalEngine {
     options: {
       ms?: number;
       multiPV?: number;
+      depth?: number;
       skill?: number;
       onInfo?: (e: Evaluation) => void;
     } = {},
@@ -126,7 +129,9 @@ export class LocalEngine {
         this.send(`setoption name MultiPV value ${options.multiPV ?? 1}`);
         this.send(`setoption name Skill Level value ${options.skill ?? 20}`);
         this.send(`position fen ${fen}`);
-        this.send(`go movetime ${ms}`);
+        this.send(
+          `go movetime ${ms}${options.depth ? ` depth ${Math.max(1, Math.min(60, Math.round(options.depth)))}` : ""}`,
+        );
       });
     };
     const task = this.queue.then(run);

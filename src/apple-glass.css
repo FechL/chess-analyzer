@@ -2226,3 +2226,50 @@ textarea::placeholder {
   line-height: 1.7;
   margin-top: 18px;
 }
+
+.engine-options {
+  padding: 0 22px 22px;
+  grid-column: 1 / -1;
+}
+.engine-options .settings-section:last-child {
+  margin-bottom: 0;
+}
+.analysis-sidebar .panel-tabs > button:not(.icon-button) {
+  padding-inline: 10px;
+  min-width: 0;
+}
+
+.settings-section > .board-sound-setting {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+}
+.board-sound-setting input[type="checkbox"] {
+  appearance: none;
+  order: 1;
+  margin: 0 0 0 auto;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 22px;
+  border: 1px solid #c4cfdd;
+  border-radius: 20px;
+  background: #d7dfe9;
+  box-shadow: inset 0 1px 3px #61718b22;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.board-sound-setting input[type="checkbox"]::after {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px #34466344;
+  transition: transform 120ms ease;
+}
+.board-sound-setting input[type="checkbox"]:checked { background: #438be8; border-color: #367dd7; }
+.board-sound-setting input[type="checkbox"]:checked::after { transform: translateX(14px); }
+.board-sound-setting input[type="checkbox"]:focus-visible { outline: 2px solid #438be8; outline-offset: 3px; }
+.engine-options .settings-section { padding-block: 18px; }

@@ -29,6 +29,7 @@ import {
 import { DashboardShell } from "./components/block/dashboard-shell";
 import Analysis from "./pages/Analysis";
 import { setBoardSound, useBoardSound } from "./lib/board-sound";
+import { setBoardAnimation, useBoardAnimation } from "./lib/board-animation";
 import BotPage from "./pages/Bot";
 import { AcademyPage, OpeningsPage, PuzzlesPage } from "./pages/Learn";
 import { Modal, ProgressRing } from "./components/Common";
@@ -51,6 +52,10 @@ export type Settings = {
   boardTheme: "sage" | "walnut" | "slate";
   analysisMs: number;
   multiPV: number;
+  engine: "lite" | "full";
+  liveEngine: boolean;
+  engineDepth: number;
+  showArrows: boolean;
 };
 type SavedGame = { id: string; date: string; game: GameData };
 const TITLES: Record<string, string> = {
@@ -65,6 +70,10 @@ const DEFAULT_SETTINGS: Settings = {
   boardTheme: "sage",
   analysisMs: 800,
   multiPV: 3,
+  engine: "lite",
+  liveEngine: true,
+  engineDepth: 0,
+  showArrows: true,
 };
 function restoreGame() {
   try {
@@ -77,6 +86,7 @@ function restoreGame() {
 }
 export default function App() {
   const boardSound = useBoardSound();
+  const boardAnimation = useBoardAnimation();
   const [page, setPage] = useState(() =>
     TITLES[location.hash.slice(1)] ? location.hash.slice(1) : "analysis",
   );
@@ -282,6 +292,7 @@ export default function App() {
             game={game}
             setGame={setGame}
             settings={settings}
+            onSettingsChange={setSettings}
             onSave={save}
             onImport={() => setModal("import")}
             onPositionChange={setAnalysisFen}
@@ -351,77 +362,27 @@ export default function App() {
             </div>
           </div>
           <div className="settings-section">
-            <label htmlFor="analysis-time">
-              Waktu analisis per posisi{" "}
-              <strong>{settings.analysisMs / 1000} detik</strong>
+            <label className="board-sound-setting">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={!boardSound}
+                onChange={(e) => setBoardSound(!e.target.checked)}
+              />
+              Bisukan suara
             </label>
-            <input
-              id="analysis-time"
-              type="range"
-              min="200"
-              max="5000"
-              step="100"
-              value={settings.analysisMs}
-              onChange={(e) =>
-                setSettings((s) => ({
-                  ...s,
-                  analysisMs: Number(e.target.value),
-                }))
-              }
-            />
-            <div className="range-labels">
-              <span>Respons cepat</span>
-              <span>Analisis lebih dalam</span>
-            </div>
-            <p>
-              Ulasan seluruh permainan memakai 350 ms per posisi. Waktu di atas
-              berlaku untuk analisis posisi yang sedang dibuka.
-            </p>
-          </div>
-          <div className="settings-section">
-            <label htmlFor="variation-count">Jumlah variasi terbaik</label>
-            <select
-              id="variation-count"
-              value={settings.multiPV}
-              onChange={(e) =>
-                setSettings((s) => ({ ...s, multiPV: Number(e.target.value) }))
-              }
-            >
-              <option value={1}>1 variasi · paling hemat</option>
-              <option value={2}>2 variasi</option>
-              <option value={3}>3 variasi · jelajahi alternatif</option>
-            </select>
           </div>
           <div className="settings-section">
             <label className="board-sound-setting">
               <input
                 type="checkbox"
-                checked={boardSound}
-                onChange={(e) => setBoardSound(e.target.checked)}
+                role="switch"
+                checked={boardAnimation}
+                onChange={(e) => setBoardAnimation(e.target.checked)}
               />
-              Suara permainan
+              Animasi langkah
             </label>
-            <p>
-              Suara langkah, tangkapan, rokade, skak, dan akhir permainan.
-              Animasi langkah cepat: 120 ms.
-            </p>
           </div>
-          <div className="settings-engine">
-            <Cpu size={19} />
-            <div>
-              <strong>Stockfish 19 · Lite single-threaded</strong>
-              <p>
-                1 thread CPU · 64 MiB hash. Total RAM juga mencakup engine dan
-                aplikasi.
-              </p>
-            </div>
-          </div>
-          <button
-            className="button secondary"
-            onClick={() => setSettings(DEFAULT_SETTINGS)}
-          >
-            <Settings2 size={15} /> Kembalikan pengaturan awal
-          </button>
         </Modal>
       )}
       {modal === "help" && (

@@ -14,6 +14,8 @@ import {
   useBoardSound,
 } from "../lib/board-sound";
 
+import { useBoardAnimation } from "../lib/board-animation";
+
 type Props = {
   fen: string;
   flipped?: boolean;
@@ -55,6 +57,7 @@ export default function Board({
   const gesture = useRef<Mark | undefined>(undefined);
   const keyboardAnchor = useRef<Mark | undefined>(undefined);
   const sound = useBoardSound();
+  const animate = useBoardAnimation();
   useEffect(() => {
     if (compact || !sound) return;
     window.addEventListener("pointerdown", unlockBoardSound, true);
@@ -80,6 +83,7 @@ export default function Board({
     if (!transition || compact) return;
     playBoardSound(transition.sound);
     if (
+      !animate ||
       before.flipped !== flipped ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     )
@@ -114,7 +118,7 @@ export default function Board({
         ),
       );
     }
-  }, [fen, flipped, compact]);
+  }, [fen, flipped, compact, animate]);
   useEffect(
     () => () => animations.current.forEach((animation) => animation.cancel()),
     [],
@@ -301,10 +305,7 @@ export default function Board({
         {arrows.length > 0 && (
           <svg className="board-arrow" viewBox="0 0 800 800" aria-hidden="true">
             {arrows.map((move, index) => (
-              <g
-                key={`${move}-${index}`}
-                opacity={index === 0 ? 1 : 0.42}
-              >
+              <g key={`${move}-${index}`} opacity={index === 0 ? 1 : 0.42}>
                 <ArrowShape
                   start={point(move.slice(0, 2))}
                   end={point(move.slice(2, 4))}

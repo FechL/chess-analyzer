@@ -38,3 +38,11 @@ await writeFile(
 console.log(
   `Stockfish ${pkg.version} lite single-threaded siap di public/engine.`,
 );
+
+// Optional full neural network build, selected from the analysis options.
+for (const extension of ["js", "wasm"]) {
+  await copyFile(
+    path.join(source, "bin", `stockfish-${major}-single.${extension}`),
+    new URL(`stockfish-full.${extension}`, target),
+  );
+}

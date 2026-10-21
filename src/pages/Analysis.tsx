@@ -47,6 +47,7 @@ import {
   writeStorage,
 } from "../lib/chess";
 import type { Evaluation, GameData, ReviewMove } from "../lib/chess";
+import { moveDurations } from "../lib/move-time";
 import { findBookMove } from "../lib/opening-book";
 import {
   mergePositionReview,
@@ -572,6 +573,7 @@ export default function Analysis({
       setPly(nextPly);
     },
     review: mainReview,
+    durations: moveDurations(mainGame),
     bookMoves: mainHistory.map((move) =>
       findBookMove(move.before, move.from + move.to + (move.promotion || "")),
     ),
@@ -612,13 +614,13 @@ export default function Analysis({
                       {name}
                       {elo ? " (" + elo + ")" : ""}
                     </span>
-                    {game.moveTimes?.some(Boolean) && (
+                    {(activeVariation || mainGame.moveTimes?.some(Boolean)) && (
                       <time
                         aria-label={
                           "Sisa waktu " + (color === "w" ? "putih" : "hitam")
                         }
                       >
-                        {playerClock(color)}
+                        {activeVariation ? "-:-:-" : playerClock(color)}
                       </time>
                     )}
                   </span>
@@ -696,7 +698,6 @@ export default function Analysis({
                     onClick={() => setTab(value)}
                   >
                     {label}
-                    {value === "engine" && <span className="tab-dot" />}
                   </button>
                 ))}
                 <IconButton

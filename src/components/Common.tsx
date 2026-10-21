@@ -12,6 +12,7 @@ import {
 import { Chess } from "chess.js";
 import { LABELS } from "../lib/chess";
 import type { GameVariation, ReviewMove } from "../lib/chess";
+import { formatMoveDuration } from "../lib/move-time";
 import type { BookMove } from "../lib/opening-book";
 
 export function Modal({
@@ -169,6 +170,7 @@ export function MoveList({
   onChange,
   review = [],
   bookMoves = [],
+  durations = [],
   startFen,
   variations = [],
   activeVariationId,
@@ -180,6 +182,7 @@ export function MoveList({
   onChange?: (n: number) => void;
   review?: ReviewMove[];
   bookMoves?: (BookMove | undefined)[];
+  durations?: (number | undefined)[];
   startFen: string;
   variations?: GameVariation[];
   activeVariationId?: string;
@@ -308,6 +311,11 @@ export function MoveList({
                         aria-label="Ada variasi"
                       >
                         ↳
+                      </span>
+                    )}
+                    {durations[index] !== undefined && (
+                      <span className="move-think-time" title="Waktu berpikir">
+                        {formatMoveDuration(durations[index]!)}
                       </span>
                     )}
                     {label && (

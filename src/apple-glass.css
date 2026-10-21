@@ -2282,8 +2282,17 @@ textarea::placeholder {
   outline-offset: 3px;
 }
 .engine-options .settings-section {
-  padding-block: 18px;
+  padding-block: 10px;
   border-bottom: 0;
+}
+.engine-options .settings-section:first-child {
+  padding-top: 18px;
+}
+.engine-options .settings-section > label {
+  margin-bottom: 8px;
+}
+.engine-options .settings-section > .board-sound-setting {
+  margin-bottom: 0;
 }
 
 .game-title-block {
@@ -2468,4 +2477,18 @@ textarea::placeholder {
 }
 .notation-variation-children > .notation-variation:last-child {
   margin-bottom: 0;
+}
+
+.move-think-time {
+  margin-left: auto;
+  margin-right: 6px;
+  padding-left: 6px;
+  color: #8b96a3;
+  font-size: 10px;
+  font-weight: 400;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.move-think-time:last-child {
+  margin-right: 0;
 }

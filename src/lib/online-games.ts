@@ -102,6 +102,7 @@ export async function chessMonth(
     try {
       const game = parseGame(item.pgn);
       game.source = "Chess.com";
+      game.timeControl ||= item.time_control;
       if (!game.moves.length || game.result === "*") continue;
       games.push({
         id: item.url,
@@ -146,6 +147,9 @@ export async function lichessGames(
     try {
       const game = parseGame(item.pgn);
       game.source = "Lichess";
+      if (!game.timeControl && item.clock)
+        game.timeControl =
+          String(item.clock.initial) + "+" + String(item.clock.increment || 0);
       if (!game.moves.length || game.result === "*") continue;
       games.push({
         id: item.id,

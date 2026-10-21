@@ -18,6 +18,7 @@ export type GameData = {
   whiteElo?: string;
   blackElo?: string;
   moveTimes?: string[];
+  timeControl?: string;
   variations?: GameVariation[];
 };
 export type EngineLine = {
@@ -93,12 +94,15 @@ export function parseGame(input: string): GameData {
       source: "FEN",
     };
   }
-  const clocks = [...text.matchAll(/\[%clk\s+([^\]]+)\]/g)].map(
-    (match) => match[1],
-  );
   chess.loadPgn(text);
   const headers = chess.getHeaders();
   const history = chess.history({ verbose: true });
+  const comments = new Map(
+    chess.getComments().map((item) => [item.fen, item.comment]),
+  );
+  const clocks = history.map(
+    (move) => comments.get(move.after)?.match(/\[%clk\s+([^\]]+)\]/)?.[1] || "",
+  );
   return {
     startFen: history[0]?.before ?? chess.fen(),
     moves: history.map((m) => m.san),
@@ -109,7 +113,8 @@ export function parseGame(input: string): GameData {
     source: "PGN",
     whiteElo: headers.WhiteElo,
     blackElo: headers.BlackElo,
-    moveTimes: clocks.length ? clocks : undefined,
+    moveTimes: clocks.some(Boolean) ? clocks : undefined,
+    timeControl: headers.TimeControl,
   };
 }
 export function emptyGame(): GameData {
@@ -144,6 +149,7 @@ export function toPgn(game: GameData): string {
     game.result,
     ...(game.whiteElo ? ["WhiteElo", game.whiteElo] : []),
     ...(game.blackElo ? ["BlackElo", game.blackElo] : []),
+    ...(game.timeControl ? ["TimeControl", game.timeControl] : []),
   );
   return c.pgn();
 }

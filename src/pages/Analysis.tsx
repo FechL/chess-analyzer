@@ -13,7 +13,6 @@ import {
   CircleHelp,
   Cpu,
   Flag,
-  GitBranch,
   Lightbulb,
   LoaderCircle,
   Maximize2,
@@ -1340,23 +1339,6 @@ export default function Analysis({
             </button>
           </div>
         </div>
-        {t(
-          activeVariation && (
-            <div className="variation-notice">
-              <GitBranch size={15} />
-              <span>{t("Anda menjelajahi variasi baru.")}</span>
-              <button
-                onClick={() => {
-                  stopReview();
-                  setActiveVariationId(undefined);
-                  setPly(mainGame.moves.length);
-                }}
-              >
-                {t("Kembali ke jalur utama")}
-              </button>
-            </div>
-          ),
-        )}
       </div>
       {t(
         showInfo && (

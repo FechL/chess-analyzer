@@ -646,30 +646,32 @@ export default function Analysis({
               </div>
             ),
           )}
-        </div>
-        {t(
-          !customEditing && (
-            <button className="button secondary" onClick={onSave}>
-              <Bookmark size={16} />
-              {t(" Simpan")}
-            </button>
-          ),
-        )}
-        <button className="button secondary" onClick={onNewGame}>
-          <Plus size={15} />
-          {t(" New Game")}
-        </button>
-        <button className="button primary" onClick={onImport}>
-          <ArrowDownToLine size={16} />
-          {t(" Impor permainan")}
-        </button>
-      </div>
-      <div className="analysis-grid">
-        <section className="board-section">
           <div className="board-turn-status">
             <span className="status-dot" />
             {t(gameStatus(position))}
           </div>
+        </div>
+        <div className="workspace-actions">
+          {t(
+            !customEditing && (
+              <button className="button secondary" onClick={onSave}>
+                <Bookmark size={16} />
+                {t(" Simpan")}
+              </button>
+            ),
+          )}
+          <button className="button secondary" onClick={onNewGame}>
+            <Plus size={15} />
+            {t(" New Game")}
+          </button>
+          <button className="button primary" onClick={onImport}>
+            <ArrowDownToLine size={16} />
+            {t(" Impor permainan")}
+          </button>
+        </div>
+      </div>
+      <div className="analysis-grid">
+        <section className="board-section">
           <div className="board-and-eval">
             <EvalBar
               cp={evaluation?.cp}

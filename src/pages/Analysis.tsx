@@ -579,6 +579,7 @@ export default function Analysis({
       setPly(nextPly);
     },
     review: mainReview,
+    positionReviews: review,
     durations: moveDurations(mainGame),
     bookMoves: mainHistory.map((move) =>
       findBookMove(move.before, move.from + move.to + (move.promotion || "")),

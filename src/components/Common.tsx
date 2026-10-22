@@ -1,7 +1,7 @@
 // i18n: rendered text
 import { pieceAsset, useAppearance } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import {
   X,
@@ -17,7 +17,9 @@ import { LABELS } from "../lib/chess";
 import type { GameVariation, ReviewMove } from "../lib/chess";
 import { NotationMove } from "./Notation";
 import { formatMoveDuration } from "../lib/move-time";
+import { findBookMove } from "../lib/opening-book";
 import type { BookMove } from "../lib/opening-book";
+import { retainReview } from "../lib/review";
 
 export function Modal({
   title,
@@ -216,6 +218,7 @@ export function MoveList({
   ply,
   onChange,
   review = [],
+  positionReviews = review,
   bookMoves = [],
   durations = [],
   startFen,
@@ -228,6 +231,7 @@ export function MoveList({
   ply: number;
   onChange?: (n: number) => void;
   review?: ReviewMove[];
+  positionReviews?: ReviewMove[];
   bookMoves?: (BookMove | undefined)[];
   durations?: (number | undefined)[];
   startFen: string;
@@ -238,6 +242,36 @@ export function MoveList({
 }) {
   const { t } = useI18n();
 
+  const variationRatings = useMemo(
+    () =>
+      new Map(
+        variations.map((branch) => {
+          const chess = new Chess(startFen);
+          const history = branch.moves.map((san) => chess.move(san));
+          const items = new Map(
+            retainReview(positionReviews, history).map((item) => [
+              item.ply,
+              item,
+            ]),
+          );
+          return [
+            branch.id,
+            history.map((move, index) => {
+              const book = findBookMove(
+                move.before,
+                move.from + move.to + (move.promotion || ""),
+              );
+              const item = items.get(index + 1);
+              return {
+                book,
+                label: book ? LABELS.book : item && LABELS[item.annotation],
+              };
+            }),
+          ];
+        }),
+      ),
+    [variations, startFen, positionReviews],
+  );
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const container = ref.current;
@@ -295,6 +329,7 @@ export function MoveList({
             const black = (index + offset) % 2 === 1;
             const current =
               activeVariationId === branch.id && variationPly === index + 1;
+            const rating = variationRatings.get(branch.id)?.[index];
             return (
               <button
                 key={index}
@@ -317,6 +352,23 @@ export function MoveList({
                   {t(black ? "..." : ".")}
                 </small>
                 <NotationMove san={san} color={black ? "b" : "w"} />
+                {rating?.label && (
+                  <span
+                    className="move-symbol"
+                    style={{ color: rating.label.color }}
+                    title={t(
+                      rating.book
+                        ? `Book Move · ${rating.book.name} (${rating.book.eco})`
+                        : rating.label.label,
+                    )}
+                  >
+                    {rating.book ? (
+                      <BookOpen size={13} aria-label={t("Book Move")} />
+                    ) : (
+                      rating.label.symbol
+                    )}
+                  </span>
+                )}
               </button>
             );
           }),

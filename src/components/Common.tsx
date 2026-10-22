@@ -131,13 +131,6 @@ export function NavigationControls({
         )}
       </span>
       <div className="navigation-buttons">
-        <IconButton
-          label={t("Ke posisi awal")}
-          onClick={() => onChange(0)}
-          disabled={ply === 0}
-        >
-          <ChevronsLeft size={19} />
-        </IconButton>
         {outsideNotation && onReturnToMain && (
           <IconButton
             label={t("Kembali ke langkah terakhir notasi asli")}
@@ -146,6 +139,13 @@ export function NavigationControls({
             <Undo2 size={18} />
           </IconButton>
         )}
+        <IconButton
+          label={t("Ke posisi awal")}
+          onClick={() => onChange(0)}
+          disabled={ply === 0}
+        >
+          <ChevronsLeft size={19} />
+        </IconButton>
         <IconButton
           label={t("Langkah sebelumnya")}
           onClick={() => onChange(Math.max(0, ply - 1))}

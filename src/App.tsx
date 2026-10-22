@@ -51,6 +51,7 @@ import {
 } from "./lib/chess";
 import type { GameData } from "./lib/chess";
 import { LESSONS } from "./data/content";
+import { ANALYSIS_SHORTCUTS } from "./lib/analysis-shortcuts";
 
 export type Settings = {
   boardTheme: "sage" | "walnut" | "slate";
@@ -634,6 +635,14 @@ export default function App() {
                   <kbd>{t("Esc")}</kbd>
                   {t(" tutup dialog")}
                 </p>
+                <h3>{t("Pintasan analisis")}</h3>
+                <ul className="analysis-shortcut-list">
+                  {ANALYSIS_SHORTCUTS.map((shortcut) => (
+                    <li key={shortcut.key}>
+                      <kbd>{shortcut.display}</kbd> {t(shortcut.label)}
+                    </li>
+                  ))}
+                </ul>
                 <div className="study-tip">
                   <ShieldCheck size={18} />
                   <p>

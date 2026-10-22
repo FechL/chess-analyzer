@@ -16,6 +16,7 @@ import {
   Sparkles,
   Swords,
   Undo2,
+  X,
 } from "lucide-react";
 import Board from "../components/Board";
 import { Modal, MoveList, PlayerRow } from "../components/Common";
@@ -23,6 +24,8 @@ import { useEngine } from "../hooks/useEngine";
 import { gameStatus, parseGame, pvToSan } from "../lib/chess";
 import type { GameData } from "../lib/chess";
 import type { Settings } from "../App";
+import { appendPremove, executePremove, MAX_PREMOVES } from "../lib/premove";
+import type { Premove } from "../lib/premove";
 
 const LEVELS = [
   {
@@ -93,12 +96,80 @@ export default function BotPage({
   const [hintArrow, setHintArrow] = useState("");
   const [error, setError] = useState("");
   const [confirmResign, setConfirmResign] = useState(false);
+  const [premoves, setPremoves] = useState<Premove[]>([]);
+  const premovesRef = useRef<Premove[]>([]);
+  const clocksRef = useRef(clocks);
+  clocksRef.current = clocks;
+  const [premoveMessage, setPremoveMessage] = useState("");
+  function updatePremoves(moves: Premove[]) {
+    premovesRef.current = moves;
+    setPremoves(moves);
+  }
+  function cancelPremoves() {
+    updatePremoves([]);
+    setPremoveMessage("");
+  }
   const { engine, status, error: engineError } = useEngine();
   const request = useRef(0);
   const fen = chess.fen();
   const current = LEVELS[level];
   const ended = chess.isGameOver() || !!outcome;
   const history = chess.history({ verbose: true });
+  useEffect(() => {
+    if (!started || ended) cancelPremoves();
+  }, [started, ended]);
+  useEffect(() => {
+    if (
+      !started ||
+      ended ||
+      thinking ||
+      chess.turn() !== human ||
+      !premoves.length
+    )
+      return;
+    const timer = setTimeout(() => {
+      const queue = premovesRef.current;
+      if (!queue.length) return;
+      if (time && clocksRef.current[human] <= 0.1) {
+        updatePremoves([]);
+        setClocks((c) => ({ ...c, [human]: 0 }));
+        return;
+      }
+      const next = cloneGame(chess);
+      if (!executePremove(next, queue[0], human)) {
+        updatePremoves([]);
+        setPremoveMessage("Premove dibatalkan: langkah tidak lagi legal.");
+        return;
+      }
+      updatePremoves(queue.slice(1));
+      if (time)
+        setClocks((c) => ({ ...c, [human]: Math.max(0, c[human] - 0.1) }));
+      setHint("");
+      setHintArrow("");
+      setChess(next);
+    }, 40);
+    return () => clearTimeout(timer);
+  }, [fen, started, ended, thinking, human, premoves.length, time]);
+  const queuePremove = (from: string, to: string, promotion = "q") => {
+    if (
+      !started ||
+      ended ||
+      (chess.turn() === human && !premovesRef.current.length)
+    )
+      return false;
+    const queue = appendPremove(
+      fen,
+      premovesRef.current,
+      human,
+      from,
+      to,
+      promotion,
+    );
+    if (!queue) return false;
+    updatePremoves(queue);
+    setPremoveMessage("");
+    return true;
+  };
   useEffect(() => {
     if (
       !started ||
@@ -165,6 +236,7 @@ export default function BotPage({
     }
   }, [clocks, started, time, ended]);
   const start = () => {
+    cancelPremoves();
     request.current++;
     engine.current?.stop();
     setChess(fromPosition ? new Chess(analysisFen) : new Chess());
@@ -188,6 +260,7 @@ export default function BotPage({
       const c = cloneGame(chess);
       c.move({ from, to, promotion });
       setChess(c);
+      setPremoveMessage("");
       setHint("");
       setHintArrow("");
       return true;
@@ -196,6 +269,7 @@ export default function BotPage({
     }
   };
   const undo = () => {
+    cancelPremoves();
     request.current++;
     engine.current?.stop();
     const c = cloneGame(chess);
@@ -269,7 +343,17 @@ export default function BotPage({
             theme={settings.boardTheme}
             onMove={move}
             lastMove={history.at(-1)}
-            disabled={!started || ended || thinking || chess.turn() !== human}
+            disabled={!started || ended}
+            premove={
+              started && !ended
+                ? {
+                    color: human,
+                    moves: premoves,
+                    onQueue: queuePremove,
+                    onCancel: cancelPremoves,
+                  }
+                : undefined
+            }
             arrow={hintArrow}
           />
           <PlayerRow
@@ -313,6 +397,49 @@ export default function BotPage({
               {t(" Menyerah")}
             </button>
           </div>
+          {started && !ended && (
+            <div className="bot-premove-panel">
+              <div className="premove-heading">
+                <span>
+                  {t("Antrean premove")}{" "}
+                  <strong>
+                    {premoves.length}/{MAX_PREMOVES}
+                  </strong>
+                </span>
+                {premoves.length > 0 && (
+                  <button className="text-button" onClick={cancelPremoves}>
+                    <X size={13} /> {t("Batalkan premove")}
+                  </button>
+                )}
+              </div>
+              {premoves.length > 0 ? (
+                <div
+                  className="premove-queue"
+                  role="group"
+                  aria-label={t("Antrean premove")}
+                >
+                  {premoves.map((move, index) => (
+                    <button
+                      key={index}
+                      title={t("Batalkan mulai langkah ini")}
+                      aria-label={t("Batalkan premove") + " " + (index + 1)}
+                      onClick={() => updatePremoves(premoves.slice(0, index))}
+                    >
+                      <strong>{index + 1}.</strong> {move.from}→{move.to}
+                      {move.promotion?.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p>
+                  {t(
+                    "Saat bot berpikir, siapkan hingga 5 langkah. Klik kanan atau Esc untuk membatalkan.",
+                  )}
+                </p>
+              )}
+              {premoveMessage && <p role="status">{t(premoveMessage)}</p>}
+            </div>
+          )}
           {t(
             hint && (
               <div className="hint-box" aria-live="polite">

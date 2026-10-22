@@ -21,6 +21,8 @@ import {
 } from "../lib/board-sound";
 
 import { useBoardAnimation } from "../lib/board-animation";
+import { premoveTargets, projectPremoves } from "../lib/premove";
+import type { Premove } from "../lib/premove";
 
 type Props = {
   fen: string;
@@ -36,6 +38,12 @@ type Props = {
   editMode?: boolean;
   onEditSquare?: (square: string, piece?: string, from?: string) => void;
   onDeleteDropSquare?: (square: string) => void;
+  premove?: {
+    color: "w" | "b";
+    moves: Premove[];
+    onQueue: (from: string, to: string, promotion?: string) => boolean;
+    onCancel: () => void;
+  };
 };
 const NAMES: Record<string, string> = {
   p: "pion",
@@ -59,12 +67,13 @@ export default function Board({
   editMode = false,
   onEditSquare,
   onDeleteDropSquare,
+  premove,
 }: Props) {
   const { t } = useI18n();
 
   const { pieceTheme } = useAppearance();
   const boardRef = useRef<HTMLDivElement>(null);
-  const previous = useRef({ fen, flipped });
+  const previous = useRef({ fen, flipped, queued: false });
   const animations = useRef<Animation[]>([]);
   const draggedMove = useRef<
     { fen: string; from: string; to: string } | undefined
@@ -86,7 +95,7 @@ export default function Board({
   }, [compact, sound]);
   useLayoutEffect(() => {
     const before = previous.current;
-    previous.current = { fen, flipped };
+    previous.current = { fen, flipped, queued: !!premove?.moves.length };
     animations.current.forEach((animation) => animation.cancel());
     animations.current = [];
     if (before.fen === fen) return;
@@ -101,6 +110,8 @@ export default function Board({
     playBoardSound(transition.sound);
     if (
       !animate ||
+      before.queued ||
+      !!premove?.moves.length ||
       before.flipped !== flipped ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     )
@@ -164,16 +175,61 @@ export default function Board({
     keyboardAnchor.current = undefined;
   };
   const chess = useMemo(() => new Chess(fen), [fen]);
+  const premoveMode =
+    !!premove && (chess.turn() !== premove.color || premove.moves.length > 0);
+  const displayChess = useMemo(
+    () =>
+      premoveMode && premove
+        ? projectPremoves(fen, premove.moves, premove.color)
+        : chess,
+    [fen, chess, premoveMode, premove?.moves, premove?.color],
+  );
+  const displayFen = displayChess.fen();
+  const interactiveColor =
+    premoveMode && premove ? premove.color : chess.turn();
   const [selection, setSelection] = useState<{ square: string; fen: string }>();
-  const [promotion, setPromotion] = useState<{ from: string; to: string }>();
+  const [promotion, setPromotion] = useState<{
+    from: string;
+    to: string;
+    premove?: boolean;
+  }>();
+  useEffect(() => {
+    if (disabled) {
+      setSelection(undefined);
+      setPromotion(undefined);
+    }
+  }, [disabled]);
   const selected =
-    selectedSquare ?? (selection?.fen === fen ? selection.square : undefined);
+    selectedSquare ??
+    (selection?.fen === displayFen ? selection.square : undefined);
   const legal = selected
-    ? chess.moves({ square: selected as Square, verbose: true })
+    ? premoveMode
+      ? premoveTargets(displayChess, selected, interactiveColor).map((to) => ({
+          to,
+        }))
+      : chess.moves({ square: selected as Square, verbose: true })
     : [];
   const files = flipped ? "hgfedcba" : "abcdefgh";
   const ranks = flipped ? "12345678" : "87654321";
   const attempt = (from: string, to: string, dragged = false) => {
+    if (disabled) return false;
+    if (premoveMode && premove) {
+      if (
+        !premoveTargets(displayChess, from, premove.color).includes(
+          to as Square,
+        )
+      )
+        return false;
+      const piece = displayChess.get(from as Square);
+      draggedMove.current = undefined;
+      if (piece?.type === "p" && to[1] === (piece.color === "w" ? "8" : "1")) {
+        setPromotion({ from, to, premove: true });
+        return true;
+      }
+      const accepted = premove.onQueue(from, to);
+      if (accepted) setSelection(undefined);
+      return accepted;
+    }
     const moves = chess
       .moves({ square: from as Square, verbose: true })
       .filter((m) => m.to === to);
@@ -192,8 +248,10 @@ export default function Board({
     clearMarks();
     if (disabled || !onMove || promotion) return;
     if (selected && attempt(selected, square)) return;
-    const p = chess.get(square as Square);
-    setSelection(p?.color === chess.turn() ? { square, fen } : undefined);
+    const p = displayChess.get(square as Square);
+    setSelection(
+      p?.color === interactiveColor ? { square, fen: displayFen } : undefined,
+    );
   };
   const point = (square: string) => ({
     x: files.indexOf(square[0]) * 100 + 50,
@@ -234,6 +292,9 @@ export default function Board({
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             clearMarks();
+            setSelection(undefined);
+            setPromotion(undefined);
+            premove?.onCancel();
             e.stopPropagation();
           }
           if (e.key.toLowerCase() !== "a" || compact || promotion) return;
@@ -262,6 +323,12 @@ export default function Board({
         onPointerDown={(e) => {
           if (e.button !== 2 || compact || promotion) return;
           e.preventDefault();
+          if (premove?.moves.length) {
+            premove.onCancel();
+            setSelection(undefined);
+            clearMarks();
+            return;
+          }
           const square = squareAt(e.clientX, e.clientY);
           if (!square) return;
           const mark = { from: square, to: square, color: annotationColor(e) };
@@ -301,7 +368,14 @@ export default function Board({
           [...ranks].flatMap((rank, row) =>
             [...files].map((file, col) => {
               const square = file + rank;
-              const p = chess.get(square as Square);
+              const p = displayChess.get(square as Square);
+              const pendingSquare = premove?.moves.some(
+                (move) => move.from === square || move.to === square,
+              );
+              const premoveIndex =
+                premove?.moves
+                  .map((move) => move.to)
+                  .lastIndexOf(square as Square) ?? -1;
               const dark = (file.charCodeAt(0) - 97 + Number(rank)) % 2 === 1;
               const isLegal = legal.some((m) => m.to === square);
               const check =
@@ -310,7 +384,7 @@ export default function Board({
                 <button
                   key={square}
                   type="button"
-                  className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""}`}
+                  className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""} ${pendingSquare ? "premove-square" : ""}`}
                   aria-label={t(
                     `${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`,
                   )}
@@ -360,11 +434,18 @@ export default function Board({
                   {t(
                     p && (
                       <img
+                        className={
+                          premoveIndex >= 0 && p.color === premove?.color
+                            ? "premove-piece"
+                            : undefined
+                        }
                         src={pieceAsset(p.color, p.type, pieceTheme)}
                         alt={t("")}
                         draggable={
                           editMode ||
-                          (!disabled && !!onMove && p.color === chess.turn())
+                          (!disabled &&
+                            !!onMove &&
+                            p.color === interactiveColor)
                         }
                         onDragStart={(e) => {
                           clearMarks();
@@ -376,7 +457,7 @@ export default function Board({
                             );
                           } else {
                             e.dataTransfer.setData("text/plain", square);
-                            setSelection({ square, fen });
+                            setSelection({ square, fen: displayFen });
                           }
                         }}
                         onDragEnd={(e) => {
@@ -385,6 +466,16 @@ export default function Board({
                         }}
                       />
                     ),
+                  )}
+                  {premoveIndex >= 0 && (
+                    <span
+                      className="premove-number"
+                      aria-label={
+                        t("Antrean premove") + " " + (premoveIndex + 1)
+                      }
+                    >
+                      {premoveIndex + 1}
+                    </span>
                   )}
                   {t(
                     annotation && lastMove?.to === square && p && (
@@ -483,13 +574,21 @@ export default function Board({
                       key={type}
                       aria-label={t(`Promosi ${NAMES[type]}`)}
                       onClick={() => {
-                        onMove?.(promotion.from, promotion.to, type);
+                        if (promotion.premove && premoveMode && premove)
+                          premove.onQueue(promotion.from, promotion.to, type);
+                        else onMove?.(promotion.from, promotion.to, type);
                         setPromotion(undefined);
                         setSelection(undefined);
                       }}
                     >
                       <img
-                        src={pieceAsset(chess.turn(), type, pieceTheme)}
+                        src={pieceAsset(
+                          promotion.premove && premove
+                            ? premove.color
+                            : chess.turn(),
+                          type,
+                          pieceTheme,
+                        )}
                         alt={t(NAMES[type])}
                       />
                     </button>

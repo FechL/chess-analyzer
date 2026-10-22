@@ -76,20 +76,23 @@ export function IconButton({
   onClick,
   disabled,
   active,
+  shortcut,
 }: {
   children: ReactNode;
   label: string;
   onClick: () => void;
   disabled?: boolean;
   active?: boolean;
+  shortcut?: string;
 }) {
   const { t } = useI18n();
 
   return (
     <button
       className={`icon-button ${active ? "active" : ""}`}
-      title={t(label)}
+      title={t(label) + (shortcut ? ` (${shortcut})` : "")}
       aria-label={t(label)}
+      aria-keyshortcuts={shortcut}
       onClick={onClick}
       disabled={disabled}
     >
@@ -104,6 +107,7 @@ export function NavigationControls({
   onFlip,
   outsideNotation = false,
   onReturnToMain,
+  enableShortcuts = false,
 }: {
   ply: number;
   total: number;
@@ -111,6 +115,7 @@ export function NavigationControls({
   onFlip?: () => void;
   outsideNotation?: boolean;
   onReturnToMain?: () => void;
+  enableShortcuts?: boolean;
 }) {
   const { t } = useI18n();
 
@@ -135,6 +140,7 @@ export function NavigationControls({
           <span className="return-to-main-control">
             <IconButton
               label={t("Kembali ke langkah terakhir notasi asli")}
+              shortcut={enableShortcuts ? "R" : undefined}
               onClick={onReturnToMain}
             >
               <Undo2 size={18} />
@@ -143,6 +149,7 @@ export function NavigationControls({
         )}
         <IconButton
           label={t("Ke posisi awal")}
+          shortcut={enableShortcuts ? "Shift+ArrowLeft" : undefined}
           onClick={() => onChange(0)}
           disabled={ply === 0}
         >
@@ -164,6 +171,7 @@ export function NavigationControls({
         </IconButton>
         <IconButton
           label={t("Ke posisi terakhir")}
+          shortcut={enableShortcuts ? "Shift+ArrowRight" : undefined}
           onClick={() => onChange(total)}
           disabled={ply === total}
         >

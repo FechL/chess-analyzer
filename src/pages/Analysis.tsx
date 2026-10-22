@@ -32,7 +32,12 @@ import {
   MoveList,
   NavigationControls,
 } from "../components/Common";
-import { DashboardButton } from "../components/block/dashboard-shell";
+import {
+  DashboardButton,
+  DashboardPopover,
+  DashboardPopoverTrigger,
+  DashboardPopoverContent,
+} from "../components/block/dashboard-shell";
 import { useEngine } from "../hooks/useEngine";
 import { LocalEngine } from "../lib/engine";
 import {
@@ -52,6 +57,10 @@ import {
 import type { Evaluation, GameData, ReviewMove } from "../lib/chess";
 import { moveDurations } from "../lib/move-time";
 import { findBookMove } from "../lib/opening-book";
+import {
+  ANALYSIS_SHORTCUTS,
+  getAnalysisShortcut,
+} from "../lib/analysis-shortcuts";
 import {
   mergePositionReview,
   retainReview,
@@ -168,6 +177,16 @@ export default function Analysis({
   const [reviewing, setReviewing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
+  const [keyboardToast, setKeyboardToast] = useState<{
+    key: string;
+    label: string;
+    enabled: boolean;
+  }>();
+  useEffect(() => {
+    if (!keyboardToast) return;
+    const timer = setTimeout(() => setKeyboardToast(undefined), 2200);
+    return () => clearTimeout(timer);
+  }, [keyboardToast]);
   const [showInfo, setShowInfo] = useState(false);
   const [notes, setNotes] = useState<Record<string, string>>(() =>
     readStorage("kuda-notes", {}),
@@ -296,12 +315,51 @@ export default function Analysis({
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (
-        e.target instanceof HTMLElement &&
-        (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) ||
-          e.target.isContentEditable ||
-          e.target.closest("dialog"))
+        e.defaultPrevented ||
+        e.isComposing ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.altKey ||
+        document.querySelector(
+          'dialog[open], [role="dialog"][aria-modal="true"]',
+        ) ||
+        (e.target instanceof HTMLElement &&
+          (e.target.isContentEditable ||
+            e.target.closest(
+              'textarea, select, [contenteditable], input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"])',
+            )))
       )
         return;
+      const shortcut = getAnalysisShortcut(e);
+      if (shortcut) {
+        if ("setting" in shortcut) {
+          if (customEditing) return;
+          e.preventDefault();
+          const enabled = !settings[shortcut.setting];
+          onSettingsChange({ ...settings, [shortcut.setting]: enabled });
+          setKeyboardToast({
+            key: shortcut.display,
+            label: shortcut.label,
+            enabled,
+          });
+        } else {
+          if (shortcut.action === "save" && customEditing) return;
+          if (shortcut.action === "return" && !activeVariation) return;
+          e.preventDefault();
+          if (shortcut.action === "new") onNewGame();
+          else if (shortcut.action === "import") onImport();
+          else if (shortcut.action === "save") onSave();
+          else if (shortcut.action === "start") setPly(0);
+          else if (shortcut.action === "end") setPly(game.moves.length);
+          else if (shortcut.action === "return") {
+            stopReview();
+            setActiveVariationId(undefined);
+            setPly(mainGame.moves.length);
+          }
+        }
+        return;
+      }
+      if (e.shiftKey) return;
       if (e.key === "ArrowRight") {
         e.preventDefault();
         setPly((p) => Math.min(game.moves.length, p + 1));
@@ -310,11 +368,21 @@ export default function Analysis({
         e.preventDefault();
         setPly((p) => Math.max(0, p - 1));
       }
-      if (e.key.toLowerCase() === "f") setFlipped((f) => !f);
+      if (e.key.toLowerCase() === "f" && !e.repeat) setFlipped((f) => !f);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [game.moves.length]);
+  }, [
+    game.moves.length,
+    settings,
+    onSettingsChange,
+    onNewGame,
+    onImport,
+    onSave,
+    customEditing,
+    activeVariation,
+    mainGame.moves.length,
+  ]);
   const stopReview = () => {
     reviewId.current++;
     reviewEngine.current?.destroy();
@@ -647,24 +715,38 @@ export default function Analysis({
             ),
           )}
           <div className="board-turn-status">
-            <span className="status-dot" />
             {t(gameStatus(position))}
           </div>
         </div>
         <div className="workspace-actions">
           {t(
             !customEditing && (
-              <button className="button secondary" onClick={onSave}>
+              <button
+                className="button secondary"
+                onClick={onSave}
+                title={t("Simpan") + " (Shift+S)"}
+                aria-keyshortcuts="Shift+S"
+              >
                 <Bookmark size={16} />
                 {t(" Simpan")}
               </button>
             ),
           )}
-          <button className="button secondary" onClick={onNewGame}>
+          <button
+            className="button secondary"
+            onClick={onNewGame}
+            title={t("New Game") + " (Shift+N)"}
+            aria-keyshortcuts="Shift+N"
+          >
             <Plus size={15} />
             {t(" New Game")}
           </button>
-          <button className="button primary" onClick={onImport}>
+          <button
+            className="button primary"
+            onClick={onImport}
+            title={t("Impor permainan") + " (Shift+I)"}
+            aria-keyshortcuts="Shift+I"
+          >
             <ArrowDownToLine size={16} />
             {t(" Impor permainan")}
           </button>
@@ -680,7 +762,9 @@ export default function Analysis({
               active={!!evaluation}
               pending={!!evaluation && !result}
             />
-            <div className={`board-main${activeVariation ? " is-variation" : ""}`}>
+            <div
+              className={`board-main${activeVariation ? " is-variation" : ""}`}
+            >
               <Board
                 fen={fen}
                 flipped={flipped}
@@ -709,6 +793,7 @@ export default function Analysis({
             </div>
           </div>
           <NavigationControls
+            enableShortcuts
             ply={ply}
             total={game.moves.length}
             outsideNotation={!!activeVariation}
@@ -1132,6 +1217,8 @@ export default function Analysis({
                           type="checkbox"
                           role="switch"
                           checked={settings.liveEngine}
+                          aria-keyshortcuts="E"
+                          title={t("Live engine") + " (E)"}
                           onChange={(e) =>
                             onSettingsChange({
                               ...settings,
@@ -1197,6 +1284,8 @@ export default function Analysis({
                           type="checkbox"
                           role="switch"
                           checked={settings.showArrows}
+                          aria-keyshortcuts="A"
+                          title={t("Tampilkan panah engine") + " (A)"}
                           onChange={(e) =>
                             onSettingsChange({
                               ...settings,
@@ -1213,6 +1302,8 @@ export default function Analysis({
                           type="checkbox"
                           role="switch"
                           checked={settings.showPieceAnnotation}
+                          aria-keyshortcuts="C"
+                          title={t("Tampilkan kategori pada buah") + " (C)"}
                           onChange={(e) =>
                             onSettingsChange({
                               ...settings,
@@ -1317,29 +1408,87 @@ export default function Analysis({
           </div>
         </div>
         <div className="board-under">
-          <span>
-            {t("← → navigasi ")}
-            <kbd>{t("F")}</kbd>
-            {t(" balik papan")}
-          </span>
-          <div className="export-actions board-export-actions">
-            <button
-              className="text-button"
-              onClick={() => downloadFile("kuda-position.fen", fen)}
-            >
-              {t("Ekspor FEN ")}
-              <ArrowDownToLine size={13} />
-            </button>
-            <button
-              className="text-button"
-              onClick={() => downloadFile("kuda-game.pgn", toPgn(game))}
-            >
-              {t("Ekspor PGN ")}
-              <ArrowDownToLine size={13} />
-            </button>
+          <div
+            className="board-shortcut-hints"
+            role="group"
+            aria-label={t("Pintasan analisis")}
+          >
+            <span>{t("← → Navigasi")}</span>
+            <span>
+              <kbd>F</kbd> {t("Balik papan")}
+            </span>
+            {ANALYSIS_SHORTCUTS.filter((shortcut) => !shortcut.shift).map(
+              (shortcut) => (
+                <span key={shortcut.key}>
+                  <kbd>{shortcut.display}</kbd>
+                  {t(shortcut.hint)}
+                </span>
+              ),
+            )}
           </div>
+          <DashboardPopover>
+            <DashboardPopoverTrigger asChild>
+              <button
+                className="icon-button shortcut-help-button"
+                aria-label={t("Pintasan lainnya")}
+                title={t("Pintasan lainnya")}
+              >
+                <CircleHelp size={16} aria-hidden="true" />
+              </button>
+            </DashboardPopoverTrigger>
+            <DashboardPopoverContent
+              className="shortcut-help-popover"
+              align="end"
+              side="top"
+              aria-label={t("Pintasan lainnya")}
+            >
+              <strong>{t("Pintasan lainnya")}</strong>
+              <dl>
+                {ANALYSIS_SHORTCUTS.filter((shortcut) => shortcut.shift).map(
+                  (shortcut) => (
+                    <div key={shortcut.key}>
+                      <dt>
+                        <kbd>{shortcut.display}</kbd>
+                      </dt>
+                      <dd>{t(shortcut.label)}</dd>
+                    </div>
+                  ),
+                )}
+              </dl>
+            </DashboardPopoverContent>
+          </DashboardPopover>
+        </div>
+        <div className="export-actions board-export-actions analysis-export-actions">
+          <button
+            className="text-button"
+            onClick={() => downloadFile("kuda-position.fen", fen)}
+          >
+            {t("Ekspor FEN ")}
+            <ArrowDownToLine size={13} />
+          </button>
+          <button
+            className="text-button"
+            onClick={() => downloadFile("kuda-game.pgn", toPgn(game))}
+          >
+            {t("Ekspor PGN ")}
+            <ArrowDownToLine size={13} />
+          </button>
         </div>
       </div>
+      {keyboardToast && (
+        <div
+          className="toast keyboard-toggle-toast"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <kbd>{keyboardToast.key}</kbd>
+          <div className="keyboard-toggle-copy">
+            <span>{t(keyboardToast.label)}</span>
+            <strong>{t(keyboardToast.enabled ? "Aktif" : "Nonaktif")}</strong>
+          </div>
+        </div>
+      )}
       {t(
         showInfo && (
           <Modal

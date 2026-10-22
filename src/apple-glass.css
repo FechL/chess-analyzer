@@ -612,6 +612,12 @@ kbd {
       rgb(41 62 68 / 2%) 5px 6px
     );
 }
+.board-main.is-variation .square.light-square {
+  background-color: color-mix(in srgb, var(--light-square) 75%, #b9bdc0);
+}
+.board-main.is-variation .square.dark-square {
+  background-color: color-mix(in srgb, var(--dark-square) 75%, #b9bdc0);
+}
 .square > img {
   filter: drop-shadow(0 3px 1px rgb(39 48 55 / 21%))
     drop-shadow(0 1px 0 rgb(255 255 255 / 10%));

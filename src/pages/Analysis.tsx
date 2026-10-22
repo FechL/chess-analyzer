@@ -681,7 +681,7 @@ export default function Analysis({
               active={!!evaluation}
               pending={!!evaluation && !result}
             />
-            <div className="board-main">
+            <div className={`board-main${activeVariation ? " is-variation" : ""}`}>
               <Board
                 fen={fen}
                 flipped={flipped}

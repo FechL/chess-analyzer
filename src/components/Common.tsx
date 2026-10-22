@@ -11,6 +11,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   RotateCw,
+  Undo2,
 } from "lucide-react";
 import { Chess } from "chess.js";
 import { LABELS } from "../lib/chess";
@@ -137,6 +138,14 @@ export function NavigationControls({
         >
           <ChevronsLeft size={19} />
         </IconButton>
+        {outsideNotation && onReturnToMain && (
+          <IconButton
+            label={t("Kembali ke langkah terakhir notasi asli")}
+            onClick={onReturnToMain}
+          >
+            <Undo2 size={18} />
+          </IconButton>
+        )}
         <IconButton
           label={t("Langkah sebelumnya")}
           onClick={() => onChange(Math.max(0, ply - 1))}
@@ -159,18 +168,6 @@ export function NavigationControls({
           <ChevronsRight size={19} />
         </IconButton>
       </div>
-      {t(
-        outsideNotation && onReturnToMain && (
-          <button
-            className="text-button return-to-main"
-            onClick={onReturnToMain}
-            title={t("Kembali ke langkah terakhir notasi asli")}
-          >
-            <RotateCw size={14} />
-            {t(" Kembali ke notasi")}
-          </button>
-        ),
-      )}
       {t(
         onFlip && (
           <IconButton label={t("Balik papan (F)")} onClick={onFlip}>

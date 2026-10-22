@@ -2560,12 +2560,6 @@ textarea::placeholder {
   grid-row: 2;
   text-align: right;
 }
-.board-controls .return-to-main {
-  font-size: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
 .notation-san {
   display: inline-flex;
   align-items: center;

@@ -104,6 +104,7 @@ export const ENGLISH: Record<string, string> = {
   "Otomatis · mengikuti waktu": "Automatic · time limit",
   "Waktu analisis": "Analysis time",
   "Tampilkan panah engine": "Show engine arrows",
+  "Bar evaluasi": "Evaluation bar",
   "Tampilkan kategori pada buah": "Show move category on pieces",
   "Jumlah variasi": "Number of variations",
   "Buat ruang ini milikmu": "Make this space yours",

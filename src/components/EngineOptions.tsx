@@ -16,10 +16,12 @@ export default function EngineOptions({
   value,
   onChange,
   shortcuts = false,
+  evaluationBar,
 }: {
   value: EngineOptionsValue;
   onChange: (next: EngineOptionsValue) => void;
   shortcuts?: boolean;
+  evaluationBar?: { checked: boolean; onChange: (checked: boolean) => void };
 }) {
   const { t } = useI18n();
   const id = useId();
@@ -141,6 +143,21 @@ export default function EngineOptions({
           {t("Tampilkan kategori pada buah")}
         </label>
       </div>
+      {evaluationBar && (
+        <div className="settings-section">
+          <label className="board-sound-setting">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={evaluationBar.checked}
+              aria-keyshortcuts={shortcuts ? "V" : undefined}
+              title={t("Tampilkan bar evaluasi") + (shortcuts ? " (V)" : "")}
+              onChange={(e) => evaluationBar.onChange(e.target.checked)}
+            />
+            {t("Tampilkan bar evaluasi")}
+          </label>
+        </div>
+      )}
       <div className="settings-section">
         <label htmlFor={`${id}-variations`}>{t("Jumlah variasi")}</label>
         <select

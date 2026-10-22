@@ -62,6 +62,7 @@ export type Settings = {
   liveEngine: boolean;
   engineDepth: number;
   showArrows: boolean;
+  showEvalBar: boolean;
   autoAnalyzeImported: boolean;
   enableShortcuts: boolean;
   showPieceAnnotation: boolean;
@@ -87,6 +88,7 @@ const DEFAULT_SETTINGS: Settings = {
   liveEngine: true,
   engineDepth: 0,
   showArrows: true,
+  showEvalBar: true,
   autoAnalyzeImported: true,
   enableShortcuts: true,
   showPieceAnnotation: true,

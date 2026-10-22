@@ -659,15 +659,16 @@ export default function BotPage({
           pause();
         }
       } else if (
-        ["e", "a", "c", "t"].includes(event.key.toLowerCase()) &&
+        ["e", "a", "v", "c", "t"].includes(event.key.toLowerCase()) &&
         !event.shiftKey &&
         permissions.engine
       ) {
         const key = event.key.toLowerCase();
         const toggle = {
-          e: ["liveEngine", "Live engine"],
-          a: ["showArrows", "Tampilkan panah engine"],
-          c: ["showCategories", "Tampilkan kategori pada buah"],
+          e: ["liveEngine", "Engine"],
+          a: ["showArrows", "Arrows"],
+          v: ["showEvalBar", "Evaluation Bar"],
+          c: ["showCategories", "Categories"],
           t: ["showThreats", "Tandai petak ancaman lawan"],
         } as const;
         const [setting, label] = toggle[key as keyof typeof toggle];
@@ -926,12 +927,19 @@ export default function BotPage({
                     <span>
                       <kbd>E</kbd> {t("Engine")}
                     </span>
-                    <span>
-                      <kbd>A</kbd> {t("Panah")}
-                    </span>
-                    <span>
-                      <kbd>C</kbd> {t("Kategori langkah")}
-                    </span>
+                    {options.liveEngine && (
+                      <>
+                        <span>
+                          <kbd>A</kbd> {t("Arrows")}
+                        </span>
+                        <span>
+                          <kbd>V</kbd> {t("Evaluation Bar")}
+                        </span>
+                        <span>
+                          <kbd>C</kbd> {t("Categories")}
+                        </span>
+                      </>
+                    )}
                     <span>
                       <kbd>T</kbd> {t("Ancaman")}
                     </span>

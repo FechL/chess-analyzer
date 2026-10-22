@@ -866,13 +866,15 @@ export default function Analysis({
       <div className="analysis-grid">
         <section className="board-section">
           <div className="board-and-eval">
-            <EvalBar
-              cp={evaluation?.cp}
-              mate={evaluation?.mate}
-              flipped={flipped}
-              active={!!evaluation}
-              pending={!!evaluation && !result}
-            />
+            {settings.showEvalBar && (
+              <EvalBar
+                cp={evaluation?.cp}
+                mate={evaluation?.mate}
+                flipped={flipped}
+                active={!!evaluation}
+                pending={!!evaluation && !result}
+              />
+            )}
             <div
               className={`board-main${activeVariation ? " is-variation" : ""}`}
             >
@@ -1316,6 +1318,11 @@ export default function Analysis({
                 tab === "options" && !customEditing && (
                   <EngineOptions
                     value={settings}
+                    evaluationBar={{
+                      checked: settings.showEvalBar,
+                      onChange: (showEvalBar) =>
+                        onSettingsChange({ ...settings, showEvalBar }),
+                    }}
                     shortcuts={settings.enableShortcuts}
                     onChange={(value) => {
                       if (value.engine !== settings.engine) {
@@ -1406,11 +1413,17 @@ export default function Analysis({
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>
-                {ANALYSIS_SHORTCUTS.filter((shortcut) => !shortcut.shift).map(
+                {ANALYSIS_SHORTCUTS.filter(
+                  (shortcut) =>
+                    !shortcut.shift &&
+                    (!("setting" in shortcut) ||
+                      shortcut.setting === "liveEngine" ||
+                      settings.liveEngine),
+                ).map(
                   (shortcut) => (
                     <span key={shortcut.key}>
                       <kbd>{shortcut.display}</kbd>
-                      {t(shortcut.hint)}
+                      {"hint" in shortcut ? t(shortcut.hint) : null}
                     </span>
                   ),
                 )}

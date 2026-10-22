@@ -1,5 +1,18 @@
 import type { ReviewMove } from "./chess";
 
+export function isMainLinePosition(
+  main: string[],
+  branch: string[],
+  ply: number,
+) {
+  return (
+    ply >= 0 &&
+    ply <= main.length &&
+    ply <= branch.length &&
+    branch.slice(0, ply).every((san, index) => san === main[index])
+  );
+}
+
 export function mergeReview(items: ReviewMove[], item: ReviewMove) {
   return [...items.filter((r) => r.ply !== item.ply), item].sort(
     (a, b) => a.ply - b.ply,

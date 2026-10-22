@@ -108,6 +108,7 @@ export function NavigationControls({
   outsideNotation = false,
   onReturnToMain,
   enableShortcuts = false,
+  actions,
 }: {
   ply: number;
   total: number;
@@ -116,6 +117,7 @@ export function NavigationControls({
   outsideNotation?: boolean;
   onReturnToMain?: () => void;
   enableShortcuts?: boolean;
+  actions?: ReactNode;
 }) {
   const { t } = useI18n();
 
@@ -178,13 +180,16 @@ export function NavigationControls({
           <ChevronsRight size={19} />
         </IconButton>
       </div>
-      {t(
-        onFlip && (
-          <IconButton label={t("Balik papan (F)")} onClick={onFlip}>
-            <RotateCw size={16} />
-          </IconButton>
-        ),
-      )}
+      <div className="board-control-actions">
+        {actions}
+        {t(
+          onFlip && (
+            <IconButton label={t("Balik papan (F)")} onClick={onFlip}>
+              <RotateCw size={16} />
+            </IconButton>
+          ),
+        )}
+      </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ npm run prepare:engine
 - **Analisis:** PGN/FEN, unggah berkas, papan klik/drag, langkah legal, rokade, en passant, pilihan promosi, navigasi keyboard, balik papan, dan jelajah cabang dengan kembali ke jalur sebelumnya.
 - **Stockfish lokal:** evaluasi putih, mate score, depth, 1–3 variasi UCI dalam SAN, panah saran, waktu analisis 0,2–5 detik per posisi.
 - **Game review:** analisis setiap posisi, estimasi akurasi kedua warna, kategori langkah, grafik evaluasi yang dapat diklik, catatan pelatih berbasis aturan, dan latihan ulang kesalahan menggunakan langkah terbaik hasil engine.
-- **Lawan bot:** empat preset Stockfish, putih/hitam/acak, waktu tanpa batas/5/10 menit, mulai dari posisi analisis, petunjuk, undo, menyerah, dan pindah ke analisis.
+- **Lawan bot:** empat tingkat kesulitan, putih/hitam/acak, waktu 3/5/10 menit serta preset bullet/blitz/rapid dan waktu kustom dengan increment. Mendukung antrean hingga lima premove, petunjuk (H), undo, navigasi notasi, penanda ancaman lawan, buah tertangkap, dan analisis permainan. Sesi serta jam disimpan secara lokal dan dijeda saat meninggalkan halaman; mode Tanpa Bantuan memblokir Hint/Undo dan engine, Bantuan membuka Hint/Undo, dan Bantuan Penuh membuka tab Engine serta seluruh Opsi. Pengaturan bantuan bot terpisah dari analisis.
 - **Opening explorer:** 12 opening, pencarian, filter warna, penjelasan strategi, langkah contoh, dan latihan dengan balasan otomatis.
 - **Akademi:** sembilan pelajaran interaktif tentang pusat, perkembangan, rokade, fork, pin, skakmat baris belakang, promosi, en passant, dan kombinasi Morphy.
 - **Puzzle Lichess:** puzzle permainan nyata dari API resmi Lichess, filter tema dan tingkat kesulitan, rating, petunjuk, solusi, dan progres. Maksimal lima puzzle disimpan per kombinasi filter dan diisi ulang saat puzzle digunakan; pengambilan puzzle baru memerlukan internet, tanpa akun atau API key.
@@ -47,7 +47,7 @@ Tes memeriksa legalitas semua jalur opening/latihan, PGN/FEN round-trip, aturan 
 
 Stockfish lite memakai jaringan lebih kecil daripada versi penuh. Waktu pencarian dibatasi, sehingga posisi rumit memerlukan pemeriksaan lebih lama. Ulasan cepat memakai **350 ms per posisi**, terpisah dari pengaturan analisis posisi.
 
-Akurasi menggunakan perubahan estimasi peluang menang dengan kurva publik berbasis centipawn, kemudian fungsi akurasi eksponensial. Kategori langkah adalah heuristik aplikasi; hasilnya **bukan skor resmi Chess.com atau Lichess**. Tidak ada klaim rating Elo untuk preset bot. Tidak ada label brilliant yang dibuat-buat. Catatan pelatih memakai aturan dan variasi Stockfish, bukan LLM.
+Akurasi menggunakan perubahan estimasi peluang menang dengan kurva publik berbasis centipawn, kemudian fungsi akurasi eksponensial. Kategori langkah adalah heuristik aplikasi; hasilnya **bukan skor resmi Chess.com atau Lichess**. Angka Elo bot merupakan perkiraan tingkat latihan, belum dikalibrasi melalui pertandingan rating. Catatan pelatih memakai aturan dan variasi Stockfish, bukan LLM.
 
 Explorer merupakan **repertoar terkurasi**, bukan database statistik jutaan pertandingan. Jam latihan dijalankan di browser, bukan jam kompetisi yang tahan manipulasi. Undo tidak mengembalikan jam sebelumnya.
 

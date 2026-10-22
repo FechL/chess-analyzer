@@ -23,6 +23,7 @@ import {
 import { useBoardAnimation } from "../lib/board-animation";
 import { premoveTargets, projectPremoves } from "../lib/premove";
 import type { Premove } from "../lib/premove";
+import { whiteEvaluationPercent } from "../lib/eval-bar";
 
 type Props = {
   fen: string;
@@ -38,6 +39,7 @@ type Props = {
   editMode?: boolean;
   onEditSquare?: (square: string, piece?: string, from?: string) => void;
   onDeleteDropSquare?: (square: string) => void;
+  threatSquares?: string[];
   premove?: {
     color: "w" | "b";
     moves: Premove[];
@@ -68,6 +70,7 @@ export default function Board({
   onEditSquare,
   onDeleteDropSquare,
   premove,
+  threatSquares = [],
 }: Props) {
   const { t } = useI18n();
 
@@ -187,7 +190,11 @@ export default function Board({
   const displayFen = displayChess.fen();
   const interactiveColor =
     premoveMode && premove ? premove.color : chess.turn();
-  const [selection, setSelection] = useState<{ square: string; fen: string }>();
+  const [selection, setSelection] = useState<{
+    square: string;
+    fen: string;
+    piece: string;
+  }>();
   const [promotion, setPromotion] = useState<{
     from: string;
     to: string;
@@ -201,7 +208,14 @@ export default function Board({
   }, [disabled]);
   const selected =
     selectedSquare ??
-    (selection?.fen === displayFen ? selection.square : undefined);
+    (selection &&
+    (selection.fen === displayFen ||
+      (premove &&
+        !disabled &&
+        displayChess.get(selection.square as Square)?.color === premove.color &&
+        displayChess.get(selection.square as Square)?.type === selection.piece))
+      ? selection.square
+      : undefined);
   const legal = selected
     ? premoveMode
       ? premoveTargets(displayChess, selected, interactiveColor).map((to) => ({
@@ -250,7 +264,9 @@ export default function Board({
     if (selected && attempt(selected, square)) return;
     const p = displayChess.get(square as Square);
     setSelection(
-      p?.color === interactiveColor ? { square, fen: displayFen } : undefined,
+      p?.color === interactiveColor
+        ? { square, fen: displayFen, piece: p.type }
+        : undefined,
     );
   };
   const point = (square: string) => ({
@@ -384,7 +400,7 @@ export default function Board({
                 <button
                   key={square}
                   type="button"
-                  className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""} ${pendingSquare ? "premove-square" : ""}`}
+                  className={`square ${dark ? "dark-square" : "light-square"} ${selected === square ? "selected" : ""} ${lastMove && [lastMove.from, lastMove.to].includes(square) ? "last-move" : ""} ${check ? "in-check" : ""} ${pendingSquare ? "premove-square" : ""} ${threatSquares.includes(square) ? "threatened-square" : ""}`}
                   aria-label={t(
                     `${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`,
                   )}
@@ -457,7 +473,11 @@ export default function Board({
                             );
                           } else {
                             e.dataTransfer.setData("text/plain", square);
-                            setSelection({ square, fen: displayFen });
+                            setSelection({
+                              square,
+                              fen: displayFen,
+                              piece: p.type,
+                            });
                           }
                         }}
                         onDragEnd={(e) => {
@@ -671,7 +691,7 @@ export function EvalBar({
 }) {
   const { t } = useI18n();
 
-  const white = Math.max(5, Math.min(95, 50 + 45 * Math.tanh(cp / 450)));
+  const white = whiteEvaluationPercent(cp, mate);
   return (
     <div
       className={`eval-bar ${flipped ? "flipped" : ""}`}
@@ -682,7 +702,7 @@ export function EvalBar({
       )}
       aria-busy={pending}
       title={t(pending ? "Menunggu evaluasi posisi baru" : undefined)}
-      style={{ "--white-height": `${white}%` } as CSSProperties}
+      style={{ "--white-fraction": white / 100 } as CSSProperties}
     >
       <div className="white-eval" />
       <span className={cp >= 0 ? "positive" : ""}>

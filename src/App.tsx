@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   LibraryBig,
   Plus,
+  RotateCcw,
   Search,
   Settings2,
   ShieldCheck,
@@ -62,6 +63,7 @@ export type Settings = {
   engineDepth: number;
   showArrows: boolean;
   autoAnalyzeImported: boolean;
+  enableShortcuts: boolean;
   showPieceAnnotation: boolean;
   notationStyle: "letters" | "pieces" | "both";
   language: "id" | "en";
@@ -86,6 +88,7 @@ const DEFAULT_SETTINGS: Settings = {
   engineDepth: 0,
   showArrows: true,
   autoAnalyzeImported: true,
+  enableShortcuts: true,
   showPieceAnnotation: true,
   notationStyle: "letters",
   language: "id",
@@ -555,6 +558,22 @@ export default function App() {
                 <input
                   type="checkbox"
                   role="switch"
+                  checked={settings.enableShortcuts}
+                  onChange={(e) =>
+                    setSettings((s) => ({
+                      ...s,
+                      enableShortcuts: e.target.checked,
+                    }))
+                  }
+                />
+                {t("Aktifkan pintasan keyboard")}
+              </label>
+            </div>
+            <div className="settings-section">
+              <label className="board-sound-setting">
+                <input
+                  type="checkbox"
+                  role="switch"
                   checked={!boardSound}
                   onChange={(e) => setBoardSound(!e.target.checked)}
                 />
@@ -571,6 +590,19 @@ export default function App() {
                 />
                 {t("Animasi langkah")}
               </label>
+            </div>
+            <div className="settings-section">
+              <button
+                className="button secondary"
+                onClick={() => {
+                  setSettings({ ...DEFAULT_SETTINGS });
+                  setBoardSound(true);
+                  setBoardAnimation(true);
+                }}
+              >
+                <RotateCcw size={15} />
+                {t("Reset ke default")}
+              </button>
             </div>
           </Modal>
         ),

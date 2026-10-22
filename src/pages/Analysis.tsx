@@ -1,3 +1,4 @@
+import EngineOptions from "../components/EngineOptions";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
@@ -65,6 +66,7 @@ import {
   mergePositionReview,
   retainReview,
   reviewSegments,
+  isMainLinePosition,
 } from "../lib/review";
 import type { Settings } from "../App";
 
@@ -162,6 +164,13 @@ export default function Analysis({
   );
   const setGame = setMainGame;
   const [ply, setPly] = useState(game.moves.length);
+  useEffect(() => {
+    if (
+      activeVariation &&
+      isMainLinePosition(mainGame.moves, activeVariation.moves, ply)
+    )
+      setActiveVariationId(undefined);
+  }, [activeVariation, mainGame.moves, ply]);
   const [flipped, setFlipped] = useState(false);
   const [tab, setTab] = useState("review");
   const [editorPiece, setEditorPiece] = useState<string>();
@@ -268,7 +277,8 @@ export default function Analysis({
           multiPV: settings.multiPV,
           depth: settings.engineDepth,
           onInfo: (value) => {
-            if (active) setEvaluation(value);
+            if (active && (value.depth >= 8 || value.mate !== undefined))
+              setEvaluation(value);
           },
         });
         if (!active) return;
@@ -315,6 +325,7 @@ export default function Analysis({
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (
+        !settings.enableShortcuts ||
         e.defaultPrevented ||
         e.isComposing ||
         e.ctrlKey ||
@@ -332,6 +343,7 @@ export default function Analysis({
         return;
       const shortcut = getAnalysisShortcut(e);
       if (shortcut) {
+        e.stopPropagation();
         if ("setting" in shortcut) {
           if (customEditing) return;
           e.preventDefault();
@@ -370,8 +382,8 @@ export default function Analysis({
       }
       if (e.key.toLowerCase() === "f" && !e.repeat) setFlipped((f) => !f);
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
   }, [
     game.moves.length,
     settings,
@@ -714,9 +726,7 @@ export default function Analysis({
               </div>
             ),
           )}
-          <div className="board-turn-status">
-            {t(gameStatus(position))}
-          </div>
+          <div className="board-turn-status">{t(gameStatus(position))}</div>
         </div>
         <div className="workspace-actions">
           {t(
@@ -724,8 +734,14 @@ export default function Analysis({
               <button
                 className="button secondary"
                 onClick={onSave}
-                title={t("Simpan") + " (Shift+S)"}
-                aria-keyshortcuts="Shift+S"
+                title={
+                  settings.enableShortcuts
+                    ? t("Simpan") + " (Shift+S)"
+                    : undefined
+                }
+                aria-keyshortcuts={
+                  settings.enableShortcuts ? "Shift+S" : undefined
+                }
               >
                 <Bookmark size={16} />
                 {t(" Simpan")}
@@ -735,8 +751,12 @@ export default function Analysis({
           <button
             className="button secondary"
             onClick={onNewGame}
-            title={t("New Game") + " (Shift+N)"}
-            aria-keyshortcuts="Shift+N"
+            title={
+              settings.enableShortcuts
+                ? t("New Game") + " (Shift+N)"
+                : undefined
+            }
+            aria-keyshortcuts={settings.enableShortcuts ? "Shift+N" : undefined}
           >
             <Plus size={15} />
             {t(" New Game")}
@@ -744,8 +764,12 @@ export default function Analysis({
           <button
             className="button primary"
             onClick={onImport}
-            title={t("Impor permainan") + " (Shift+I)"}
-            aria-keyshortcuts="Shift+I"
+            title={
+              settings.enableShortcuts
+                ? t("Impor permainan") + " (Shift+I)"
+                : undefined
+            }
+            aria-keyshortcuts={settings.enableShortcuts ? "Shift+I" : undefined}
           >
             <ArrowDownToLine size={16} />
             {t(" Impor permainan")}
@@ -793,7 +817,7 @@ export default function Analysis({
             </div>
           </div>
           <NavigationControls
-            enableShortcuts
+            enableShortcuts={settings.enableShortcuts}
             ply={ply}
             total={game.moves.length}
             outsideNotation={!!activeVariation}
@@ -1191,154 +1215,18 @@ export default function Analysis({
               )}
               {t(
                 tab === "options" && !customEditing && (
-                  <div className="engine-options">
-                    <div className="settings-section">
-                      <label htmlFor="engine-choice">{t("Pilih engine")}</label>
-                      <select
-                        id="engine-choice"
-                        value={settings.engine}
-                        onChange={(e) => {
-                          stopReview();
-                          setEvaluation(undefined);
-                          evaluationCache.current.clear();
-                          onSettingsChange({
-                            ...settings,
-                            engine: e.target.value as Settings["engine"],
-                          });
-                        }}
-                      >
-                        <option value="lite">{t("Stockfish 19 Lite")}</option>
-                        <option value="full">{t("Stockfish 19 Full")}</option>
-                      </select>
-                    </div>
-                    <div className="settings-section">
-                      <label className="board-sound-setting">
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          checked={settings.liveEngine}
-                          aria-keyshortcuts="E"
-                          title={t("Live engine") + " (E)"}
-                          onChange={(e) =>
-                            onSettingsChange({
-                              ...settings,
-                              liveEngine: e.target.checked,
-                            })
-                          }
-                        />
-                        {t("Live engine")}
-                      </label>
-                    </div>
-                    <div className="settings-section">
-                      <label htmlFor="engine-depth">{t("Batas depth")}</label>
-                      <select
-                        id="engine-depth"
-                        value={settings.engineDepth}
-                        onChange={(e) =>
-                          onSettingsChange({
-                            ...settings,
-                            engineDepth: Number(e.target.value),
-                          })
-                        }
-                      >
-                        <option value={0}>
-                          {t("Otomatis · mengikuti waktu")}
-                        </option>
-                        {t(
-                          [8, 12, 16, 20, 24, 30].map((depth) => (
-                            <option key={depth} value={depth}>
-                              {t("Depth ")}
-                              {t(depth)}
-                            </option>
-                          )),
-                        )}
-                      </select>
-                    </div>
-                    <div className="settings-section">
-                      <label htmlFor="analysis-time">
-                        {t("Waktu analisis")}
-                        {t(" ")}
-                        <strong>
-                          {t(settings.analysisMs / 1000)}
-                          {t(" detik")}
-                        </strong>
-                      </label>
-                      <input
-                        id="analysis-time"
-                        type="range"
-                        min="200"
-                        max="10000"
-                        step="100"
-                        value={settings.analysisMs}
-                        onChange={(e) =>
-                          onSettingsChange({
-                            ...settings,
-                            analysisMs: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="settings-section">
-                      <label className="board-sound-setting">
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          checked={settings.showArrows}
-                          aria-keyshortcuts="A"
-                          title={t("Tampilkan panah engine") + " (A)"}
-                          onChange={(e) =>
-                            onSettingsChange({
-                              ...settings,
-                              showArrows: e.target.checked,
-                            })
-                          }
-                        />
-                        {t("Tampilkan panah engine")}
-                      </label>
-                    </div>
-                    <div className="settings-section">
-                      <label className="board-sound-setting">
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          checked={settings.showPieceAnnotation}
-                          aria-keyshortcuts="C"
-                          title={t("Tampilkan kategori pada buah") + " (C)"}
-                          onChange={(e) =>
-                            onSettingsChange({
-                              ...settings,
-                              showPieceAnnotation: e.target.checked,
-                            })
-                          }
-                        />
-                        {t("Tampilkan kategori pada buah")}
-                      </label>
-                    </div>
-                    <div className="settings-section">
-                      <label htmlFor="variation-count">
-                        {t("Jumlah variasi")}
-                      </label>
-                      <select
-                        id="variation-count"
-                        value={settings.multiPV}
-                        onChange={(e) =>
-                          onSettingsChange({
-                            ...settings,
-                            multiPV: Number(e.target.value),
-                          })
-                        }
-                      >
-                        {t(
-                          [1, 2, 3].map((count) => (
-                            <option key={count} value={count}>
-                              {t(count)}
-                              {t(" variasi")}
-                            </option>
-                          )),
-                        )}
-                      </select>
-                    </div>
-                  </div>
+                  <EngineOptions
+                    value={settings}
+                    shortcuts
+                    onChange={(value) => {
+                      if (value.engine !== settings.engine) {
+                        stopReview();
+                        setEvaluation(undefined);
+                        evaluationCache.current.clear();
+                      }
+                      onSettingsChange({ ...settings, ...value });
+                    }}
+                  />
                 ),
               )}
               {t(
@@ -1408,55 +1296,59 @@ export default function Analysis({
           </div>
         </div>
         <div className="board-under">
-          <div
-            className="board-shortcut-hints"
-            role="group"
-            aria-label={t("Pintasan analisis")}
-          >
-            <span>{t("← → Navigasi")}</span>
-            <span>
-              <kbd>F</kbd> {t("Balik papan")}
-            </span>
-            {ANALYSIS_SHORTCUTS.filter((shortcut) => !shortcut.shift).map(
-              (shortcut) => (
-                <span key={shortcut.key}>
-                  <kbd>{shortcut.display}</kbd>
-                  {t(shortcut.hint)}
-                </span>
-              ),
-            )}
-          </div>
-          <DashboardPopover>
-            <DashboardPopoverTrigger asChild>
-              <button
-                className="icon-button shortcut-help-button"
-                aria-label={t("Pintasan lainnya")}
-                title={t("Pintasan lainnya")}
+          {settings.enableShortcuts && (
+            <>
+              <div
+                className="board-shortcut-hints"
+                role="group"
+                aria-label={t("Pintasan analisis")}
               >
-                <CircleHelp size={16} aria-hidden="true" />
-              </button>
-            </DashboardPopoverTrigger>
-            <DashboardPopoverContent
-              className="shortcut-help-popover"
-              align="end"
-              side="top"
-              aria-label={t("Pintasan lainnya")}
-            >
-              <strong>{t("Pintasan lainnya")}</strong>
-              <dl>
-                {ANALYSIS_SHORTCUTS.filter((shortcut) => shortcut.shift).map(
+                <span>{t("← → Navigasi")}</span>
+                <span>
+                  <kbd>F</kbd> {t("Balik papan")}
+                </span>
+                {ANALYSIS_SHORTCUTS.filter((shortcut) => !shortcut.shift).map(
                   (shortcut) => (
-                    <div key={shortcut.key}>
-                      <dt>
-                        <kbd>{shortcut.display}</kbd>
-                      </dt>
-                      <dd>{t(shortcut.label)}</dd>
-                    </div>
+                    <span key={shortcut.key}>
+                      <kbd>{shortcut.display}</kbd>
+                      {t(shortcut.hint)}
+                    </span>
                   ),
                 )}
-              </dl>
-            </DashboardPopoverContent>
-          </DashboardPopover>
+              </div>
+              <DashboardPopover>
+                <DashboardPopoverTrigger asChild>
+                  <button
+                    className="icon-button shortcut-help-button"
+                    aria-label={t("Pintasan lainnya")}
+                    title={t("Pintasan lainnya")}
+                  >
+                    <CircleHelp size={16} aria-hidden="true" />
+                  </button>
+                </DashboardPopoverTrigger>
+                <DashboardPopoverContent
+                  className="shortcut-help-popover"
+                  align="end"
+                  side="top"
+                  aria-label={t("Pintasan lainnya")}
+                >
+                  <strong>{t("Pintasan lainnya")}</strong>
+                  <dl>
+                    {ANALYSIS_SHORTCUTS.filter(
+                      (shortcut) => shortcut.shift,
+                    ).map((shortcut) => (
+                      <div key={shortcut.key}>
+                        <dt>
+                          <kbd>{shortcut.display}</kbd>
+                        </dt>
+                        <dd>{t(shortcut.label)}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </DashboardPopoverContent>
+              </DashboardPopover>
+            </>
+          )}
         </div>
         <div className="export-actions board-export-actions analysis-export-actions">
           <button

@@ -7,6 +7,7 @@ import {
   mergeReview,
   retainReview,
   reviewSegments,
+  isMainLinePosition,
 } from "./review";
 const evaluation = (fen: string, cp: number, bestmove = ""): Evaluation => ({
   fen,
@@ -69,6 +70,14 @@ describe("incremental move review", () => {
 });
 
 describe("reviews across variations", () => {
+  it("returns to the main line when undo reaches its shared prefix", () => {
+    const main = ["e4", "e5", "Nf3", "Nc6"];
+    const branch = ["e4", "c5", "Nf3", "d6"];
+    expect(isMainLinePosition(main, branch, 1)).toBe(true);
+    expect(isMainLinePosition(main, branch, 0)).toBe(true);
+    expect(isMainLinePosition(main, branch, 2)).toBe(false);
+    expect(isMainLinePosition(main, branch, 3)).toBe(false);
+  });
   it("keeps both continuations at the same ply and restores their own ratings", () => {
     const { items } = game();
     const branch = new Chess();

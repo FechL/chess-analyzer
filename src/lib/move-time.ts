@@ -1,6 +1,6 @@
 import type { GameData } from "./chess";
 
-function clockSeconds(clock?: string): number | undefined {
+export function clockSeconds(clock?: string): number | undefined {
   if (!clock || !/^\d+:\d{2}(?::\d{2})?(?:\.\d+)?$/.test(clock.trim())) return;
   return clock
     .trim()
@@ -16,7 +16,7 @@ export function moveDurations(game: GameData): (number | undefined)[] {
   const increment = control ? Number(control[2] || 0) : 0;
   const previous: (number | undefined)[] = [initial, initial];
   const offset = game.startFen.split(" ")[1] === "b" ? 1 : 0;
-  return game.moves.map((_, index) => {
+  const fromClocks = game.moves.map((_, index) => {
     const color = (index + offset) % 2;
     const current = clockSeconds(game.moveTimes?.[index]);
     const before = previous[color];
@@ -25,6 +25,9 @@ export function moveDurations(game: GameData): (number | undefined)[] {
     const elapsed = before + increment - current;
     return elapsed >= 0 ? elapsed : undefined;
   });
+  return game.moves.map(
+    (_, index) => game.moveDurations?.[index] ?? fromClocks[index],
+  );
 }
 export function formatMoveDuration(seconds: number) {
   const rounded = Math.round(seconds);
@@ -33,4 +36,13 @@ export function formatMoveDuration(seconds: number) {
   return minutes
     ? minutes + "m" + (remainder ? " " + remainder + "s" : "")
     : remainder + "s";
+}
+
+export function formatPgnTime(value: number): string {
+  const millis = Math.round(Math.max(0, value) * 1000);
+  const hours = Math.floor(millis / 3600000);
+  const minutes = Math.floor((millis % 3600000) / 60000);
+  const seconds = Math.floor((millis % 60000) / 1000);
+  const fraction = millis % 1000;
+  return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}${fraction ? "." + String(fraction).padStart(3, "0").replace(/0+$/, "") : ""}`;
 }

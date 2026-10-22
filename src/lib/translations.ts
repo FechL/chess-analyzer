@@ -42,6 +42,9 @@ export const ENGLISH: Record<string, string> = {
   "Tandai petak ancaman lawan": "Highlight opponent threats",
   "Tampilkan bar evaluasi": "Show evaluation bar",
   "Waktu lanjutan": "Advanced time control",
+  "Tanpa batas waktu": "Unlimited",
+  "Klik kanan untuk menandai petak, tarik klik kanan untuk panah. Escape menghapus anotasi.":
+    "Right-click to mark squares, drag with the right mouse button to draw arrows. Escape clears annotations.",
   "Menit per pemain": "Minutes per player",
   "Tambahan detik per langkah": "Increment in seconds",
   "Gunakan waktu ini": "Use this time control",

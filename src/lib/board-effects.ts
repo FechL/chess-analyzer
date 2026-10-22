@@ -64,6 +64,7 @@ export function isAllowedArrow(from: string, to: string): boolean {
   return (
     (dx === 0 && dy > 0) ||
     (dy === 0 && dx > 0) ||
+    (dx === dy && dx > 0) ||
     (dx === 1 && dy === 2) ||
     (dx === 2 && dy === 1)
   );

@@ -6,6 +6,8 @@ import {
   capturedBy,
   chooseBotMove,
   DEFAULT_BOT_OPTIONS,
+  elapseBotTime,
+  finishBotTurn,
   newBotSession,
   restoreBotSession,
   threatenedSquares,
@@ -106,5 +108,91 @@ describe("bot assistance and material", () => {
   it("formats simple controls and controls with increments", () => {
     expect(timeControlLabel({ seconds: 180, increment: 0 })).toBe("3m");
     expect(timeControlLabel({ seconds: 180, increment: 2 })).toBe("3+2");
+  });
+});
+
+describe("bot move timing", () => {
+  it("records each player's elapsed time and clock including increment", () => {
+    const chess = new Chess();
+    let session = {
+      ...newBotSession(),
+      started: true,
+      control: { seconds: 300, increment: 2 },
+    };
+    session = elapseBotTime(session, "w", 3.25);
+    chess.move("e4");
+    session = finishBotTurn(session, chess, "w");
+    expect(session.clocks).toEqual({ w: 298.75, b: 300 });
+    expect(session.moveTimes).toEqual(["0:04:58.75"]);
+    expect(session.moveDurations).toEqual([3.25]);
+    session = elapseBotTime(session, "b", 1.5);
+    chess.move("e5");
+    session = finishBotTurn(session, chess, "b");
+    expect(session.moveDurations).toEqual([3.25, 1.5]);
+    expect(session.moveTimes).toEqual(["0:04:58.75", "0:05:00.5"]);
+    const restored = restoreBotSession(JSON.parse(JSON.stringify(session)));
+    expect(restored.moveDurations).toEqual(session.moveDurations);
+    expect(restored.moveTimes).toEqual(session.moveTimes);
+  });
+  it("records elapsed time without running out of time in Unlimited", () => {
+    const chess = new Chess();
+    let session = {
+      ...newBotSession(),
+      started: true,
+      control: { seconds: 0, increment: 0 },
+      clocks: { w: 0, b: 0 },
+    };
+    session = elapseBotTime(session, "w", 90);
+    chess.move("e4");
+    session = finishBotTurn(session, chess, "w");
+    expect(session.clocks).toEqual({ w: 0, b: 0 });
+    expect(session.moveTimes).toEqual([""]);
+    expect(session.moveDurations).toEqual([90]);
+    expect(restoreBotSession(session).control.seconds).toBe(0);
+    expect(timeControlLabel(session.control)).toBe("Unlimited");
+  });
+  it("keeps the historical board selected when the bot moves in No assistance", () => {
+    const chess = new Chess();
+    chess.move("e4");
+    const session = {
+      ...newBotSession(),
+      started: true,
+      mode: "none" as const,
+      pgn: chess.pgn(),
+      viewPly: 0,
+      turnElapsed: 0.5,
+    };
+    chess.move("e5");
+    const next = finishBotTurn(session, chess, "b");
+    expect(next.viewPly).toBe(0);
+    expect(next.paused).toBe(false);
+    expect(restoreBotSession(next).paused).toBe(false);
+  });
+  it("excludes paused time from thinking time and clocks", () => {
+    const session = {
+      ...newBotSession(),
+      started: true,
+      paused: true,
+      turnElapsed: 3,
+    };
+    expect(elapseBotTime(session, "w", 25)).toEqual(session);
+  });
+});
+
+describe("clock expiry while completing a move", () => {
+  it("does not rescue an expired clock with increment", () => {
+    const chess = new Chess();
+    chess.move("e4");
+    const before = {
+      ...newBotSession(),
+      started: true,
+      control: { seconds: 300, increment: 2 },
+      clocks: { w: 0.03, b: 300 },
+    };
+    const expired = finishBotTurn(elapseBotTime(before, "w", 0.05), chess, "w");
+    expect(expired.outcome).toBe("timeout-w");
+    expect(expired.clocks.w).toBe(0);
+    expect(expired.pgn).toBe(before.pgn);
+    expect(expired.moveDurations).toEqual([]);
   });
 });

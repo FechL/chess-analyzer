@@ -22,6 +22,7 @@ import {
   Plus,
   RotateCcw,
   TrendingUp,
+  Undo2,
   Trash2,
   WandSparkles,
 } from "lucide-react";
@@ -157,6 +158,10 @@ export default function Analysis({
             ...mainGame,
             moves: activeVariation.moves,
             moveTimes: mainGame.moveTimes?.slice(0, activeVariation.forkPly),
+            moveDurations: mainGame.moveDurations?.slice(
+              0,
+              activeVariation.forkPly,
+            ),
             result: "*",
           }
         : mainGame,
@@ -446,6 +451,7 @@ export default function Analysis({
           ...mainGame,
           moves,
           moveTimes: game.moveTimes?.slice(0, ply),
+          moveDurations: game.moveDurations?.slice(0, ply),
           result: c.isCheckmate()
             ? c.turn() === "w"
               ? "0-1"
@@ -460,6 +466,84 @@ export default function Analysis({
     } catch {
       return false;
     }
+  }
+  function undoFreeMove() {
+    if (
+      customEditing ||
+      !["Bebas", "Kustom"].includes(mainGame.source || "") ||
+      ply <= 0
+    )
+      return;
+    stopReview();
+    const nextPly = ply - 1;
+    if (activeVariation) {
+      if (nextPly <= activeVariation.forkPly) {
+        setActiveVariationId(activeVariation.parentId);
+      } else {
+        const removed = new Set<string>();
+        mainGame.variations?.forEach((branch) => {
+          if (
+            branch.parentId === activeVariation.id &&
+            branch.forkPly >= nextPly
+          )
+            removed.add(branch.id);
+        });
+        let changed = true;
+        while (changed) {
+          changed = false;
+          mainGame.variations?.forEach((branch) => {
+            if (
+              branch.parentId &&
+              removed.has(branch.parentId) &&
+              !removed.has(branch.id)
+            ) {
+              removed.add(branch.id);
+              changed = true;
+            }
+          });
+        }
+        setMainGame({
+          ...mainGame,
+          variations: mainGame.variations
+            ?.filter((branch) => !removed.has(branch.id))
+            .map((branch) =>
+              branch.id === activeVariation.id
+                ? { ...branch, moves: branch.moves.slice(0, nextPly) }
+                : branch,
+            ),
+        });
+      }
+    } else {
+      const keep = new Set<string>();
+      mainGame.variations?.forEach((branch) => {
+        if (!branch.parentId && branch.forkPly <= nextPly) keep.add(branch.id);
+      });
+      let changed = true;
+      while (changed) {
+        changed = false;
+        mainGame.variations?.forEach((branch) => {
+          if (
+            branch.parentId &&
+            keep.has(branch.parentId) &&
+            !keep.has(branch.id)
+          ) {
+            keep.add(branch.id);
+            changed = true;
+          }
+        });
+      }
+      setMainGame({
+        ...mainGame,
+        moves: mainGame.moves.slice(0, nextPly),
+        moveTimes: mainGame.moveTimes?.slice(0, nextPly),
+        moveDurations: mainGame.moveDurations?.slice(0, nextPly),
+        variations: mainGame.variations?.filter((branch) =>
+          keep.has(branch.id),
+        ),
+        result: "*",
+      });
+    }
+    setPly(nextPly);
   }
   const editSquare = (square: string, droppedPiece?: string, from?: string) => {
     const c = new Chess(game.startFen);
@@ -492,6 +576,7 @@ export default function Analysis({
         startFen: nextFen,
         moves: [],
         moveTimes: undefined,
+        moveDurations: undefined,
         result: "*",
       });
       setPly(0);
@@ -506,6 +591,7 @@ export default function Analysis({
         startFen: nextFen,
         moves: [],
         moveTimes: undefined,
+        moveDurations: undefined,
         result: "*",
       });
     setEditorSquare(undefined);
@@ -519,6 +605,7 @@ export default function Analysis({
         startFen: nextFen,
         moves: [],
         moveTimes: undefined,
+        moveDurations: undefined,
         result: "*",
       });
     setEditorSquare(undefined);
@@ -530,6 +617,7 @@ export default function Analysis({
       startFen: new Chess().fen(),
       moves: [],
       moveTimes: undefined,
+      moveDurations: undefined,
       result: "*",
       event: "Analisis Bebas (Kustom)",
     });
@@ -705,8 +793,7 @@ export default function Analysis({
                           {t(elo ? " (" + elo + ")" : "")}
                         </span>
                         {t(
-                          (activeVariation ||
-                            mainGame.moveTimes?.some(Boolean)) && (
+                          mainGame.moveTimes?.some(Boolean) && (
                             <time
                               aria-label={t(
                                 "Sisa waktu " +
@@ -828,6 +915,18 @@ export default function Analysis({
             }}
             onChange={setPly}
             onFlip={() => setFlipped((f) => !f)}
+            actions={
+              !customEditing &&
+              ["Bebas", "Kustom"].includes(mainGame.source || "") ? (
+                <IconButton
+                  label={t("Ulang langkah")}
+                  onClick={undoFreeMove}
+                  disabled={ply <= 0}
+                >
+                  <Undo2 size={16} />
+                </IconButton>
+              ) : undefined
+            }
           />
         </section>
         <div className="analysis-sidebar">
@@ -1217,7 +1316,7 @@ export default function Analysis({
                 tab === "options" && !customEditing && (
                   <EngineOptions
                     value={settings}
-                    shortcuts
+                    shortcuts={settings.enableShortcuts}
                     onChange={(value) => {
                       if (value.engine !== settings.engine) {
                         stopReview();

@@ -84,7 +84,6 @@ export default function Board({
   const [marks, setMarks] = useState<Mark[]>([]);
   const [drawing, setDrawing] = useState<Mark>();
   const gesture = useRef<Mark | undefined>(undefined);
-  const keyboardAnchor = useRef<Mark | undefined>(undefined);
   const sound = useBoardSound();
   const animate = useBoardAnimation();
   useEffect(() => {
@@ -105,7 +104,6 @@ export default function Board({
     setMarks([]);
     setDrawing(undefined);
     gesture.current = undefined;
-    keyboardAnchor.current = undefined;
     const dragged = draggedMove.current;
     draggedMove.current = undefined;
     const transition = boardTransition(before.fen, fen);
@@ -175,7 +173,6 @@ export default function Board({
     setMarks([]);
     setDrawing(undefined);
     gesture.current = undefined;
-    keyboardAnchor.current = undefined;
   };
   const chess = useMemo(() => new Chess(fen), [fen]);
   const premoveMode =
@@ -299,42 +296,16 @@ export default function Board({
         ref={boardRef}
         className={`chessboard board-${theme}`}
         onContextMenu={(e) => e.preventDefault()}
-        title={t(
-          "Klik kanan: tandai petak. Klik kanan + tarik: panah. Shift: hijau, Ctrl: merah, Alt: biru. Klik kiri/Esc: hapus.",
-        )}
         aria-description={t(
-          "Klik kanan untuk menandai petak, tarik klik kanan untuk panah. Keyboard: fokuskan petak, tekan A di petak asal dan tujuan. Escape menghapus anotasi.",
+          "Klik kanan untuk menandai petak, tarik klik kanan untuk panah. Escape menghapus anotasi.",
         )}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
-            clearMarks();
-            setSelection(undefined);
-            setPromotion(undefined);
-            premove?.onCancel();
-            e.stopPropagation();
-          }
-          if (e.key.toLowerCase() !== "a" || compact || promotion) return;
-          const target = e.target as HTMLElement;
-          const square =
-            target.closest<HTMLElement>("[data-square]")?.dataset.square;
-          if (!square) return;
-          e.preventDefault();
+          if (e.key !== "Escape") return;
+          clearMarks();
+          setSelection(undefined);
+          setPromotion(undefined);
+          premove?.onCancel();
           e.stopPropagation();
-          const anchor = keyboardAnchor.current;
-          if (anchor) {
-            if (isAllowedArrow(anchor.from, square))
-              setMarks((items) => toggleMark(items, { ...anchor, to: square }));
-            keyboardAnchor.current = undefined;
-            setDrawing(undefined);
-          } else {
-            const mark = {
-              from: square,
-              to: square,
-              color: annotationColor(e),
-            };
-            keyboardAnchor.current = mark;
-            setDrawing(mark);
-          }
         }}
         onPointerDown={(e) => {
           if (e.button !== 2 || compact || promotion) return;
@@ -356,7 +327,9 @@ export default function Board({
           if (!gesture.current) return;
           const square = squareAt(e.clientX, e.clientY);
           setDrawing(
-            square && isAllowedArrow(gesture.current.from, square)
+            square &&
+              (square === gesture.current.from ||
+                isAllowedArrow(gesture.current.from, square))
               ? { ...gesture.current, to: square }
               : undefined,
           );
@@ -365,7 +338,10 @@ export default function Board({
           const mark = gesture.current;
           if (!mark || e.button !== 2) return;
           const square = squareAt(e.clientX, e.clientY);
-          if (square && isAllowedArrow(mark.from, square))
+          if (
+            square &&
+            (square === mark.from || isAllowedArrow(mark.from, square))
+          )
             setMarks((items) => toggleMark(items, { ...mark, to: square }));
           gesture.current = undefined;
           setDrawing(undefined);
@@ -502,7 +478,6 @@ export default function Board({
                       <span
                         className="piece-category-badge"
                         style={{ background: LABELS[annotation].color }}
-                        title={t(LABELS[annotation].label)}
                         aria-label={t(LABELS[annotation].label)}
                       >
                         {t(LABELS[annotation].symbol)}

@@ -51,6 +51,7 @@ import { mergePositionReview, retainReview } from "../lib/review";
 import { findBookMove } from "../lib/opening-book";
 import { pieceAsset } from "../lib/preferences";
 import { appendPremove, executePremove } from "../lib/premove";
+import { clockSeconds } from "../lib/move-time";
 import {
   BOT_LEVELS,
   BOT_MODES,
@@ -58,6 +59,8 @@ import {
   capturedBy,
   chooseBotMove,
   DEFAULT_BOT_OPTIONS,
+  elapseBotTime,
+  finishBotTurn,
   newBotSession,
   restoreBotSession,
   threatenedSquares,
@@ -149,7 +152,20 @@ export default function BotPage({
   const visibleFen = visibleChess.fen();
   const visibleHistory = visibleChess.history({ verbose: true });
   const lastMove = visibleHistory.at(-1);
-  const available = session.started && !ended && !session.paused && atLatest;
+  const running = session.started && !ended && !session.paused;
+  const unlimited = session.control.seconds === 0;
+  const available = running && atLatest;
+  const clockTick = useRef<{ fen: string; last: number } | undefined>(
+    undefined,
+  );
+  function pendingElapsed() {
+    const tick = clockTick.current;
+    if (!tick || tick.fen !== fen) return 0;
+    const now = performance.now();
+    const elapsed = (now - tick.last) / 1000;
+    tick.last = now;
+    return elapsed;
+  }
   const [evaluation, setEvaluation] = useState<Evaluation>();
   const [positionReviews, setPositionReviews] = useState<ReviewMove[]>([]);
   const assistance = useRef<LocalEngine | undefined>(undefined);
@@ -193,18 +209,18 @@ export default function BotPage({
       const value = latest.current;
       writeStorage(SESSION_KEY, {
         ...value,
-        paused: value.started ? true : value.paused,
+        paused: value.started && value.mode !== "none" ? true : value.paused,
       });
     };
     const interval = setInterval(persist, 1000);
     window.addEventListener("beforeunload", persist);
     const hidden = () => {
-      if (document.hidden) {
+      if (document.hidden && latest.current.mode !== "none") {
         request.current++;
         engine.current?.stop();
         setSession((value) => ({
           ...value,
-          paused: value.started ? true : value.paused,
+          paused: value.started && value.mode !== "none" ? true : value.paused,
         }));
       }
     };
@@ -229,28 +245,17 @@ export default function BotPage({
     setPremoveMessage("");
   }
   function commitTurn(next: Chess, color: Color, premove = false) {
-    setSession((value) => ({
-      ...value,
-      pgn: next.pgn(),
-      viewPly: null,
-      clocks: {
-        ...value.clocks,
-        [color]:
-          Math.max(0, value.clocks[color] - (premove ? 0.1 : 0)) +
-          value.control.increment,
-      },
-      premoves: next.isGameOver()
-        ? []
-        : premove
-          ? value.premoves.slice(1)
-          : value.premoves,
-    }));
+    const elapsed = pendingElapsed();
+    clockTick.current = undefined;
+    setSession((value) =>
+      finishBotTurn(elapseBotTime(value, color, elapsed), next, color, premove),
+    );
     setHint("");
     setHintArrow("");
   }
   useEffect(() => {
     if (
-      !available ||
+      !running ||
       chess.turn() === human ||
       status !== "ready" ||
       !engine.current
@@ -267,7 +272,8 @@ export default function BotPage({
           if (
             id !== request.current ||
             latest.current.paused ||
-            latest.current.clocks[opponent] <= 0 ||
+            (latest.current.control.seconds > 0 &&
+              latest.current.clocks[opponent] <= 0) ||
             latest.current.pgn !== session.pgn
           )
             return;
@@ -296,7 +302,7 @@ export default function BotPage({
       instance.stop();
       setThinking(false);
     };
-  }, [fen, available, human, status, session.level]);
+  }, [fen, running, human, status, session.level]);
   useEffect(() => {
     if (
       !available ||
@@ -307,7 +313,7 @@ export default function BotPage({
       return;
     const timer = setTimeout(() => {
       if (!latest.current.premoves.length || latest.current.paused) return;
-      if (latest.current.clocks[human] <= 0.1) {
+      if (!unlimited && latest.current.clocks[human] <= 0.1) {
         setSession((value) => ({
           ...value,
           clocks: { ...value.clocks, [human]: 0 },
@@ -326,26 +332,25 @@ export default function BotPage({
     return () => clearTimeout(timer);
   }, [fen, available, thinking, human, session.premoves.length]);
   useEffect(() => {
-    if (!session.started || session.paused || ended) return;
+    if (!running) {
+      clockTick.current = undefined;
+      return;
+    }
     const turn = chess.turn();
-    let last = performance.now();
+    clockTick.current = { fen, last: performance.now() };
     const interval = setInterval(() => {
-      const now = performance.now();
-      const elapsed = (now - last) / 1000;
-      last = now;
-      setSession((value) => ({
-        ...value,
-        clocks: {
-          ...value.clocks,
-          [turn]: Math.max(0, value.clocks[turn] - elapsed),
-        },
-      }));
+      const elapsed = pendingElapsed();
+      setSession((value) => elapseBotTime(value, turn, elapsed));
     }, 100);
-    return () => clearInterval(interval);
-  }, [fen, session.started, session.paused, ended]);
+    return () => {
+      clearInterval(interval);
+      clockTick.current = undefined;
+    };
+  }, [fen, running]);
   useEffect(() => {
     if (
       !session.started ||
+      unlimited ||
       ended ||
       (session.clocks.w > 0 && session.clocks.b > 0)
     )
@@ -357,7 +362,7 @@ export default function BotPage({
       paused: true,
       premoves: [],
     }));
-  }, [session.clocks, session.started, ended]);
+  }, [session.clocks, session.started, ended, unlimited]);
 
   useEffect(() => {
     if (!liveAssistance) {
@@ -507,7 +512,7 @@ export default function BotPage({
       !available ||
       chess.turn() !== human ||
       thinking ||
-      latest.current.clocks[human] <= 0
+      (!unlimited && latest.current.clocks[human] <= 0)
     )
       return false;
     try {
@@ -545,9 +550,27 @@ export default function BotPage({
     const next = gameFromPgn(session.pgn);
     next.undo();
     if (next.turn() !== human) next.undo();
+    const length = next.history().length;
+    const moves = next.history({ verbose: true });
+    clockTick.current = undefined;
     setSession((value) => ({
       ...value,
       pgn: next.pgn(),
+      moveTimes: value.moveTimes.slice(0, length),
+      moveDurations: value.moveDurations.slice(0, length),
+      turnElapsed: 0,
+      clocks: Object.fromEntries(
+        (["w", "b"] as const).map((color) => {
+          let index = moves.length - 1;
+          while (index >= 0 && moves[index].color !== color) index--;
+          return [
+            color,
+            index < 0
+              ? value.control.seconds
+              : (clockSeconds(value.moveTimes[index]) ?? value.clocks[color]),
+          ];
+        }),
+      ) as Record<Color, number>,
       premoves: [],
       viewPly: null,
       outcome: "",
@@ -556,17 +579,22 @@ export default function BotPage({
     setPremoveMessage("");
   }
   function navigate(nextPly: number) {
-    stopWork();
+    const elapsed = pendingElapsed();
     setSession((value) => ({
-      ...value,
+      ...elapseBotTime(value, chess.turn(), elapsed),
       viewPly: nextPly >= history.length ? null : Math.max(0, nextPly),
-      paused: nextPly < history.length && value.started ? true : value.paused,
       premoves: [],
     }));
   }
   function pause() {
+    if (session.mode === "none") return;
+    const elapsed = pendingElapsed();
     stopWork();
-    setSession((value) => ({ ...value, paused: !value.paused, viewPly: null }));
+    setSession((value) => ({
+      ...elapseBotTime(value, chess.turn(), elapsed),
+      paused: !value.paused,
+      viewPly: null,
+    }));
   }
   async function getHint() {
     if (
@@ -626,7 +654,7 @@ export default function BotPage({
         event.preventDefault();
         undo();
       } else if (event.key.toLowerCase() === "p" && !event.shiftKey) {
-        if (session.started && !ended) {
+        if (session.started && !ended && session.mode !== "none") {
           event.preventDefault();
           pause();
         }
@@ -670,7 +698,11 @@ export default function BotPage({
     if (human === "w") game.blackElo = String(current.elo);
     else game.whiteElo = String(current.elo);
     game.event = `Latihan vs ${current.name}`;
-    game.timeControl = `${session.control.seconds}+${session.control.increment}`;
+    game.timeControl = unlimited
+      ? "-"
+      : `${session.control.seconds}+${session.control.increment}`;
+    game.moveTimes = session.moveTimes;
+    game.moveDurations = session.moveDurations;
     if (session.outcome === "resigned")
       game.result = human === "w" ? "0-1" : "1-0";
     else if (session.outcome.startsWith("timeout"))
@@ -687,8 +719,9 @@ export default function BotPage({
         aria-label={t(color === "w" ? "Sisa waktu putih" : "Sisa waktu hitam")}
         className={`chess-clock ${available && chess.turn() === color ? "clock-active" : ""}`}
       >
-        {String(Math.floor(seconds / 60)).padStart(2, "0")}:
-        {String(seconds % 60).padStart(2, "0")}
+        {unlimited
+          ? "∞"
+          : `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`}
       </time>
     );
   }
@@ -873,9 +906,11 @@ export default function BotPage({
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>
-                <span>
-                  <kbd>P</kbd> {t("Jeda")}
-                </span>
+                {session.mode !== "none" && (
+                  <span>
+                    <kbd>P</kbd> {t("Jeda")}
+                  </span>
+                )}
                 {permissions.hint && (
                   <span>
                     <kbd>H</kbd> {t("Petunjuk")}
@@ -925,14 +960,6 @@ export default function BotPage({
                       ["Shift+←", "Ke posisi awal"],
                       ["Shift+→", "Ke posisi terakhir"],
                       ["Esc", "Batalkan premove"],
-                      ...(permissions.engine
-                        ? ([
-                            ["E", "Engine"],
-                            ["A", "Panah"],
-                            ["C", "Kategori langkah"],
-                            ["T", "Ancaman"],
-                          ] as const)
-                        : []),
                     ].map(([key, label]) => (
                       <div key={key}>
                         <dt>
@@ -1128,15 +1155,21 @@ export default function BotPage({
                         <button
                           disabled={session.started && !ended}
                           className={
+                            session.control.seconds === 0 ||
                             ![180, 300, 600].includes(
                               session.control.seconds,
-                            ) || session.control.increment
+                            ) ||
+                            session.control.increment > 0
                               ? "active"
                               : ""
                           }
                           onClick={() => {
                             setCustomMinutes(
-                              String(session.control.seconds / 60),
+                              String(
+                                session.control.seconds
+                                  ? session.control.seconds / 60
+                                  : 5,
+                              ),
                             );
                             setCustomIncrement(
                               session.control.increment
@@ -1146,7 +1179,7 @@ export default function BotPage({
                             setAdvancedTime(true);
                           }}
                         >
-                          {t("Lanjutan")}
+                          {t(unlimited ? "Tanpa batas waktu" : "Lanjutan")}
                           {session.control.seconds > 0 &&
                             (![180, 300, 600].includes(
                               session.control.seconds,
@@ -1240,7 +1273,11 @@ export default function BotPage({
                           {t("Ulas permainan")}
                         </button>
                       ) : (
-                        <button className="button secondary" onClick={pause}>
+                        <button
+                          className="button secondary"
+                          onClick={pause}
+                          disabled={session.mode === "none"}
+                        >
                           {session.paused ? (
                             <Play size={14} />
                           ) : (
@@ -1290,6 +1327,7 @@ export default function BotPage({
                     </div>
                     <MoveList
                       moves={history.map((move) => move.san)}
+                      durations={session.moveDurations}
                       ply={ply}
                       onChange={navigate}
                       review={
@@ -1383,7 +1421,7 @@ export default function BotPage({
                       showCategories: showPieceAnnotation,
                     }))
                   }
-                  shortcuts
+                  shortcuts={settings.enableShortcuts}
                 />
                 <div className="settings-section">
                   <label className="board-sound-setting">
@@ -1451,6 +1489,19 @@ export default function BotPage({
           title={t("Waktu lanjutan")}
           onClose={() => setAdvancedTime(false)}
         >
+          <button
+            className={`button secondary full${unlimited ? " active" : ""}`}
+            onClick={() => {
+              setSession((value) => ({
+                ...value,
+                control: { seconds: 0, increment: 0 },
+                clocks: { w: 0, b: 0 },
+              }));
+              setAdvancedTime(false);
+            }}
+          >
+            {t("Tanpa batas waktu")}
+          </button>
           <div className="time-preset-groups">
             {Object.entries(TIME_PRESETS).map(([name, controls]) => (
               <section key={name}>

@@ -1,6 +1,7 @@
 import { Chess } from "chess.js";
 import type { Color, PieceSymbol, Square } from "chess.js";
 import type { Premove } from "./premove";
+import { formatPgnTime } from "./move-time";
 
 export const BOT_LEVELS = [
   {
@@ -65,9 +66,11 @@ export const TIME_PRESETS = {
   ],
 };
 export const timeControlLabel = (control: TimeControl) =>
-  control.increment
-    ? `${control.seconds / 60}+${control.increment}`
-    : `${control.seconds / 60}m`;
+  control.seconds === 0
+    ? "Unlimited"
+    : control.increment
+      ? `${control.seconds / 60}+${control.increment}`
+      : `${control.seconds / 60}m`;
 export type BotOptions = {
   engine: "lite" | "full";
   engineDepth: number;
@@ -129,6 +132,9 @@ export type BotSession = {
   outcome: "" | "resigned" | "timeout-w" | "timeout-b";
   viewPly: number | null;
   premoves: Premove[];
+  turnElapsed: number;
+  moveTimes: string[];
+  moveDurations: (number | undefined)[];
 };
 export function newBotSession(): BotSession {
   return {
@@ -145,6 +151,9 @@ export function newBotSession(): BotSession {
     outcome: "",
     viewPly: null,
     premoves: [],
+    turnElapsed: 0,
+    moveTimes: [],
+    moveDurations: [],
   };
 }
 export function restoreBotSession(value: unknown): BotSession {
@@ -160,7 +169,8 @@ export function restoreBotSession(value: unknown): BotSession {
       !["w", "b", "random"].includes(saved.side) ||
       !["w", "b"].includes(saved.human) ||
       !Number.isFinite(saved.control.seconds) ||
-      saved.control.seconds < 15 ||
+      (saved.control.seconds !== 0 && saved.control.seconds < 15) ||
+      (saved.control.seconds === 0 && saved.control.increment !== 0) ||
       saved.control.seconds > 10800 ||
       !Number.isFinite(saved.control.increment) ||
       saved.control.increment < 0 ||
@@ -177,7 +187,25 @@ export function restoreBotSession(value: unknown): BotSession {
       mode: BOT_MODES.some((mode) => mode.id === saved.mode)
         ? saved.mode
         : fallback.mode,
-      paused: !!saved.started,
+      paused: saved.mode === "none" ? false : !!saved.started,
+      turnElapsed:
+        Number.isFinite(saved.turnElapsed) && saved.turnElapsed >= 0
+          ? saved.turnElapsed
+          : 0,
+      moveTimes: Array.isArray(saved.moveTimes)
+        ? saved.moveTimes
+            .slice(0, chess.history().length)
+            .map((time) => (typeof time === "string" ? time : ""))
+        : [],
+      moveDurations: Array.isArray(saved.moveDurations)
+        ? saved.moveDurations
+            .slice(0, chess.history().length)
+            .map((time) =>
+              typeof time === "number" && Number.isFinite(time) && time >= 0
+                ? time
+                : undefined,
+            )
+        : [],
       viewPly:
         saved.viewPly === null
           ? null
@@ -263,4 +291,69 @@ export function threatenedSquares(chess: Chess, human: Color) {
       (String.fromCharCode(97 + (index % 8)) +
         (8 - Math.floor(index / 8))) as Square,
   ).filter((square) => chess.isAttacked(square, enemy));
+}
+
+export function elapseBotTime(
+  session: BotSession,
+  color: Color,
+  elapsed: number,
+): BotSession {
+  if (!session.started || session.paused || session.outcome || elapsed <= 0)
+    return session;
+  return {
+    ...session,
+    turnElapsed: session.turnElapsed + elapsed,
+    clocks:
+      session.control.seconds === 0
+        ? session.clocks
+        : {
+            ...session.clocks,
+            [color]: Math.max(0, session.clocks[color] - elapsed),
+          },
+  };
+}
+
+export function finishBotTurn(
+  session: BotSession,
+  next: Chess,
+  color: Color,
+  premove = false,
+): BotSession {
+  const unlimited = session.control.seconds === 0;
+  const duration = premove ? 0.1 : session.turnElapsed;
+  const beforeIncrement = Math.max(
+    0,
+    session.clocks[color] -
+      (premove ? Math.max(0, 0.1 - session.turnElapsed) : 0),
+  );
+  if (!unlimited && beforeIncrement <= 0)
+    return {
+      ...session,
+      clocks: { ...session.clocks, [color]: 0 },
+      outcome: color === "w" ? "timeout-w" : "timeout-b",
+      paused: true,
+      premoves: [],
+    };
+  const remaining = unlimited ? 0 : beforeIncrement + session.control.increment;
+  const index = next.history().length - 1;
+  return {
+    ...session,
+    pgn: next.pgn(),
+    viewPly: session.mode === "none" ? session.viewPly : null,
+    clocks: { ...session.clocks, [color]: remaining },
+    turnElapsed: 0,
+    moveTimes: [
+      ...Array.from({ length: index }, (_, i) => session.moveTimes[i] || ""),
+      unlimited ? "" : formatPgnTime(remaining),
+    ],
+    moveDurations: [
+      ...Array.from({ length: index }, (_, i) => session.moveDurations[i]),
+      duration,
+    ],
+    premoves: next.isGameOver()
+      ? []
+      : premove
+        ? session.premoves.slice(1)
+        : session.premoves,
+  };
 }

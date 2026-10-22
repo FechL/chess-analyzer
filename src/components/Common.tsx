@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  CornerUpLeft,
   RotateCw,
   Undo2,
 } from "lucide-react";
@@ -145,7 +146,7 @@ export function NavigationControls({
               shortcut={enableShortcuts ? "R" : undefined}
               onClick={onReturnToMain}
             >
-              <Undo2 size={18} />
+              <CornerUpLeft size={18} />
             </IconButton>
           </span>
         )}
@@ -184,7 +185,11 @@ export function NavigationControls({
         {actions}
         {t(
           onFlip && (
-            <IconButton label={t("Balik papan (F)")} onClick={onFlip}>
+            <IconButton
+              label={t("Balik papan")}
+              shortcut={enableShortcuts ? "F" : undefined}
+              onClick={onFlip}
+            >
               <RotateCw size={16} />
             </IconButton>
           ),

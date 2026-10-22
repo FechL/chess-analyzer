@@ -90,20 +90,22 @@ describe("board annotation toggles", () => {
 });
 
 describe("allowed annotation arrows", () => {
-  it("allows horizontal, vertical, and knight-shaped arrows only", () => {
+  it("allows horizontal, vertical, diagonal, and knight-shaped arrows", () => {
     for (const [from, to] of [
       ["a1", "h1"],
       ["d2", "d8"],
       ["b1", "c3"],
       ["g8", "e7"],
+      ["a1", "h8"],
+      ["f1", "b5"],
+      ["a1", "b2"],
+      ["b1", "d3"],
     ]) {
       expect(isAllowedArrow(from, to)).toBe(true);
     }
     for (const [from, to] of [
       ["a1", "a1"],
-      ["a1", "b2"],
       ["a1", "c4"],
-      ["b1", "d3"],
     ]) {
       expect(isAllowedArrow(from, to)).toBe(false);
     }

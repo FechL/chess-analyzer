@@ -1,5 +1,6 @@
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import type { Move } from "chess.js";
+import { clockSeconds, formatPgnTime } from "./move-time";
 
 export type GameVariation = {
   id: string;
@@ -18,6 +19,7 @@ export type GameData = {
   whiteElo?: string;
   blackElo?: string;
   moveTimes?: string[];
+  moveDurations?: (number | undefined)[];
   timeControl?: string;
   variations?: GameVariation[];
 };
@@ -103,6 +105,12 @@ export function parseGame(input: string): GameData {
   const clocks = history.map(
     (move) => comments.get(move.after)?.match(/\[%clk\s+([^\]]+)\]/)?.[1] || "",
   );
+  const durations = history.map((move) => {
+    const value = comments.get(move.after)?.match(/\[%emt\s+([^\]]+)\]/)?.[1];
+    if (!value) return undefined;
+    const seconds = clockSeconds(value);
+    return seconds !== undefined && seconds >= 0 ? seconds : undefined;
+  });
   return {
     startFen: history[0]?.before ?? chess.fen(),
     moves: history.map((m) => m.san),
@@ -114,6 +122,9 @@ export function parseGame(input: string): GameData {
     whiteElo: headers.WhiteElo,
     blackElo: headers.BlackElo,
     moveTimes: clocks.some(Boolean) ? clocks : undefined,
+    moveDurations: durations.some((time) => time !== undefined)
+      ? durations
+      : undefined,
     timeControl: headers.TimeControl,
   };
 }
@@ -137,7 +148,7 @@ export function historyOf(game: GameData): Move[] {
   return positionAt(game, game.moves.length).history({ verbose: true });
 }
 export function toPgn(game: GameData): string {
-  const c = positionAt(game, game.moves.length);
+  const c = new Chess(game.startFen);
   c.header(
     "Event",
     game.event,
@@ -151,6 +162,17 @@ export function toPgn(game: GameData): string {
     ...(game.blackElo ? ["BlackElo", game.blackElo] : []),
     ...(game.timeControl ? ["TimeControl", game.timeControl] : []),
   );
+  game.moves.forEach((san, index) => {
+    c.move(san);
+    const tags: string[] = [];
+    const clock = game.moveTimes?.[index];
+    if (clock) tags.push(`[%clk ${clock}]`);
+    const duration = game.moveDurations?.[index];
+    if (duration !== undefined && Number.isFinite(duration)) {
+      tags.push(`[%emt ${formatPgnTime(duration)}]`);
+    }
+    if (tags.length) c.setComment(tags.join(" "));
+  });
   return c.pgn();
 }
 export function pvToSan(fen: string, pv: string[], max = 6): string[] {

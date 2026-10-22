@@ -678,6 +678,8 @@ kbd {
   color: #8999b0;
 }
 .board-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   background: linear-gradient(rgb(255 255 255 / 78%), rgb(228 234 244 / 70%));
   border-color: rgb(255 255 255 / 90%);
   border-radius: 11px;
@@ -685,6 +687,30 @@ kbd {
     inset 0 1px 0 white,
     0 2px 3px rgb(69 92 129 / 7%);
   margin-top: 6px;
+}
+.board-controls > .icon-button {
+  justify-self: end;
+}
+.board-controls .move-position {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.navigation-buttons {
+  position: relative;
+  --navigation-gap: 9px;
+  gap: var(--navigation-gap);
+}
+.return-to-main-control {
+  position: absolute;
+  right: 100%;
+  margin-right: var(--navigation-gap);
+  display: flex;
+}
+@media (max-width: 480px) {
+  .navigation-buttons {
+    --navigation-gap: 3px;
+  }
 }
 .board-controls .icon-button {
   color: #5d728e;

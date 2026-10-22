@@ -132,12 +132,14 @@ export function NavigationControls({
       </span>
       <div className="navigation-buttons">
         {outsideNotation && onReturnToMain && (
-          <IconButton
-            label={t("Kembali ke langkah terakhir notasi asli")}
-            onClick={onReturnToMain}
-          >
-            <Undo2 size={18} />
-          </IconButton>
+          <span className="return-to-main-control">
+            <IconButton
+              label={t("Kembali ke langkah terakhir notasi asli")}
+              onClick={onReturnToMain}
+            >
+              <Undo2 size={18} />
+            </IconButton>
+          </span>
         )}
         <IconButton
           label={t("Ke posisi awal")}

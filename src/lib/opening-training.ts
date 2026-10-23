@@ -55,6 +55,9 @@ export function recordOpeningAttempt(
     : 0;
   // Reading a familiar line must not erase its existing review schedule.
   const keepSchedule = mode === "learn" && !!previous?.intervalDays;
+  const previousPractice = previous?.completed?.practice;
+  const practiceAlreadyPerfect =
+    previousPractice?.mistakes === 0 && previousPractice.hints === 0;
   return {
     ...previous,
     learned: true,
@@ -69,7 +72,10 @@ export function recordOpeningAttempt(
         ? previous?.completed
         : {
             ...previous?.completed,
-            [mode]: { mistakes, hints },
+            [mode]:
+              mode === "practice" && practiceAlreadyPerfect
+                ? previousPractice
+                : { mistakes, hints },
           },
   };
 }

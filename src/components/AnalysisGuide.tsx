@@ -8,19 +8,38 @@ import {
 
 export default function AnalysisGuide({
   accuracy = false,
+  header = false,
 }: {
   accuracy?: boolean;
+  header?: boolean;
 }) {
   const { t } = useI18n();
   return (
     <DashboardPopover>
       <DashboardPopoverTrigger asChild>
         <button
-          className={accuracy ? undefined : "icon-button"}
-          aria-label={t(accuracy ? "Metode akurasi" : "Tentang analisis")}
-          title={t(accuracy ? "Metode akurasi" : "Tentang analisis")}
+          className={
+            accuracy ? undefined : `icon-button${header ? " header-help" : ""}`
+          }
+          aria-label={t(
+            accuracy
+              ? "Metode akurasi"
+              : header
+                ? "Buka panduan"
+                : "Tentang analisis",
+          )}
+          title={t(
+            accuracy
+              ? "Metode akurasi"
+              : header
+                ? "Buka panduan"
+                : "Tentang analisis",
+          )}
         >
-          <CircleHelp size={accuracy ? 13 : 15} aria-hidden="true" />
+          <CircleHelp
+            size={accuracy ? 13 : header ? 18 : 15}
+            aria-hidden="true"
+          />
         </button>
       </DashboardPopoverTrigger>
       <DashboardPopoverContent

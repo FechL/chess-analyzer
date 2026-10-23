@@ -105,6 +105,7 @@ export function NavigationControls({
   ply,
   total,
   navigationLimit = total,
+  navigationDisabled = false,
   onChange,
   onFlip,
   outsideNotation = false,
@@ -115,6 +116,7 @@ export function NavigationControls({
   ply: number;
   total: number;
   navigationLimit?: number;
+  navigationDisabled?: boolean;
   onChange: (n: number) => void;
   onFlip?: () => void;
   outsideNotation?: boolean;
@@ -156,21 +158,21 @@ export function NavigationControls({
           label={t("Ke posisi awal")}
           shortcut={enableShortcuts ? "Shift+ArrowLeft" : undefined}
           onClick={() => onChange(0)}
-          disabled={ply === 0}
+          disabled={navigationDisabled || ply === 0}
         >
           <ChevronsLeft size={19} />
         </IconButton>
         <IconButton
           label={t("Langkah sebelumnya")}
           onClick={() => onChange(Math.max(0, ply - 1))}
-          disabled={ply === 0}
+          disabled={navigationDisabled || ply === 0}
         >
           <ChevronLeft size={20} />
         </IconButton>
         <IconButton
           label={t("Langkah berikutnya")}
           onClick={() => onChange(Math.min(navigationLimit, ply + 1))}
-          disabled={ply >= navigationLimit}
+          disabled={navigationDisabled || ply >= navigationLimit}
         >
           <ChevronRight size={20} />
         </IconButton>
@@ -178,7 +180,7 @@ export function NavigationControls({
           label={t("Ke posisi terakhir")}
           shortcut={enableShortcuts ? "Shift+ArrowRight" : undefined}
           onClick={() => onChange(navigationLimit)}
-          disabled={ply >= navigationLimit}
+          disabled={navigationDisabled || ply >= navigationLimit}
         >
           <ChevronsRight size={19} />
         </IconButton>

@@ -19,6 +19,40 @@ export const OPENING_ENGLISH: Record<string, string> = {
     "Opening names, ECO codes, and training lines",
 
   "Panduan mode opening": "Opening mode guide",
+  Review: "Review",
+  "Tes acak": "Random test",
+  "Review opening": "Opening review",
+  "Tes acak dari line yang sudah dipelajari dan diselesaikan dengan Practice 100%. Setiap line muncul sekali per sesi. Nyawa dan timer bisa diaktifkan bersama atau terpisah; rekor disimpan untuk tiap kombinasi mode.":
+    "A random test of lines learned and completed with 100% Practice. Each line appears once per session. Lives and timer can be enabled together or separately; records are kept for each mode combination.",
+  "Mainkan line acak yang sudah selesai Learn dan Practice 100%. Setiap line muncul sekali dalam satu tes.":
+    "Play random lines you have learned and completed with 100% Practice. Each line appears once per test.",
+  "Line tersedia": "Available lines",
+  "Skor tertinggi": "High score",
+  "Tes selesai": "Test complete",
+  "Waktu habis": "Time's up",
+  "Batas kesalahan tercapai": "Mistake limit reached",
+  Skor: "Score",
+  "Mode tes": "Test modes",
+  "Pilih salah satu, keduanya, atau tanpa batasan.":
+    "Choose either mode, both, or neither.",
+  Nyawa: "Lives",
+  "Maksimal 3 langkah salah.": "Up to 3 incorrect moves.",
+  Timer: "Timer",
+  "Awal: 1 detik per langkah di semua line. Selesai satu line: tambah 0,5 detik per langkah line itu.":
+    "Start with 1 second per move across all lines. Completing a line adds 0.5 seconds per move in that line.",
+  "Selesaikan Learn dan Practice 100% pada setidaknya satu line untuk membuka Review.":
+    "Complete Learn and 100% Practice on at least one line to unlock Review.",
+  "Mulai tes": "Start test",
+  "Tes lagi": "Test again",
+  Kesalahan: "Mistakes",
+  Waktu: "Time",
+  "Line selesai": "Line complete",
+  "Langkah kurang tepat. Coba lagi.": "Incorrect move. Try again.",
+  "Line berikutnya akan dimulai.": "The next line will start shortly.",
+  "Mainkan langkah berikutnya tanpa petunjuk.":
+    "Play the next move without hints.",
+  "Notasi tes": "Test notation",
+  "Ulangi tes": "Restart test",
   "Pelajari langkah dan ide opening dengan panduan di papan. Panah langkah dapat diatur melalui Options dan hanya muncul dalam Learn. Selesaikan line ini untuk membuka Practice, lalu lanjutkan Learn line berikutnya secara berurutan.":
     "Learn the opening moves and their ideas with guidance on the board. Move arrows can be toggled in Options and appear only in Learn. Complete the line to unlock its Practice, then learn subsequent lines in order.",
   "Mainkan line dari ingatan setelah menyelesaikan Learn pada line tersebut. Tidak ada panah panduan. Langkah yang salah perlu dicoba kembali; penggunaan Hint dicatat. Practice baru dinyatakan selesai setelah satu percobaan tanpa kesalahan dan tanpa Hint. Next practice tersedia jika line berikutnya sudah terbuka.":

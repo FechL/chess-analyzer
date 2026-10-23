@@ -1,5 +1,6 @@
 import EngineOptions from "../components/EngineOptions";
 import AnalysisGuide from "../components/AnalysisGuide";
+import CopyGameActions from "../components/CopyGameActions";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
@@ -1445,22 +1446,7 @@ export default function Analysis({
             </>
           )}
         </div>
-        <div className="export-actions board-export-actions analysis-export-actions">
-          <button
-            className="text-button"
-            onClick={() => downloadFile("kuda-position.fen", fen)}
-          >
-            {t("Ekspor FEN ")}
-            <ArrowDownToLine size={13} />
-          </button>
-          <button
-            className="text-button"
-            onClick={() => downloadFile("kuda-game.pgn", toPgn(game))}
-          >
-            {t("Ekspor PGN ")}
-            <ArrowDownToLine size={13} />
-          </button>
-        </div>
+        <CopyGameActions fen={fen} getPgn={() => toPgn(game)} />
       </div>
       {keyboardToast && (
         <div

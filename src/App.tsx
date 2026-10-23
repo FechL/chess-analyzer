@@ -30,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { DashboardShell } from "./components/block/dashboard-shell";
+import AnalysisGuide from "./components/AnalysisGuide";
 import { AppearanceContext, pieceAsset } from "./lib/preferences";
 import { setLanguage } from "./lib/i18n";
 import Analysis from "./pages/Analysis";
@@ -299,13 +300,17 @@ export default function App() {
         )}
         headerActions={
           <>
-            <button
-              className="icon-button header-help"
-              aria-label={t("Buka panduan")}
-              onClick={() => setModal("help")}
-            >
-              <HelpCircle size={18} />
-            </button>
+            {page === "analysis" ? (
+              <AnalysisGuide header />
+            ) : (
+              <button
+                className="icon-button header-help"
+                aria-label={t("Buka panduan")}
+                onClick={() => setModal("help")}
+              >
+                <HelpCircle size={18} />
+              </button>
+            )}
             <span className="profile-avatar" title={t("Profil lokal")}>
               {t("K")}
             </span>

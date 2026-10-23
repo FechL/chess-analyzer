@@ -4,7 +4,6 @@ import type { Color } from "chess.js";
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowDownToLine,
   Bot as BotIcon,
   CircleHelp,
   Cpu,
@@ -20,6 +19,7 @@ import {
 import { useI18n } from "../lib/i18n";
 import Board, { EvalBar } from "../components/Board";
 import EngineOptions from "../components/EngineOptions";
+import CopyGameActions from "../components/CopyGameActions";
 import { NotationLine } from "../components/Notation";
 import {
   IconButton,
@@ -36,7 +36,6 @@ import { useEngine } from "../hooks/useEngine";
 import { LocalEngine } from "../lib/engine";
 import {
   annotate,
-  downloadFile,
   formatEval,
   gameStatus,
   material,
@@ -1475,22 +1474,11 @@ export default function BotPage({
             ) : null}
           </aside>
         </div>
-        <div className="export-actions board-export-actions analysis-export-actions bot-export-actions">
-          <button
-            className="text-button"
-            onClick={() => downloadFile("kuda-bot-position.fen", visibleFen)}
-          >
-            {t("Ekspor FEN")} <ArrowDownToLine size={13} />
-          </button>
-          <button
-            className="text-button"
-            onClick={() =>
-              downloadFile("kuda-bot-game.pgn", toPgn(exportGame()))
-            }
-          >
-            {t("Ekspor PGN")} <ArrowDownToLine size={13} />
-          </button>
-        </div>
+        <CopyGameActions
+          fen={visibleFen}
+          getPgn={() => toPgn(exportGame())}
+          className="bot-export-actions"
+        />
       </div>
       {advancedTime && (
         <Modal

@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { OPENINGS } from "../data/content";
+import { openingOverviewMoves } from "../data/opening-overviews";
 import {
   reviewCandidates,
   reviewInitialTimeMs,
-  reviewModeKey,
   reviewTimeBonusMs,
   shuffleReviewLines,
 } from "./opening-review";
-import { recordOpeningAttempt } from "./opening-training";
+import { openingPositions, recordOpeningAttempt } from "./opening-training";
 import type { OpeningLine, OpeningProgress } from "./opening-training";
 
 const lines: OpeningLine[] = [
@@ -37,11 +38,25 @@ describe("opening review test", () => {
     expect(reviewTimeBonusMs(lines[2])).toBe(1_500);
   });
 
-  it("shuffles every eligible challenge exactly once and separates mode records", () => {
+  it("shuffles every eligible challenge exactly once", () => {
     const queue = shuffleReviewLines(lines);
     expect(queue).toHaveLength(lines.length);
     expect(new Set(queue)).toEqual(new Set(lines.map((line) => line.id)));
-    expect(reviewModeKey({ lives: false, timer: true })).toBe("0-1");
-    expect(reviewModeKey({ lives: true, timer: true })).toBe("1-1");
+  });
+});
+
+describe("opening overview positions", () => {
+  it("reaches the characteristic position shown in each overview", () => {
+    for (const opening of OPENINGS) {
+      const moves = openingOverviewMoves(opening.id, opening.moves);
+      const position = openingPositions({
+        id: opening.id,
+        eco: opening.eco,
+        name: opening.name,
+        moves,
+      });
+      expect(position.moves.map((move) => move.san)).toEqual(moves);
+      expect(position.positions).toHaveLength(moves.length + 1);
+    }
   });
 });

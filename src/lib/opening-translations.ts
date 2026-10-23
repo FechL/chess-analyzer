@@ -22,13 +22,11 @@ export const OPENING_ENGLISH: Record<string, string> = {
   Review: "Review",
   "Tes acak": "Random test",
   "Review opening": "Opening review",
-  "Tes acak dari line yang sudah dipelajari dan diselesaikan dengan Practice 100%. Setiap line muncul sekali per sesi. Nyawa dan timer bisa diaktifkan bersama atau terpisah; rekor disimpan untuk tiap kombinasi mode.":
-    "A random test of lines learned and completed with 100% Practice. Each line appears once per session. Lives and timer can be enabled together or separately; records are kept for each mode combination.",
+  "Tes acak dari line yang sudah dipelajari dan diselesaikan dengan Practice 100%. Setiap line muncul sekali per sesi. Nyawa dan timer bisa diaktifkan bersama atau terpisah.":
+    "A random test of lines learned and completed with 100% Practice. Each line appears once per session. Lives and timer can be enabled together or separately.",
   "Mainkan line acak yang sudah selesai Learn dan Practice 100%. Setiap line muncul sekali dalam satu tes.":
     "Play random lines you have learned and completed with 100% Practice. Each line appears once per test.",
   "Line tersedia": "Available lines",
-  "Skor tertinggi": "High score",
-  "Tes selesai": "Test complete",
   "Waktu habis": "Time's up",
   "Batas kesalahan tercapai": "Mistake limit reached",
   Skor: "Score",
@@ -46,13 +44,9 @@ export const OPENING_ENGLISH: Record<string, string> = {
   "Tes lagi": "Test again",
   Kesalahan: "Mistakes",
   Waktu: "Time",
-  "Line selesai": "Line complete",
+  "Keluar review": "Exit review",
   "Langkah kurang tepat. Coba lagi.": "Incorrect move. Try again.",
-  "Line berikutnya akan dimulai.": "The next line will start shortly.",
-  "Mainkan langkah berikutnya tanpa petunjuk.":
-    "Play the next move without hints.",
   "Notasi tes": "Test notation",
-  "Ulangi tes": "Restart test",
   "Pelajari langkah dan ide opening dengan panduan di papan. Panah langkah dapat diatur melalui Options dan hanya muncul dalam Learn. Selesaikan line ini untuk membuka Practice, lalu lanjutkan Learn line berikutnya secara berurutan.":
     "Learn the opening moves and their ideas with guidance on the board. Move arrows can be toggled in Options and appear only in Learn. Complete the line to unlock its Practice, then learn subsequent lines in order.",
   "Mainkan line dari ingatan setelah menyelesaikan Learn pada line tersebut. Tidak ada panah panduan. Langkah yang salah perlu dicoba kembali; penggunaan Hint dicatat. Practice baru dinyatakan selesai setelah satu percobaan tanpa kesalahan dan tanpa Hint. Next practice tersedia jika line berikutnya sudah terbuka.":

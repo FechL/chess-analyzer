@@ -27,10 +27,6 @@ export function shuffleReviewLines(lines: OpeningLine[]): string[] {
   return ids;
 }
 
-export function reviewModeKey(options: ReviewOptions): string {
-  return `${Number(options.lives)}-${Number(options.timer)}`;
-}
-
 export function reviewInitialTimeMs(lines: OpeningLine[]): number {
   return lines.reduce((total, line) => total + line.moves.length * 1000, 0);
 }

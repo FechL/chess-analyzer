@@ -384,3 +384,13 @@ export const OPENING_OVERVIEWS: Record<string, OpeningOverview> = {
     wikipedia: "English_Opening",
   },
 };
+
+export function openingOverviewMoves(openingId: string, fallback: string[]) {
+  const notation = OPENING_OVERVIEWS[openingId]?.moves;
+  return notation
+    ? notation
+        .replace(/\d+\.(?:\.\.)?/g, " ")
+        .trim()
+        .split(/\s+/)
+    : fallback;
+}

@@ -1,6 +1,6 @@
 // i18n: rendered text
 import { useI18n } from "@/lib/i18n";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -51,8 +51,10 @@ import {
   writeStorage,
 } from "./lib/chess";
 import type { GameData } from "./lib/chess";
-import { LESSONS } from "./data/content";
+import { LESSONS, OPENINGS } from "./data/content";
 import { ANALYSIS_SHORTCUTS } from "./lib/analysis-shortcuts";
+
+const OpeningStudy = lazy(() => import("./pages/OpeningStudy"));
 
 export type Settings = {
   boardTheme: "sage" | "walnut" | "slate";
@@ -111,9 +113,15 @@ export default function App() {
 
   const boardSound = useBoardSound();
   const boardAnimation = useBoardAnimation();
-  const [page, setPage] = useState(() =>
-    TITLES[location.hash.slice(1)] ? location.hash.slice(1) : "analysis",
+  const [route, setRoute] = useState(
+    () => location.hash.slice(1) || "analysis",
   );
+  const routePage = route.split("/")[0];
+  const page = TITLES[routePage] ? routePage : "analysis";
+  const activeOpening =
+    page === "openings"
+      ? OPENINGS.find((opening) => opening.id === route.split("/")[1])
+      : undefined;
   const [game, setGame] = useState<GameData>(restoreGame);
   const [analysisFen, setAnalysisFen] = useState(() => {
     const g = restoreGame();
@@ -155,15 +163,15 @@ export default function App() {
   useEffect(() => {
     const handler = () => {
       const next = location.hash.slice(1);
-      if (TITLES[next]) setPage(next);
+      setRoute(next || "analysis");
     };
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
   }, []);
   useEffect(() => {
-    document.title = `${t(TITLES[page])} · Kuda`;
+    document.title = `${activeOpening?.name || t(TITLES[page])} · Kuda`;
     setCompleted(readStorage("kuda-lessons", []));
-  }, [page, modal, t]);
+  }, [page, activeOpening?.name, modal, t]);
   useEffect(() => {
     const update = () => setCompleted(readStorage("kuda-lessons", []));
     window.addEventListener("kuda-progress", update);
@@ -175,7 +183,7 @@ export default function App() {
       setModal(id);
       return;
     }
-    setPage(id);
+    setRoute(id);
     location.hash = id;
   };
   const notify = (message: string) => {
@@ -273,7 +281,20 @@ export default function App() {
           <span className="breadcrumb">
             <span>{t("Studio")}</span>
             <ChevronRight size={14} />
-            {t(TITLES[page])}
+            {activeOpening ? (
+              <>
+                <button
+                  className="breadcrumb-link"
+                  onClick={() => navigate("openings")}
+                >
+                  {t("Opening explorer")}
+                </button>
+                <ChevronRight size={14} />
+                <span aria-current="page">{activeOpening.name}</span>
+              </>
+            ) : (
+              t(TITLES[page])
+            )}
           </span>,
         )}
         headerActions={
@@ -358,9 +379,28 @@ export default function App() {
           ),
         )}
         {t(
-          page === "openings" && (
-            <OpeningsPage settings={settings} onAnalyze={analyzePosition} />
-          ),
+          page === "openings" &&
+            (activeOpening ? (
+              <Suspense
+                fallback={
+                  <div className="page opening-loading" role="status">
+                    {t("Memuat opening…")}
+                  </div>
+                }
+              >
+                <OpeningStudy
+                  key={activeOpening.id}
+                  opening={activeOpening}
+                  settings={settings}
+                  onBack={() => navigate("openings")}
+                />
+              </Suspense>
+            ) : (
+              <OpeningsPage
+                settings={settings}
+                onOpenOpening={(id) => navigate(`openings/${id}`)}
+              />
+            )),
         )}
         {t(
           page === "academy" && (

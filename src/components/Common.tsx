@@ -104,6 +104,7 @@ export function IconButton({
 export function NavigationControls({
   ply,
   total,
+  navigationLimit = total,
   onChange,
   onFlip,
   outsideNotation = false,
@@ -113,6 +114,7 @@ export function NavigationControls({
 }: {
   ply: number;
   total: number;
+  navigationLimit?: number;
   onChange: (n: number) => void;
   onFlip?: () => void;
   outsideNotation?: boolean;
@@ -167,16 +169,16 @@ export function NavigationControls({
         </IconButton>
         <IconButton
           label={t("Langkah berikutnya")}
-          onClick={() => onChange(Math.min(total, ply + 1))}
-          disabled={ply === total}
+          onClick={() => onChange(Math.min(navigationLimit, ply + 1))}
+          disabled={ply >= navigationLimit}
         >
           <ChevronRight size={20} />
         </IconButton>
         <IconButton
           label={t("Ke posisi terakhir")}
           shortcut={enableShortcuts ? "Shift+ArrowRight" : undefined}
-          onClick={() => onChange(total)}
-          disabled={ply === total}
+          onClick={() => onChange(navigationLimit)}
+          disabled={ply >= navigationLimit}
         >
           <ChevronsRight size={19} />
         </IconButton>

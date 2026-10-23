@@ -56,5 +56,11 @@ License: Creative Commons CC0 public domain dedication.
 
 ## Chess content
 
+The opening variation data in src/data/opening-lines.json is derived from
+https://github.com/lichess-org/chess-openings (a.tsv through e.tsv), retrieved
+on 2026-10-23. The upstream dataset is dedicated to the public domain under CC0.
+The license is included in docs/licenses/lichess-openings-CC0.txt.
+Rebuild it with scripts/prepare-opening-lines.mjs and a local copy of those TSV files.
+
 Opening explanations and exercise text in this app are newly written in Indonesian.
 The Morphy Opera Game (Paris, 1858) is used as a historical example.

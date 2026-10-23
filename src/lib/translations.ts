@@ -1,4 +1,7 @@
+import { OPENING_ENGLISH } from "./opening-translations";
+
 export const ENGLISH: Record<string, string> = {
+  ...OPENING_ENGLISH,
   "Vs Bot": "Vs Bot",
   Mode: "Mode",
   "Penjelasan mode bantuan": "Assistance mode details",

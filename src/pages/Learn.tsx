@@ -24,7 +24,7 @@ import {
 import Board from "../components/Board";
 import { Modal, NavigationControls, ProgressRing } from "../components/Common";
 import { LESSONS, OPENINGS } from "../data/content";
-import type { Exercise, Opening } from "../data/content";
+import type { Exercise } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
 import {
   cachedPuzzles,
@@ -36,17 +36,16 @@ import type { Settings } from "../App";
 
 export function OpeningsPage({
   settings,
-  onAnalyze,
+  onOpenOpening,
 }: {
   settings: Settings;
-  onAnalyze: (fen: string, name: string) => void;
+  onOpenOpening: (id: string) => void;
 }) {
   const { t } = useI18n();
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState<Opening>();
-  const [completed, setCompleted] = useState<string[]>(() =>
+  const [completed] = useState<string[]>(() =>
     readStorage("kuda-openings", []),
   );
   const openings = OPENINGS.filter(
@@ -96,7 +95,7 @@ export function OpeningsPage({
         </div>
         <button
           className="button primary"
-          onClick={() => setSelected(OPENINGS[0])}
+          onClick={() => onOpenOpening(OPENINGS[0].id)}
         >
           {t("Pelajari sekarang ")}
           <ArrowRight size={16} />
@@ -144,10 +143,10 @@ export function OpeningsPage({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setSelected(o);
+                    onOpenOpening(o.id);
                   }
                 }}
-                onClick={() => setSelected(o)}
+                onClick={() => onOpenOpening(o.id)}
               >
                 <div className={`opening-card-art art-${i % 4}`}>
                   <div className="opening-mini-board" inert>
@@ -209,67 +208,6 @@ export function OpeningsPage({
           "Repertoar lokal terkurasi · Jalur contoh untuk belajar, bukan database statistik pertandingan.",
         )}
       </p>
-      {t(
-        selected && (
-          <Modal
-            title={t(selected.name)}
-            onClose={() => setSelected(undefined)}
-            wide
-          >
-            <div className="study-layout">
-              <div>
-                <LineTrainer
-                  key={selected.id}
-                  fen={DEFAULT_POSITION}
-                  moves={selected.moves}
-                  color={selected.side}
-                  theme={settings.boardTheme}
-                  title={t("Latih urutan opening")}
-                  onComplete={() => {
-                    const next = [...new Set([...completed, selected.id])];
-                    setCompleted(next);
-                    writeStorage("kuda-openings", next);
-                  }}
-                  onAnalyze={(fen) => {
-                    onAnalyze(fen, selected.name);
-                    setSelected(undefined);
-                  }}
-                />
-              </div>
-              <div className="study-theory">
-                <span className="subtle-pill">
-                  {t(selected.eco)}
-                  {t(" · ")}
-                  {t(selected.category)}
-                </span>
-                <h3>{t("Pahami idenya.")}</h3>
-                <p>{t(selected.description)}</p>
-                <ol>
-                  {t(
-                    selected.ideas.map((idea, i) => (
-                      <li key={i}>
-                        <span>{t(String(i + 1).padStart(2, "0"))}</span>
-                        {t(idea)}
-                      </li>
-                    )),
-                  )}
-                </ol>
-                <div className="study-tip">
-                  <Lightbulb size={18} />
-                  <p>{t(selected.tip)}</p>
-                </div>
-                <p className="muted">
-                  {t("Mainkan buah ")}
-                  {t(selected.side === "w" ? "putih" : "hitam")}
-                  {t(
-                    " pada mode latihan. Lawan membalas otomatis sesuai jalur contoh.",
-                  )}
-                </p>
-              </div>
-            </div>
-          </Modal>
-        ),
-      )}
     </div>
   );
 }

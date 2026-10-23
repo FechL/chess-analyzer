@@ -3581,3 +3581,17 @@ textarea::placeholder {
     width: 24px;
   }
 }
+
+.analysis-guide-popover {
+  width: min(390px, calc(100vw - 32px));
+  max-height: min(560px, 75vh);
+  overflow-y: auto;
+}
+.analysis-guide-copy p {
+  margin: 0 0 14px;
+  line-height: 1.75;
+}
+.analysis-guide-copy a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
-  ArrowLeft,
   ArrowRight,
   BookOpen,
   Check,
@@ -43,6 +42,8 @@ import type {
   OpeningMode,
   OpeningProgress,
 } from "../lib/opening-training";
+import OpeningOverview from "./OpeningOverview";
+import { playBoardSound } from "../lib/board-sound";
 import "./opening-study.css";
 
 const MODES = [
@@ -72,11 +73,9 @@ const MODES = [
 export default function OpeningStudy({
   opening,
   settings,
-  onBack,
 }: {
   opening: Opening;
   settings: Settings;
-  onBack: () => void;
 }) {
   const { t, language } = useI18n();
   const lines = useMemo(() => openingLines(opening), [opening]);
@@ -93,7 +92,9 @@ export default function OpeningStudy({
   const line = lines.find((item) => item.id === lineId) || lines[0];
   const { positions, moves } = useMemo(() => openingPositions(line), [line]);
   const [mode, setMode] = useState<OpeningMode>("learn");
-  const [tab, setTab] = useState<"lesson" | "lines" | "options">("lesson");
+  const [tab, setTab] = useState<"overview" | "lesson" | "lines" | "options">(
+    "lesson",
+  );
   const [step, setStep] = useState(0);
   const [viewPly, setViewPly] = useState<number | null>(null);
   const [flipped, setFlipped] = useState(opening.side === "b");
@@ -177,6 +178,12 @@ export default function OpeningStudy({
     )
       return;
     completionRecorded.current = true;
+    if (
+      mode === "learn" ||
+      (mode === "practice" && mistakes === 0 && hints === 0)
+    ) {
+      playBoardSound("success");
+    }
     const next = recordOpeningAttempt(progress[line.id], mode, mistakes, hints);
     setProgress((value) => ({ ...value, [line.id]: next }));
     setResult(next);
@@ -216,6 +223,10 @@ export default function OpeningStudy({
         : nextOpeningLine(lines, progress, nextMode);
     const target =
       next || nextOpeningLine(lines, progress, "learn") || lines[0];
+    openLine(target, nextMode);
+    if (!next && nextMode === "review") setReviewEmpty(true);
+  }
+  function openLine(target: OpeningLine, nextMode: OpeningMode) {
     begin(target, nextMode);
     const completed =
       nextMode !== "review"
@@ -229,7 +240,6 @@ export default function OpeningStudy({
       setHints(completed?.hints || 0);
       setResult(progress[target.id]);
     }
-    if (!next && nextMode === "review") setReviewEmpty(true);
   }
   function navigate(next: number) {
     if (challengeLocked || reviewEmpty) return;
@@ -397,14 +407,11 @@ export default function OpeningStudy({
   );
 
   return (
-    <div className="page opening-study-page">
-      <div className="opening-study-heading">
-        <div>
-          <button className="text-button" onClick={onBack}>
-            <ArrowLeft size={14} /> {t("Semua opening")}
-          </button>
-          <h1>{opening.name}</h1>
-          <span>
+    <div className="page analysis-page opening-study-page">
+      <div className="workspace-toolbar opening-study-heading">
+        <div className="game-title-block">
+          <strong>{opening.name}</strong>
+          <span className="opening-repertoire">
             {t(opening.side === "w" ? "Repertoar putih" : "Repertoar hitam")} ·{" "}
             {lines.length} {t("variasi")}
           </span>
@@ -494,13 +501,23 @@ export default function OpeningStudy({
             }
           />
         </section>
-        <div className="opening-study-sidebar">
+        <div className="analysis-sidebar opening-study-sidebar">
           <aside className="analysis-panel opening-study-panel">
             <div
               className="panel-tabs"
               role="tablist"
               aria-label={t("Materi opening")}
             >
+              <button
+                role="tab"
+                id="opening-overview-tab"
+                aria-controls="opening-overview-panel"
+                aria-selected={tab === "overview"}
+                className={tab === "overview" ? "active" : ""}
+                onClick={() => setTab("overview")}
+              >
+                {t("Ikhtisar")}
+              </button>
               <button
                 role="tab"
                 id="opening-lesson-tab"
@@ -557,7 +574,7 @@ export default function OpeningStudy({
                 </DashboardPopoverContent>
               </DashboardPopover>
             </div>
-            {tab !== "options" && (
+            {tab === "lesson" && (
               <div className="opening-mode-picker">
                 <div
                   className="segmented"
@@ -580,7 +597,9 @@ export default function OpeningStudy({
                 </div>
               </div>
             )}
-            {tab === "options" ? (
+            {tab === "overview" ? (
+              <OpeningOverview opening={opening} />
+            ) : tab === "options" ? (
               <div
                 className="opening-options-panel"
                 role="tabpanel"
@@ -621,17 +640,19 @@ export default function OpeningStudy({
                 <div className="opening-variation-list">
                   {filteredLines.slice(0, listLimit).map((item) => {
                     const state = progress[item.id];
-                    const itemMode = mode === "review" ? "practice" : mode;
+                    const practice = state?.completed?.practice;
+                    const practiceComplete =
+                      !!practice &&
+                      practice.mistakes === 0 &&
+                      practice.hints === 0;
                     const unlocked = isOpeningLineUnlocked(
                       lines,
                       progress,
                       item.id,
-                      itemMode,
+                      "learn",
                     );
                     const lockReason =
-                      itemMode === "learn"
-                        ? "Selesaikan Learn line sebelumnya terlebih dahulu."
-                        : "Selesaikan Learn line ini terlebih dahulu.";
+                      "Selesaikan Learn line sebelumnya terlebih dahulu.";
                     return (
                       <button
                         key={item.id}
@@ -640,14 +661,19 @@ export default function OpeningStudy({
                         className={`opening-variation-item${item.id === line.id ? " active" : ""}`}
                         aria-current={item.id === line.id ? "true" : undefined}
                         onClick={() => {
-                          begin(item, mode === "review" ? "practice" : mode);
+                          openLine(
+                            item,
+                            state?.learned && mode !== "learn"
+                              ? "practice"
+                              : "learn",
+                          );
                           setTab("lesson");
                         }}
                       >
                         <span className="opening-variation-icon">
                           {!unlocked ? (
                             <LockKeyhole size={16} />
-                          ) : state?.cleanStreak >= 2 ? (
+                          ) : practiceComplete ? (
                             <CheckCheck size={16} />
                           ) : state?.learned ? (
                             <Check size={16} />
@@ -876,24 +902,6 @@ export default function OpeningStudy({
                         style={{ width: `${(step / moves.length) * 100}%` }}
                       />
                     </div>
-                    {(mode === "learn" || browsing || finished) && (
-                      <div className="opening-lesson-theory">
-                        <h3>{t("Rencana opening")}</h3>
-                        <p>{t(opening.description)}</p>
-                        <ol>
-                          {opening.ideas.map((idea, index) => (
-                            <li key={idea}>
-                              <span>{String(index + 1).padStart(2, "0")}</span>
-                              {t(idea)}
-                            </li>
-                          ))}
-                        </ol>
-                        <div className="opening-study-tip">
-                          <Lightbulb size={17} />
-                          <p>{t(opening.tip)}</p>
-                        </div>
-                      </div>
-                    )}
                     <div className="notation-heading">
                       <span>{t("Notasi variasi")}</span>
                       <span>
@@ -911,7 +919,7 @@ export default function OpeningStudy({
                 )}
               </div>
             )}
-            {tab !== "options" && !reviewEmpty && (
+            {tab === "lesson" && !reviewEmpty && (
               <div
                 className={`notation-heading opening-study-footer${statusComplete ? " completed" : ""}`}
                 role="status"
@@ -924,7 +932,7 @@ export default function OpeningStudy({
                 <span>{t(lineStatus)}</span>
               </div>
             )}
-            {tab !== "options" &&
+            {tab === "lesson" &&
               (mode !== "review" || (result && !reviewEmpty)) && (
                 <div
                   className="opening-action-dock"

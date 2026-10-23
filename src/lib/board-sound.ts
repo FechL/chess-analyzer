@@ -40,7 +40,7 @@ export function useBoardSound() {
   return useSyncExternalStore(subscribe, enabled, () => true);
 }
 
-export function playBoardSound(kind: BoardTransition["sound"]) {
+export function playBoardSound(kind: BoardTransition["sound"] | "success") {
   if (!enabled() || !context || context.state !== "running") return;
   const patterns = {
     move: [
@@ -59,6 +59,11 @@ export function playBoardSound(kind: BoardTransition["sound"]) {
       [660, 0, 0.08],
       [880, 0.085, 0.1],
     ],
+    success: [
+      [523, 0.05, 0.12],
+      [659, 0.16, 0.12],
+      [1046, 0.27, 0.22],
+    ],
     end: [
       [523, 0, 0.1],
       [659, 0.1, 0.1],
@@ -72,7 +77,7 @@ export function playBoardSound(kind: BoardTransition["sound"]) {
     oscillator.type = kind === "capture" ? "triangle" : "sine";
     oscillator.frequency.setValueAtTime(frequency, start);
     oscillator.frequency.exponentialRampToValueAtTime(
-      frequency * 0.65,
+      frequency * (kind === "success" ? 1 : 0.65),
       start + duration,
     );
     gain.gain.setValueAtTime(0.0001, start);

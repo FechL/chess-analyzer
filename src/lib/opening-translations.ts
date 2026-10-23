@@ -1,4 +1,23 @@
 export const OPENING_ENGLISH: Record<string, string> = {
+  Ikhtisar: "Overview",
+  "Langkah pembuka": "Opening moves",
+  "Pengertian dasar": "The basics",
+  "Sejarah singkat": "A brief history",
+  "Rencana putih": "White's plan",
+  "Rencana hitam": "Black's plan",
+  "Cabang penting": "Key branches",
+  "Tips praktis": "Practical tips",
+  "Yang perlu diwaspadai": "What to watch for",
+  "Sumber & kredit": "Sources & credits",
+  "Ringkasan ditulis ulang untuk materi belajar ini. Baca referensi lengkap melalui tautan berikut.":
+    "These summaries were written for this learning material. Explore the full references below.",
+  "Dasar, strategi, dan sejarah opening":
+    "Opening fundamentals, strategy, and history",
+  "Bacaan lanjutan dan konteks sejarah":
+    "Further reading and historical context",
+  "Database nama, kode ECO, dan variasi latihan":
+    "Opening names, ECO codes, and training lines",
+
   "Panduan mode opening": "Opening mode guide",
   "Pelajari langkah dan ide opening dengan panduan di papan. Panah langkah dapat diatur melalui Options dan hanya muncul dalam Learn. Selesaikan line ini untuk membuka Practice, lalu lanjutkan Learn line berikutnya secara berurutan.":
     "Learn the opening moves and their ideas with guidance on the board. Move arrows can be toggled in Options and appear only in Learn. Complete the line to unlock its Practice, then learn subsequent lines in order.",

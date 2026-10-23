@@ -392,7 +392,6 @@ export default function App() {
                   key={activeOpening.id}
                   opening={activeOpening}
                   settings={settings}
-                  onBack={() => navigate("openings")}
                 />
               </Suspense>
             ) : (

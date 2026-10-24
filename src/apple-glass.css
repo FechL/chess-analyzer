@@ -871,11 +871,7 @@ kbd {
 .shortcut-help-popover dd {
   margin: 0;
 }
-[data-color-mode="dark"] .shortcut-help-popover {
-  color: #dce8f8;
-  border-color: #52668080;
-  background: linear-gradient(#26354bf5, #1b2b40f2);
-}
+
 .analysis-page .board-export-actions {
   flex-shrink: 0;
 }
@@ -1567,11 +1563,6 @@ textarea::placeholder {
   margin-right: 8px;
   text-align: center;
 }
-[data-color-mode="dark"] .keyboard-toggle-toast {
-  color: #dce8f8;
-  border-color: #52668080;
-  background: linear-gradient(#26354bf5, #1b2b40ee);
-}
 
 /* The same material language continues through learning and play. */
 .learning-counter,
@@ -2092,7 +2083,7 @@ textarea::placeholder {
 @media (max-width: 1050px) {
   .analysis-grid,
   .analysis-page .workspace-toolbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .analysis-page .game-title-block {
     max-width: 620px;
@@ -2918,254 +2909,8 @@ textarea::placeholder {
   padding: 25px;
 }
 
-:root[data-color-mode="dark"] {
-  color-scheme: dark;
-  --ink: #dce5f1;
-  --muted: #9daec4;
-  --line: #758ca32d;
-  --paper: #1d2939cc;
-  --surface: #1b2635;
-  --cream: #243246;
-  --glass-border: #6c7d923b;
-  --glass-shadow: inset 0 1px 0 #b5c6e315, 0 12px 32px -12px #0008;
-  background: #101925;
-}
-[data-color-mode="dark"] body {
-  background:
-    radial-gradient(ellipse at 0 0, #203751, transparent 60%),
-    radial-gradient(ellipse at 100% 0, #302b45, transparent 50%), #111b29;
-  color: var(--ink);
-}
-[data-color-mode="dark"] .kuda-shell {
-  background: linear-gradient(125deg, #18273de0, #172333aa);
-}
-[data-color-mode="dark"] .kuda-shell > section {
-  background: #12203133;
-}
-[data-color-mode="dark"] .kuda-shell > section > header {
-  background: linear-gradient(#26354bd9, #1b2b40cc);
-  border-color: var(--line);
-}
-[data-color-mode="dark"] .kuda-shell aside {
-  background-color: #182536d9;
-}
-[data-color-mode="dark"]
-  :is(
-    .analysis-panel,
-    .eval-chart-card,
-    .modal,
-    .bot-settings,
-    .bot-setup,
-    .bot-board-card,
-    .opening-board-card,
-    .opening-detail,
-    .opening-list,
-    .lesson-card,
-    .lesson-detail,
-    .lesson-board-card,
-    .puzzle-board-card,
-    .puzzle-sidebar,
-    .library-card,
-    .help-sources,
-    .study-tip,
-    .saved-game-card,
-    .stat-card,
-    .empty-library
-  ) {
-  background: linear-gradient(140deg, #26354bdc, #1c2a3edb);
-  border-color: var(--line);
-  box-shadow: var(--glass-shadow);
-  color: var(--ink);
-}
-[data-color-mode="dark"] .analysis-sidebar .panel-tabs {
-  background: #233249;
-}
-[data-color-mode="dark"]
-  :is(
-    .panel-tabs > button.active,
-    .move-cell.current,
-    .notation-variation-moves .variation-move.current
-  ) {
-  background: #43587599;
-  color: #eef5ff;
-  box-shadow: inset 0 1px 0 #9db3d226;
-}
-[data-color-mode="dark"]
-  :is(
-    h1,
-    h2,
-    h3,
-    h4,
-    .game-title-block strong,
-    .line-heading h3,
-    .engine-chip strong,
-    .section-label,
-    .modal h2,
-    .player-name strong
-  ) {
-  color: #dce8f8;
-}
-[data-color-mode="dark"]
-  :is(
-    p,
-    .modal-description,
-    .notes-panel p,
-    .game-title-block span,
-    .piece-editor p,
-    .move-cell,
-    .move-number,
-    .variation-depth,
-    .chart-axis,
-    .board-under,
-    .breadcrumb,
-    .engine-chip,
-    .engine-chip > span,
-    .notation-variation-heading,
-    .settings-section > label,
-    .engine-options label,
-    .field-label,
-    .puzzle-title h2,
-    .saved-note
-  ) {
-  color: #9eb0c9;
-}
-[data-color-mode="dark"]
-  :is(input:not([type="checkbox"]):not([type="range"]), select, textarea) {
-  background: #172538;
-  border-color: #52668080;
-  color: #dce8f8;
-  box-shadow: inset 0 1px 3px #0003;
-}
-[data-color-mode="dark"]
-  :is(
-    .button.secondary,
-    .board-theme-options > button,
-    .piece-theme-options button,
-    .piece-editor-group button,
-    .icon-button,
-    .online-game-item
-  ) {
-  background: linear-gradient(#344760, #273950);
-  border-color: #5e73904d;
-  color: #c7d8ef;
-  box-shadow:
-    inset 0 1px 0 #ffffff15,
-    0 2px 4px #0002;
-}
-[data-color-mode="dark"] .button.primary {
-  color: white;
-}
-[data-color-mode="dark"] .chessboard-wrap {
-  background: #344252;
-  border-color: #60778d5c;
-}
-[data-color-mode="dark"] .eval-bar {
-  border-color: #5c728a44;
-}
-[data-color-mode="dark"] .notation-variation {
-  background: #36465c66;
-  border-color: #6b7f99;
-}
-[data-color-mode="dark"] .notation-variation.is-active {
-  background: #43567188;
-}
-[data-color-mode="dark"] .notation-variation-moves .variation-move {
-  color: #bdcce0;
-}
-[data-color-mode="dark"] .game-player time {
-  background: #142235cc;
-  color: #d4e4f7;
-  border-color: #526c8b80;
-}
-[data-color-mode="dark"]
-  :is(.engine-status, .notation-heading, .board-controls, .settings-section) {
-  border-color: #6e85a22b;
-}
-[data-color-mode="dark"] .engine-line:hover,
-[data-color-mode="dark"] .move-cell:hover {
-  background: #56729833;
-}
-[data-color-mode="dark"] .coach-card {
-  background: #23384bd9;
-  border-color: #57779155;
-}
-[data-color-mode="dark"] .modal-overlay {
-  background: #030a15a8;
-}
-[data-color-mode="dark"] .move-think-time {
-  color: #92a7c1;
-}
-
-[data-color-mode="dark"] .kuda-shell > aside {
-  background: linear-gradient(145deg, #1d2d42ee, #17263aee);
-  border-right-color: #6c829d2d;
-}
-[data-color-mode="dark"]
-  .kuda-shell
-  > aside
-  > div:first-child
-  > div:first-child
-  .text-sm {
-  color: #dce8f8;
-  text-shadow: none;
-}
-[data-color-mode="dark"] .sidebar-learning {
-  background: linear-gradient(#30435aab, #253951aa);
-  border-color: #7890b044;
-  box-shadow: inset 0 1px 0 #d8e7fb12;
-}
-[data-color-mode="dark"] .sidebar-learning h3 {
-  color: #afc4e0;
-  text-shadow: none;
-}
-[data-color-mode="dark"] .panel-tabs > button:not(.icon-button) {
-  color: #a3b8d3;
-}
-[data-color-mode="dark"] .notation-heading {
-  background: #2c405ae0;
-  color: #c0d2eb;
-}
-[data-color-mode="dark"] .notation-heading > span:last-child {
-  color: #a7bbd7;
-}
-[data-color-mode="dark"] .accuracy-scores strong {
-  color: #d5e5fb;
-}
-[data-color-mode="dark"]
-  :is(
-    .accuracy-scores strong small,
-    .accuracy-scores > div > span:nth-child(2),
-    .classification-summary small,
-    .card-heading h3,
-    .card-heading > span
-  ) {
-  color: #9fb6d5;
-}
-[data-color-mode="dark"]
-  :is(
-    .panel-tabs .icon-button,
-    .header-help,
-    .text-button,
-    .card-heading > div,
-    .line-heading h3,
-    .engine-line p,
-    .engine-line-meta strong,
-    .section-label,
-    .review-overview-heading .section-label
-  ) {
-  color: #a9c1e0;
-}
-[data-color-mode="dark"] .kuda-shell aside button:not([aria-current="page"]) {
-  color: #9db3d0;
-}
-[data-color-mode="dark"] .kuda-shell aside [aria-current="page"] {
-  color: #fff;
-}
-[data-color-mode="dark"] .kuda-shell [role="dialog"][aria-label] {
-  background: #1d2d42ed;
-}
-
 .bot-player-header {
+  min-width: 0;
   grid-column: 1;
   grid-row: 1;
   display: flex;
@@ -3185,6 +2930,7 @@ textarea::placeholder {
   min-height: 32px;
 }
 .bot-workspace > .bot-board-under {
+  min-width: 0;
   grid-column: 1;
   grid-row: 3;
   display: flex;
@@ -3511,14 +3257,7 @@ textarea::placeholder {
   opacity: 1;
   cursor: default;
 }
-[data-color-mode="dark"] .bot-mode-choices button.active {
-  background: linear-gradient(#354b66, #2a3c54);
-  color: #e2edfa;
-}
-[data-color-mode="dark"] .bot-game-over-card {
-  color: #edf4ff;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 70%);
-}
+
 .bot-position-board {
   position: relative;
   overflow: hidden;
@@ -3583,14 +3322,7 @@ textarea::placeholder {
   border: 1px solid var(--line);
   border-radius: 8px;
 }
-[data-color-mode="dark"] .bot-challenges > button,
-[data-color-mode="dark"] .bot-time-choices > button {
-  background: #283b5250;
-}
-[data-color-mode="dark"] .bot-challenges > button.active,
-[data-color-mode="dark"] .bot-time-choices > button.active {
-  background: #458fe32c;
-}
+
 @media (max-width: 1050px) {
   .bot-sidebar {
     grid-column: 1;

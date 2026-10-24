@@ -1,0 +1,790 @@
+/* Shared dark materials for the workspace, lazy-loaded lessons, and portal layers. */
+:root[data-color-mode="dark"] {
+  color-scheme: dark;
+  --ink: #e3ebf7;
+  --muted: #a9b9ce;
+  --line: rgb(143 166 198 / 21%);
+  --paper: #203047;
+  --surface: #182638;
+  --cream: #293a50;
+  --green: #85b9ff;
+  --green-dark: #a8ceff;
+  --glass-border: rgb(143 166 198 / 24%);
+  --glass-shadow: inset 0 1px 0 #e3edff08, 0 8px 24px -12px #0008;
+  --dark-panel: linear-gradient(140deg, #24344aeb, #1c2b3fe8);
+  --dark-control: linear-gradient(#30435c, #293b52);
+  --dark-hover: #364d69;
+  --dark-active: #304c70;
+  --dark-active-border: #75a7e3;
+  --dark-inset: #172538;
+  --dark-subtle: #8da1bc;
+  --dark-success: #8ad4b2;
+  --dark-warning: #efd093;
+  --dark-danger: #ffaba9;
+  background: #111c2b;
+  color: var(--ink);
+}
+
+:root[data-color-mode="dark"] body {
+  background:
+    radial-gradient(ellipse at 0 0, #213752, transparent 60%),
+    radial-gradient(ellipse at 100% 0, #302c46, transparent 50%), #111c2b;
+}
+
+:root[data-color-mode="dark"]
+  :is(.kuda-shell, .obsidian-dashboard-shell-layer) {
+  --obsidian-dashboard-shell-background: #1a293d;
+  --obsidian-dashboard-shell-sidebar: #1b2b40;
+  --obsidian-dashboard-shell-panel: #1d2d43;
+  --obsidian-dashboard-shell-foreground: #e3ebf7;
+  --obsidian-dashboard-shell-text-muted: #a9b9ce;
+  --obsidian-dashboard-shell-text-subtle: #8da1bc;
+  --obsidian-dashboard-shell-border: rgb(143 166 198 / 21%);
+  --obsidian-dashboard-shell-border-strong: rgb(143 166 198 / 36%);
+  --obsidian-dashboard-shell-control: #293b52;
+  --obsidian-dashboard-shell-muted: #293d56;
+  --obsidian-dashboard-shell-muted-hover: #354c68;
+  --obsidian-dashboard-shell-icon: #b0c5e0;
+  --obsidian-dashboard-shell-accent: #3288ed;
+  --obsidian-dashboard-shell-accent-hover: #4799fc;
+  --obsidian-dashboard-shell-ring: #85b9ff;
+  --obsidian-dashboard-shell-hover: #91b8ed15;
+  --obsidian-dashboard-shell-menu: #203148f5;
+  --obsidian-dashboard-shell-menu-highlight: #9dc4fa1c;
+}
+
+:root[data-color-mode="dark"] .kuda-shell {
+  background: linear-gradient(125deg, #19293ee0, #182336b8);
+}
+:root[data-color-mode="dark"] .kuda-shell > section {
+  background: #15223540;
+}
+:root[data-color-mode="dark"] .kuda-shell > section > header {
+  background: linear-gradient(#26374edb, #1c2d43d9);
+  border-color: var(--line);
+  box-shadow: 0 1px 0 #0002;
+}
+:root[data-color-mode="dark"] .kuda-shell > aside {
+  background: linear-gradient(145deg, #1f3047ee, #18283cee);
+  border-color: var(--line);
+}
+:root[data-color-mode="dark"] .kuda-shell [role="dialog"][aria-label] {
+  background: #1b2c42f5;
+  border-color: var(--line);
+  box-shadow: var(--glass-shadow);
+}
+:root[data-color-mode="dark"] .kuda-shell > aside > div > div:last-child {
+  border-color: var(--line);
+}
+:root[data-color-mode="dark"]
+  .kuda-shell
+  :is(nav > div > div > span, nav button > svg) {
+  color: var(--dark-subtle);
+}
+:root[data-color-mode="dark"] .kuda-shell nav button {
+  color: #b8c8df;
+}
+:root[data-color-mode="dark"] .kuda-shell nav button[data-active="true"],
+:root[data-color-mode="dark"] .kuda-shell nav button[data-active="true"] > svg {
+  color: #fff;
+}
+:root[data-color-mode="dark"]
+  .kuda-shell
+  > aside
+  > div:first-child
+  > div:first-child
+  .text-sm,
+:root[data-color-mode="dark"] .sidebar-learning h3 {
+  color: var(--ink);
+  text-shadow: none;
+}
+:root[data-color-mode="dark"]
+  .kuda-shell
+  > aside
+  > div:first-child
+  > div:first-child
+  .text-xs {
+  color: var(--dark-subtle);
+}
+:root[data-color-mode="dark"]
+  :is(.sidebar-learning, .help-sources, .study-tip) {
+  background: linear-gradient(140deg, #2d425ca6, #24364d99);
+  border-color: var(--line);
+  box-shadow: var(--glass-shadow);
+}
+:root[data-color-mode="dark"]
+  :is(.sidebar-learning-icon, .sidebar-learning button) {
+  color: var(--green);
+}
+:root[data-color-mode="dark"] :is(.sidebar-progress-label, .sidebar-bottom) {
+  color: var(--dark-subtle);
+}
+:root[data-color-mode="dark"] .sidebar-progress {
+  background: #101d30a6;
+}
+
+/* Panels and text use the same contrast on every route. */
+:root[data-color-mode="dark"]
+  :is(
+    .analysis-panel,
+    .eval-chart-card,
+    .opening-callout,
+    .critical-moments,
+    .bot-config,
+    .bot-settings,
+    .bot-setup,
+    .bot-board-card,
+    .opening-board-card,
+    .opening-detail,
+    .opening-list,
+    .opening-card,
+    .lesson-card,
+    .lesson-detail,
+    .lesson-board-card,
+    .puzzle-board-card,
+    .puzzle-sidebar,
+    .library-card,
+    .saved-game-card,
+    .stat-card,
+    .empty-library,
+    .modal
+  ) {
+  background: var(--dark-panel);
+  border-color: var(--glass-border);
+  color: var(--ink);
+  box-shadow: var(--glass-shadow);
+}
+:root[data-color-mode="dark"]
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    .page-intro h1,
+    .game-title-block strong,
+    .opening-card h3,
+    .lesson-card h3,
+    .saved-game-card h3,
+    .puzzle-title h2,
+    .puzzle-sidebar-head h3,
+    .player-name strong,
+    .engine-chip strong,
+    .prose strong,
+    .opening-current-line h2,
+    .opening-variation-item strong
+  ) {
+  color: var(--ink);
+  text-shadow: none;
+}
+:root[data-color-mode="dark"]
+  :is(
+    p,
+    .page-intro p,
+    .modal-description,
+    .prose,
+    .study-theory li,
+    .opening-card p,
+    .lesson-card p,
+    .saved-game-card p,
+    .study-theory > p,
+    .small-label,
+    .section-label,
+    .muted,
+    .content-note,
+    .player-side,
+    .player-name > span,
+    .game-title-block span,
+    .game-title-block .game-player > strong,
+    .field-label,
+    .settings-section > label,
+    .settings-section p,
+    .engine-options label,
+    .config-group > label,
+    .bot-mode-label-row > label,
+    .checkbox-label,
+    .range-labels,
+    .notes-panel label,
+    .saved-note,
+    .empty-inline,
+    .empty-state,
+    .opening-card-meta,
+    .opening-card-meta > span:first-child,
+    .opening-moves,
+    .lesson-number,
+    .lesson-bottom,
+    .lesson-bottom > span:last-child,
+    .learning-counter > span,
+    .academy-progress span,
+    .puzzle-counter > span,
+    .trainer-instruction,
+    .trainer-instruction > span:last-child,
+    .saved-card-bottom > span,
+    .saved-game-card p > span,
+    .online-month,
+    .online-import-status,
+    .online-import-note,
+    .puzzle-sidebar-head p,
+    .exercise-feedback,
+    .study-theory li > span,
+    .opening-lesson-theory li > span,
+    .settings-section > label > strong
+  ) {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .eyebrow,
+    .page-intro h1 > span,
+    .learning-counter strong,
+    .academy-progress strong,
+    .puzzle-counter strong
+  ) {
+  color: #a9c8f0;
+}
+:root[data-color-mode="dark"] :is(.breadcrumb, .header-help) {
+  color: #c1d1e7;
+}
+:root[data-color-mode="dark"] :is(.breadcrumb > span, .breadcrumb > svg) {
+  color: var(--dark-subtle);
+}
+:root[data-color-mode="dark"] .profile-avatar {
+  background: var(--dark-control);
+  border-color: #647f9f;
+  color: var(--ink);
+  outline-color: var(--line);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Reusable controls, selected options, focus, and portal popups. */
+:root[data-color-mode="dark"]
+  :is(
+    .button.secondary,
+    .board-theme-options > button,
+    .piece-theme-options button,
+    .piece-editor-group button,
+    .color-choices > button,
+    .bot-levels > button,
+    .critical-moment,
+    .icon-button
+  ) {
+  background: var(--dark-control);
+  border-color: var(--line);
+  color: #d0def1;
+  text-shadow: none;
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    0 2px 4px #0002;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .button.secondary,
+    .board-theme-options > button,
+    .piece-theme-options button,
+    .color-choices > button,
+    .bot-levels > button,
+    .critical-moment,
+    .icon-button
+  ):hover:not(:disabled) {
+  background: var(--dark-hover);
+  border-color: #8baad060;
+  color: #f2f6ff;
+  box-shadow: inset 0 1px 0 #ffffff0c;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .board-theme-options > button.active,
+    .piece-theme-options button.active,
+    .piece-editor-group button.active,
+    .color-choices > button.active,
+    .bot-levels > button.active,
+    .icon-button.active
+  ) {
+  background: var(--dark-active);
+  border-color: var(--dark-active-border);
+  color: #f1f6ff;
+  box-shadow:
+    inset 0 1px 0 #b8d5ff12,
+    0 0 0 1px #85b9ff18;
+}
+:root[data-color-mode="dark"] .button.primary {
+  color: #fff;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .button.subtle,
+    .text-button,
+    .text-button.green,
+    .board-export-actions .text-button,
+    .engine-settings-link
+  ) {
+  color: var(--green);
+}
+:root[data-color-mode="dark"]
+  :is(.text-button, .button.subtle):hover:not(:disabled) {
+  color: #b4d5ff;
+  background: #91b8ed12;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .subtle-pill,
+    .eco-label,
+    .complete-badge,
+    .depth-badge,
+    .line-index,
+    .illustration-note
+  ) {
+  background: #2d435ee6;
+  color: #c3d6ee;
+  border-color: var(--line);
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+:root[data-color-mode="dark"]
+  :is(
+    input:not([type="checkbox"]):not([type="range"]),
+    select,
+    textarea,
+    .search-input
+  ) {
+  background: var(--dark-inset);
+  border-color: #637c9d70;
+  color: var(--ink);
+  box-shadow: inset 0 1px 3px #0003;
+}
+:root[data-color-mode="dark"] .search-input input {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+:root[data-color-mode="dark"] :is(input, textarea)::placeholder {
+  color: #8da2bf;
+  opacity: 1;
+}
+:root[data-color-mode="dark"] :is(input, textarea, select):focus {
+  outline-color: #75a9ed;
+}
+:root[data-color-mode="dark"] input[type="range"] {
+  accent-color: #85b9ff;
+}
+:root[data-color-mode="dark"]
+  .board-sound-setting
+  input[type="checkbox"]:not(:checked) {
+  background: #42536d;
+  border-color: #7589a557;
+  box-shadow: inset 0 1px 3px #0003;
+}
+:root[data-color-mode="dark"] kbd {
+  background: linear-gradient(#354b67, #293b53);
+  border-color: #7d96b655;
+  color: #dbe9fc;
+  box-shadow: 0 1px 0 #0004;
+}
+:root[data-color-mode="dark"] .notation-example {
+  color: var(--ink);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .notation-piece,
+    .piece-editor-group img,
+    .bot-color-icon img,
+    .bot-captures img
+  ) {
+  filter: drop-shadow(0 0 1px #e2ecffd9);
+}
+:root[data-color-mode="dark"]
+  :is(.segmented, .trainer-mode, .import-source-options) {
+  background: #152338b3;
+  border-color: var(--line);
+  box-shadow: inset 0 1px 2px #0003;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .segmented > button,
+    .trainer-mode > button,
+    .import-source-options button
+  ) {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .segmented > button.active,
+    .trainer-mode > button.active,
+    .import-source-options button.active
+  ) {
+  color: #eef5ff;
+  background: var(--dark-active);
+  border-color: #81afe344;
+  box-shadow:
+    inset 0 1px 0 #b8d5ff12,
+    0 1px 4px #0003;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .segmented > button,
+    .trainer-mode > button,
+    .import-source-options button
+  ):hover:not(.active):not(:disabled) {
+  background: #6d99ca21;
+  color: var(--ink);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .shortcut-help-popover,
+    .keyboard-toggle-toast,
+    .toast,
+    .promotion-picker > div
+  ) {
+  background: linear-gradient(#2a3e56f5, #1f3048f5);
+  color: var(--ink);
+  border-color: #819bbb66;
+  box-shadow: var(--glass-shadow);
+}
+:root[data-color-mode="dark"] .modal::backdrop {
+  background: #030a1599;
+}
+:root[data-color-mode="dark"] .modal-overlay {
+  background: #030a1599;
+}
+:root[data-color-mode="dark"] .modal {
+  scrollbar-color: #627e9b transparent;
+}
+
+/* Chess workspace: keep the board palette intact; darken its surrounding chrome. */
+:root[data-color-mode="dark"] .chessboard-wrap {
+  background: linear-gradient(145deg, #536174, #344357 70%, #46596e);
+  border-color: #8a9bb855;
+  box-shadow:
+    inset 0 1px 0 #ffffff1a,
+    0 5px 16px #0004;
+}
+:root[data-color-mode="dark"] .board-controls {
+  background: linear-gradient(#2b3d56e6, #22344ae6);
+  border-color: var(--line);
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    0 2px 3px #0002;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .move-position,
+    .move-position > span,
+    .board-under,
+    .board-shortcut-hints,
+    .variation-notice,
+    .chart-axis,
+    .chart-empty,
+    .engine-chip,
+    .engine-chip > span,
+    .variation-depth,
+    .engine-line > svg,
+    .empty-inline,
+    .move-number,
+    .move-think-time,
+    .card-heading > span,
+    .card-heading > div,
+    .local-state
+  ) {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"] .eval-bar {
+  border-color: #8ca0ba55;
+}
+:root[data-color-mode="dark"] :is(.panel-tabs, .analysis-sidebar .panel-tabs) {
+  background: #26374e;
+  border-color: var(--line);
+  box-shadow: 0 1px 0 #0002;
+}
+:root[data-color-mode="dark"] .panel-tabs > button:not(.icon-button) {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"] .panel-tabs > button.active:not(.icon-button) {
+  background: #3c536f;
+  color: #f1f6ff;
+  box-shadow:
+    inset 0 1px 0 #c6dcfc12,
+    0 1px 3px #0003;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .panel-tabs > button,
+    .move-cell,
+    .variation-move,
+    .engine-line
+  ):hover:not(:disabled) {
+  background: #6b98cc24;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .engine-status,
+    .engine-line,
+    .notation-heading,
+    .saved-card-bottom,
+    .opening-moves,
+    .lesson-bottom,
+    .study-theory li,
+    .puzzle-navigation,
+    .puzzle-sidebar > .section-label,
+    .online-game-list,
+    .online-game-item,
+    .puzzle-list-item
+  ) {
+  border-color: var(--line);
+}
+:root[data-color-mode="dark"] :is(.engine-chip > span, .score-divider) {
+  border-color: #8ca6c74d;
+}
+:root[data-color-mode="dark"] .score-divider {
+  background: var(--line);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .accuracy-scores strong,
+    .engine-line strong,
+    .engine-line-meta strong,
+    .classification-summary strong,
+    .critical-moment strong
+  ) {
+  color: #d6e5fa;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .accuracy-scores strong small,
+    .accuracy-scores > div > span:nth-child(2),
+    .classification-summary small,
+    .engine-line p,
+    .critical-moment > div > span,
+    .critical-loss > small
+  ) {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"] :is(.notation-heading, .opening-study-footer) {
+  background: #9bbff20d;
+  color: #c2d5ef;
+}
+:root[data-color-mode="dark"] .notation-heading > span:last-child {
+  color: var(--muted);
+}
+:root[data-color-mode="dark"] :is(.move-cell, .variation-move) {
+  color: #c3d2e7;
+}
+:root[data-color-mode="dark"]
+  :is(.move-cell.current, .notation-variation-moves .variation-move.current) {
+  background: #416185;
+  color: #fff;
+  box-shadow: inset 0 1px 0 #c6dcfc12;
+}
+:root[data-color-mode="dark"] .notation-variation {
+  background: #8ba5c514;
+  border-color: #7e94ae;
+}
+:root[data-color-mode="dark"] .notation-variation.is-active {
+  background: #8ba5c528;
+}
+:root[data-color-mode="dark"] .notation-variation-heading {
+  color: #afc2d9;
+}
+:root[data-color-mode="dark"] .coach-card {
+  background: linear-gradient(145deg, #323b45b3, #273547b3);
+  border-color: #ccba8b33;
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+:root[data-color-mode="dark"] .coach-avatar {
+  background: #665b43;
+  color: #f2d497;
+  box-shadow: none;
+}
+:root[data-color-mode="dark"] .coach-card .small-label {
+  color: #dfcb9d;
+}
+:root[data-color-mode="dark"] :is(.coach-label > strong, .coach-move) {
+  color: #e3cf9f;
+}
+:root[data-color-mode="dark"]
+  :is(.move-symbol, .classification-summary > div > span:first-child) {
+  filter: brightness(1.35) saturate(0.85);
+}
+:root[data-color-mode="dark"] .notes-panel textarea {
+  background:
+    repeating-linear-gradient(transparent 0 25px, #afc4df12 25px 26px),
+    var(--dark-inset);
+  background-origin: content-box, border-box;
+}
+:root[data-color-mode="dark"] :is(.game-player time, .chess-clock) {
+  background: var(--dark-inset);
+  color: #deebff;
+  border-color: #758fa94d;
+  box-shadow: inset 0 1px 3px #0003;
+}
+:root[data-color-mode="dark"] .chess-clock.clock-active {
+  background: #304d70;
+  color: #fff;
+  border-color: #81afe399;
+}
+:root[data-color-mode="dark"] .eval-chart svg > line {
+  stroke: #94afcd45;
+}
+:root[data-color-mode="dark"] .eval-chart svg polyline {
+  stroke: #95c8b0;
+}
+:root[data-color-mode="dark"] .eval-chart .evaluation-marker {
+  stroke: #23364d;
+}
+
+/* Catalogs, learning feedback, bot setup, and opening training share semantic states. */
+:root[data-color-mode="dark"] :is(.feature-banner, .academy-feature) {
+  background:
+    radial-gradient(ellipse at 100% 0, #527bb144, transparent 65%),
+    linear-gradient(125deg, #2c4058df, #22334ad9);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+:root[data-color-mode="dark"] :is(.feature-chess-icon, .illustration-spark) {
+  color: #b1c9e8;
+  text-shadow: none;
+}
+:root[data-color-mode="dark"] :is(.opening-card:hover, .lesson-card:hover) {
+  border-color: #87a9d070;
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    0 12px 25px -10px #0006;
+}
+:root[data-color-mode="dark"] .opening-card-art {
+  background: linear-gradient(145deg, #354b68, #2c3c56);
+  border-color: var(--line);
+}
+:root[data-color-mode="dark"] .opening-card-art.art-1 {
+  background: linear-gradient(145deg, #454362, #34364f);
+}
+:root[data-color-mode="dark"] .opening-card-art.art-2 {
+  background: linear-gradient(145deg, #544a42, #3f3b40);
+}
+:root[data-color-mode="dark"] .opening-card-art.art-3 {
+  background: linear-gradient(145deg, #314f4c, #2d4052);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .learning-counter-icon,
+    .lesson-icon,
+    .saved-game-icon,
+    .empty-icon,
+    .bot-levels > button > span,
+    .callout-icon
+  ) {
+  background: var(--dark-control);
+  color: #accbf1;
+  border-color: var(--line);
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+:root[data-color-mode="dark"] .lesson-icon.tone-1 {
+  background: #4a4133;
+  color: #ebcb94;
+}
+:root[data-color-mode="dark"] .lesson-icon.tone-2 {
+  background: #403d58;
+  color: #c8bde9;
+}
+:root[data-color-mode="dark"] .illustration-board {
+  background: repeating-conic-gradient(#526781 0% 25%, #354a66 0% 50%) 50% /
+    70px 70px;
+  border-color: #758eab66;
+  box-shadow: 10px 12px 0 #15253d;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .exercise-feedback.success,
+    .opening-study-footer.completed,
+    .opening-review-outcome,
+    .opening-result
+  ) {
+  background: #66bc9214;
+  border-color: #7bcba44d;
+  color: var(--dark-success);
+  box-shadow: none;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .lesson-done,
+    .complete-badge,
+    .opening-study-footer.completed > svg,
+    .opening-review-outcome > svg
+  ) {
+  color: var(--dark-success);
+}
+:root[data-color-mode="dark"] :is(.hint-box, .opening-coach.retry) {
+  background: #b98d3921;
+  border-color: #ddbb764d;
+  color: var(--dark-warning);
+  box-shadow: none;
+}
+:root[data-color-mode="dark"] :is(.error-message, .bot-premove-message) {
+  background: #d4757521;
+  border-color: #ed95954d;
+  color: var(--dark-danger);
+}
+:root[data-color-mode="dark"]
+  :is(.review-progress, .opening-training-progress) {
+  background: #10203799;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .engine-explainer,
+    .settings-engine,
+    .opening-coach,
+    .opening-overview-moves,
+    .opening-study-tip
+  ) {
+  background: #81aee51a;
+  border-color: var(--line);
+  color: var(--ink);
+}
+:root[data-color-mode="dark"]
+  :is(.opening-variation-item.active, .puzzle-list-item.active) {
+  background: #81aee526;
+  box-shadow: inset 3px 0 #85b9ff;
+}
+:root[data-color-mode="dark"] .opening-variation-item:hover {
+  background: #81aee51a;
+}
+:root[data-color-mode="dark"]
+  :is(.bot-challenges > button, .bot-time-choices > button, .online-game-item) {
+  background: #9dbfec0b;
+  color: var(--ink);
+  border-color: var(--line);
+}
+:root[data-color-mode="dark"]
+  :is(
+    .bot-challenges > button.active,
+    .bot-time-choices > button.active,
+    .bot-mode-choices > button.active
+  ) {
+  background: var(--dark-active);
+  border-color: var(--dark-active-border);
+  color: #f1f6ff;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .bot-challenges > button,
+    .bot-time-choices > button,
+    .online-game-item
+  ):hover:not(:disabled) {
+  background: #81aee521;
+}
+:root[data-color-mode="dark"]
+  :is(
+    .bot-levels strong,
+    .bot-levels small,
+    .bot-levels > button.active strong,
+    .bot-levels > button > svg
+  ) {
+  color: #c1d4ed;
+}
+:root[data-color-mode="dark"] .bot-game-over-card {
+  color: #f4f8ff;
+  text-shadow: 0 1px 6px #000b;
+}
+:root[data-color-mode="dark"] .library-empty {
+  background: #92b6e60a;
+  border-color: #839fc84d;
+}
+:root[data-color-mode="dark"] .promotion-picker > div > button:hover {
+  background: #526f9580;
+}

@@ -656,12 +656,7 @@
 .opening-loading {
   color: var(--muted);
 }
-[data-color-mode="dark"] .opening-coach {
-  background: linear-gradient(135deg, rgb(42 63 87 / 65%), rgb(25 43 65 / 55%));
-}
-[data-color-mode="dark"] .opening-coach.retry {
-  background: rgb(156 112 45 / 10%);
-}
+
 @media (max-width: 1050px) {
   .opening-study-sidebar {
     grid-column: 1;

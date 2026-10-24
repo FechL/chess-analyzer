@@ -17,12 +17,15 @@ import {
   Import,
   LayoutDashboard,
   LibraryBig,
+  Monitor,
   Plus,
   RotateCcw,
   Search,
   Settings2,
   ShieldCheck,
   Sparkles,
+  Sun,
+  Moon,
   Swords,
   Target,
   Trash2,
@@ -71,7 +74,7 @@ export type Settings = {
   showPieceAnnotation: boolean;
   notationStyle: "letters" | "pieces" | "both";
   language: "id" | "en";
-  colorMode: "light" | "dark";
+  colorMode: "light" | "dark" | "system";
   pieceTheme: "classic" | "merida" | "celtic";
 };
 type SavedGame = { id: string; date: string; game: GameData };
@@ -97,7 +100,7 @@ const DEFAULT_SETTINGS: Settings = {
   showPieceAnnotation: true,
   notationStyle: "letters",
   language: "id",
-  colorMode: "light",
+  colorMode: "system",
   pieceTheme: "classic",
 };
 function restoreGame() {
@@ -151,12 +154,23 @@ export default function App() {
   }, [game]);
   useEffect(() => {
     writeStorage("kuda-settings", settings);
-    document.documentElement.dataset.colorMode = settings.colorMode;
-    document.documentElement.classList.toggle(
-      "dark",
-      settings.colorMode === "dark",
-    );
     setLanguage(settings.language);
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyColorMode = () => {
+      const effectiveMode =
+        settings.colorMode === "system"
+          ? systemTheme.matches
+            ? "dark"
+            : "light"
+          : settings.colorMode;
+      document.documentElement.dataset.colorMode = effectiveMode;
+      document.documentElement.classList.toggle("dark", effectiveMode === "dark");
+      document.documentElement.style.colorScheme = effectiveMode;
+    };
+    applyColorMode();
+    if (settings.colorMode === "system")
+      systemTheme.addEventListener("change", applyColorMode);
+    return () => systemTheme.removeEventListener("change", applyColorMode);
   }, [settings]);
   useEffect(() => {
     writeStorage("kuda-library", saved);
@@ -397,6 +411,7 @@ export default function App() {
                   key={activeOpening.id}
                   opening={activeOpening}
                   settings={settings}
+                  onSettingsChange={setSettings}
                 />
               </Suspense>
             ) : (
@@ -479,19 +494,17 @@ export default function App() {
       {t(
         modal === "settings" && (
           <Modal
-            title={t("Buat ruang ini milikmu")}
+            title={t("Pengaturan")}
             onClose={() => setModal(undefined)}
           >
-            <p className="modal-description">
-              {t("Preferensi tersimpan otomatis di perangkat ini.")}
-            </p>
+            <div className="app-settings">
             <div className="settings-section">
               <label>{t("Tampilan papan")}</label>
               <div className="board-theme-options">
                 {t(
                   (["sage", "walnut", "slate"] as const).map((theme, i) => (
-                    <button
-                      key={theme}
+                <button
+                  key={theme}
                       className={settings.boardTheme === theme ? "active" : ""}
                       onClick={() =>
                         setSettings((s) => ({ ...s, boardTheme: theme }))
@@ -506,54 +519,6 @@ export default function App() {
                   )),
                 )}
               </div>
-            </div>
-            <div className="settings-section">
-              <label htmlFor="notation-style">{t("Tampilan notasi")}</label>
-              <select
-                id="notation-style"
-                value={settings.notationStyle}
-                onChange={(e) =>
-                  setSettings((s) => ({
-                    ...s,
-                    notationStyle: e.target.value as Settings["notationStyle"],
-                  }))
-                }
-              >
-                <option value="letters">{t("Huruf")}</option>
-                <option value="pieces">{t("Gambar buah")}</option>
-                <option value="both">{t("Gambar dan huruf")}</option>
-              </select>
-            </div>
-            <div className="settings-section">
-              <label htmlFor="app-language">{t("Bahasa")}</label>
-              <select
-                id="app-language"
-                value={settings.language}
-                onChange={(e) => {
-                  const language = e.target.value as Settings["language"];
-                  setLanguage(language);
-                  setSettings((s) => ({ ...s, language }));
-                }}
-              >
-                <option value="id">{t("Bahasa Indonesia")}</option>
-                <option value="en">{t("English")}</option>
-              </select>
-            </div>
-            <div className="settings-section">
-              <label htmlFor="color-mode">{t("Mode tampilan")}</label>
-              <select
-                id="color-mode"
-                value={settings.colorMode}
-                onChange={(e) =>
-                  setSettings((s) => ({
-                    ...s,
-                    colorMode: e.target.value as Settings["colorMode"],
-                  }))
-                }
-              >
-                <option value="light">{t("Terang")}</option>
-                <option value="dark">{t("Gelap")}</option>
-              </select>
             </div>
             <div className="settings-section">
               <label>{t("Tema buah")}</label>
@@ -584,47 +549,75 @@ export default function App() {
               </div>
             </div>
             <div className="settings-section">
-              <label className="board-sound-setting">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={settings.autoAnalyzeImported}
-                  onChange={(e) =>
-                    setSettings((s) => ({
-                      ...s,
-                      autoAnalyzeImported: e.target.checked,
-                    }))
-                  }
-                />
-                {t("Analisis otomatis saat impor")}
-              </label>
+              <label>{t("Tampilan notasi")}</label>
+              <div className="board-theme-options settings-choice-options notation-choice-options" role="group" aria-label={t("Tampilan notasi")}>
+                {t(
+                  ([
+                    ["letters", "Huruf"],
+                    ["pieces", "Gambar buah"],
+                    ["both", "Keduanya"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      className={settings.notationStyle === value ? "active" : ""}
+                      aria-pressed={settings.notationStyle === value}
+                      onClick={() =>
+                        setSettings((s) => ({ ...s, notationStyle: value }))
+                      }
+                    >
+                      <span className="notation-example" aria-hidden="true">
+                        {value !== "letters" && (
+                          <img src={pieceAsset("w", "N", settings.pieceTheme)} alt="" />
+                        )}
+                        {value !== "pieces" && <span>Nf3</span>}
+                        {value === "pieces" && <span>f3</span>}
+                      </span>
+                      <span>{t(label)}</span>
+                      {settings.notationStyle === value && <Check className="setting-choice-check" size={14} />}
+                    </button>
+                  )),
+                )}
+              </div>
             </div>
             <div className="settings-section">
-              <label className="board-sound-setting">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={settings.enableShortcuts}
-                  onChange={(e) =>
-                    setSettings((s) => ({
-                      ...s,
-                      enableShortcuts: e.target.checked,
-                    }))
-                  }
-                />
-                {t("Aktifkan pintasan keyboard")}
-              </label>
+              <label>{t("Mode tampilan")}</label>
+              <div className="board-theme-options settings-choice-options appearance-choice-options" role="group" aria-label={t("Mode tampilan")}>
+                {t(
+                  ([
+                    ["light", "Terang"],
+                    ["dark", "Gelap"],
+                    ["system", "Sistem"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      className={settings.colorMode === value ? "active" : ""}
+                      aria-pressed={settings.colorMode === value}
+                      onClick={() =>
+                        setSettings((s) => ({ ...s, colorMode: value }))
+                      }
+                    >
+                      {value === "light" ? <Sun size={16} aria-hidden="true" /> : value === "dark" ? <Moon size={16} aria-hidden="true" /> : <Monitor size={16} aria-hidden="true" />}
+                      <span>{t(label)}</span>
+                      {settings.colorMode === value && <Check size={14} />}
+                    </button>
+                  )),
+                )}
+              </div>
             </div>
             <div className="settings-section">
-              <label className="board-sound-setting">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={!boardSound}
-                  onChange={(e) => setBoardSound(!e.target.checked)}
-                />
-                {t("Bisukan suara")}
-              </label>
+              <label htmlFor="app-language">{t("Bahasa")}</label>
+              <select
+                id="app-language"
+                value={settings.language}
+                onChange={(e) => {
+                  const language = e.target.value as Settings["language"];
+                  setLanguage(language);
+                  setSettings((s) => ({ ...s, language }));
+                }}
+              >
+                <option value="id">{t("Bahasa Indonesia")}</option>
+                <option value="en">{t("English")}</option>
+              </select>
             </div>
             <div className="settings-section">
               <label className="board-sound-setting">
@@ -635,6 +628,39 @@ export default function App() {
                   onChange={(e) => setBoardAnimation(e.target.checked)}
                 />
                 {t("Animasi langkah")}
+              </label>
+            </div>
+            <div className="settings-section">
+              <label className="board-sound-setting">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={settings.autoAnalyzeImported}
+                  onChange={(e) => setSettings((s) => ({ ...s, autoAnalyzeImported: e.target.checked }))}
+                />
+                {t("Analisis otomatis saat impor")}
+              </label>
+            </div>
+            <div className="settings-section">
+              <label className="board-sound-setting">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={boardSound}
+                  onChange={(e) => setBoardSound(e.target.checked)}
+                />
+                {t("Suara")}
+              </label>
+            </div>
+            <div className="settings-section">
+              <label className="board-sound-setting">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={settings.enableShortcuts}
+                  onChange={(e) => setSettings((s) => ({ ...s, enableShortcuts: e.target.checked }))}
+                />
+                {t("Aktifkan pintasan keyboard")}
               </label>
             </div>
             <div className="settings-section">
@@ -649,6 +675,7 @@ export default function App() {
                 <RotateCcw size={15} />
                 {t("Reset ke default")}
               </button>
+            </div>
             </div>
           </Modal>
         ),

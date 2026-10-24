@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 export type Appearance = {
   notationStyle: "letters" | "pieces" | "both";
   pieceTheme: "classic" | "merida" | "celtic";
-  colorMode: "light" | "dark";
+  colorMode: "light" | "dark" | "system";
 };
 export const AppearanceContext = createContext<Appearance>({
   notationStyle: "letters",

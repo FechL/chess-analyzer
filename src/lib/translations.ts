@@ -113,11 +113,12 @@ export const ENGLISH: Record<string, string> = {
   "Buat ruang ini milikmu": "Make this space yours",
   "Preferensi tersimpan otomatis di perangkat ini.":
     "Preferences are saved automatically on this device.",
+  Suara: "Sound",
   "Tampilan papan": "Board appearance",
   "Tampilan notasi": "Notation display",
   Huruf: "Letters",
   "Gambar buah": "Piece images",
-  "Gambar dan huruf": "Images and letters",
+  Keduanya: "Both",
   Bahasa: "Language",
   "Bahasa Indonesia": "Bahasa Indonesia",
   "Mode tampilan": "Appearance mode",

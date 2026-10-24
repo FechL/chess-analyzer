@@ -649,6 +649,10 @@
 .opening-study-shortcuts {
   margin: 0;
 }
+.opening-study-page .board-and-eval > .eval-bar {
+  flex: 0 0 18px;
+  min-height: 0;
+}
 .opening-loading {
   color: var(--muted);
 }

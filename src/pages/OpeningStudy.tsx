@@ -16,7 +16,7 @@ import {
 import type { Settings } from "../App";
 import type { Opening } from "../data/content";
 import { openingOverviewMoves } from "../data/opening-overviews";
-import Board from "../components/Board";
+import Board, { EvalBar } from "../components/Board";
 import {
   DashboardPopover,
   DashboardPopoverTrigger,
@@ -48,6 +48,9 @@ import {
 import type { ReviewOptions } from "../lib/opening-review";
 import OpeningOverview from "./OpeningOverview";
 import { playBoardSound } from "../lib/board-sound";
+import { useEngine } from "../hooks/useEngine";
+import { useBoardAnimation } from "../lib/board-animation";
+import type { Evaluation } from "../lib/chess";
 import "./opening-study.css";
 
 const MODES = [
@@ -93,11 +96,16 @@ const EMPTY_REVIEW: ReviewRun = {
 export default function OpeningStudy({
   opening,
   settings,
+  onSettingsChange,
 }: {
   opening: Opening;
   settings: Settings;
+  onSettingsChange: (settings: Settings) => void;
 }) {
   const { t } = useI18n();
+  const moveAnimations = useBoardAnimation();
+  const { engine, status: engineStatus } = useEngine(settings.engine);
+  const [evaluation, setEvaluation] = useState<Evaluation>();
   const lines = useMemo(() => openingLines(opening), [opening]);
   const storageKey = `kuda-opening-progress-${opening.id}`;
   const [progress, setProgress] = useState<OpeningProgress>(() =>
@@ -127,6 +135,10 @@ export default function OpeningStudy({
   >("overview");
   const [overviewPly, setOverviewPly] = useState(0);
   const [overviewReplay, setOverviewReplay] = useState(0);
+  const [tabTransition, setTabTransition] = useState<{
+    fens: string[];
+    index: number;
+  } | null>(null);
   const [previewLineId, setPreviewLineId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [viewPly, setViewPly] = useState<number | null>(null);
@@ -204,6 +216,17 @@ export default function OpeningStudy({
     }, 520);
     return () => window.clearTimeout(timer);
   }, [tab, overviewPly, overviewReplay, overviewPosition]);
+
+  useEffect(() => {
+    if (!tabTransition) return;
+    const timer = window.setTimeout(() => {
+      setTabTransition((current) => {
+        if (!current || current.index >= current.fens.length - 1) return null;
+        return { ...current, index: current.index + 1 };
+      });
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [tabTransition]);
 
   useEffect(() => {
     writeStorage(storageKey, progress);
@@ -490,6 +513,16 @@ export default function OpeningStudy({
       )
         return;
       const key = event.key.toLowerCase();
+      if (!event.shiftKey && key === "v") {
+        event.preventDefault();
+        onSettingsChange({ ...settings, showEvalBar: !settings.showEvalBar });
+        return;
+      }
+      if (!event.shiftKey && key === "a") {
+        event.preventDefault();
+        setShowLearnArrows((value) => !value);
+        return;
+      }
       if (tab !== "lesson") {
         if (!event.shiftKey && key === "f") {
           event.preventDefault();
@@ -512,6 +545,28 @@ export default function OpeningStudy({
       } else if (!event.shiftKey && key === "r" && browsing) {
         event.preventDefault();
         setViewPly(null);
+      } else if (!event.shiftKey && key === "r" && !challengeLocked) {
+        event.preventDefault();
+        begin(line, mode);
+      } else if (!event.shiftKey && key === "n") {
+        if (
+          mode === "learn" &&
+          followingLine &&
+          progress[line.id]?.learned &&
+          isOpeningLineUnlocked(lines, progress, followingLine.id, "learn")
+        ) {
+          event.preventDefault();
+          begin(followingLine, "learn");
+        } else if (
+          mode === "practice" &&
+          followingLine &&
+          nextPracticeUnlocked &&
+          result &&
+          perfectPractice
+        ) {
+          event.preventDefault();
+          begin(followingLine, "practice");
+        }
       }
     };
     window.addEventListener("keydown", handler);
@@ -587,10 +642,81 @@ export default function OpeningStudy({
     reviewRun.status === "active" && reviewExpected?.color === opening.side;
   const reviewTotal = reviewLine?.moves.length || 0;
   const overviewTotal = overviewPosition.moves.length;
+  const boardFen = tabTransition
+    ? tabTransition.fens[tabTransition.index]
+    : reviewing
+    ? reviewPositions?.positions[reviewRun.step] || DEFAULT_POSITION
+    : showingOverview
+      ? overviewPosition.positions[overviewPly]
+      : showingVariation && previewPosition
+        ? previewPosition.positions[previewPosition.moves.length]
+        : fen;
+  const hasEvaluationTab = ["overview", "lines", "lesson", "review"].includes(
+    tab,
+  );
+  const evaluationMatches = evaluation?.fen === boardFen;
+  useEffect(() => {
+    if (
+      !settings.showEvalBar ||
+      !hasEvaluationTab ||
+      engineStatus !== "ready" ||
+      !engine.current
+    )
+      return;
+    let active = true;
+    const instance = engine.current;
+    const timer = window.setTimeout(() => {
+      instance
+        .analyze(boardFen, {
+          ms: settings.analysisMs,
+          multiPV: 1,
+          depth: settings.engineDepth,
+          onInfo: (value) => {
+            if (active) setEvaluation(value);
+          },
+        })
+        .then((value) => {
+          if (active) setEvaluation(value);
+        })
+        .catch(() => {});
+    }, 80);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      instance.stop();
+    };
+  }, [
+    boardFen,
+    hasEvaluationTab,
+    engineStatus,
+    settings.showEvalBar,
+    settings.analysisMs,
+    settings.engineDepth,
+    settings.engine,
+    engine,
+  ]);
   function replayOverview() {
+    setTabTransition(null);
     setOverviewPly(0);
     setOverviewReplay((count) => count + 1);
     setTab("overview");
+  }
+
+  function openLesson() {
+    if (
+      tab === "overview" &&
+      moveAnimations &&
+      overviewPly > 0 &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      const fens = Array.from({ length: overviewPly }, (_, index) =>
+        overviewPosition.positions[overviewPly - index - 1],
+      );
+      setTabTransition({ fens, index: 0 });
+    } else {
+      setTabTransition(null);
+    }
+    setTab("lesson");
   }
 
   return (
@@ -607,18 +733,18 @@ export default function OpeningStudy({
       <div className="analysis-grid opening-study-grid">
         <section className="board-section">
           <div className="board-and-eval">
+            {settings.showEvalBar && (
+              <EvalBar
+                cp={evaluation?.cp}
+                mate={evaluation?.mate}
+                flipped={flipped}
+                active={!!evaluation}
+                pending={!!evaluation && !evaluationMatches}
+              />
+            )}
             <div className={`board-main${showingOverview || showingLines ? " is-variation" : ""}`}>
               <Board
-                fen={
-                  reviewing
-                    ? reviewPositions?.positions[reviewRun.step] ||
-                      DEFAULT_POSITION
-                    : showingOverview
-                      ? overviewPosition.positions[overviewPly]
-                      : showingVariation
-                        ? previewPosition.positions[previewPosition.moves.length]
-                      : fen
-                }
+                fen={boardFen}
                 flipped={flipped}
                 theme={settings.boardTheme}
                 onMove={reviewing ? playReviewMove : playMove}
@@ -736,7 +862,7 @@ export default function OpeningStudy({
                 aria-controls="opening-lesson-panel"
                 aria-selected={tab === "lesson"}
                 className={tab === "lesson" ? "active" : ""}
-                onClick={() => setTab("lesson")}
+                onClick={openLesson}
               >
                 {t("Pelajaran")}
               </button>
@@ -1343,6 +1469,28 @@ export default function OpeningStudy({
               <span>
                 <kbd>F</kbd> {t("Balik papan")}
               </span>
+              {hasEvaluationTab && (
+                <span>
+                  <kbd>V</kbd> {t("Bar evaluasi")}
+                </span>
+              )}
+              {tab === "lesson" && (
+                <>
+                  <span>
+                    <kbd>A</kbd> {t("Panah")}
+                  </span>
+                  {!browsing && (
+                    <span>
+                      <kbd>R</kbd> {t("Ulangi variasi")}
+                    </span>
+                  )}
+                  {followingLine && (
+                    <span>
+                      <kbd>N</kbd> {t("Variasi berikutnya")}
+                    </span>
+                  )}
+                </>
+              )}
               {tab === "lesson" && (
                 <span>
                   <kbd>H</kbd> {t("Petunjuk")}

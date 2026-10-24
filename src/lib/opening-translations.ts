@@ -127,6 +127,7 @@ export const OPENING_ENGLISH: Record<string, string> = {
     "Repeat without hints to strengthen your recall.",
   "Latihan tanpa petunjuk": "Practice without hints",
   "Variasi berikutnya": "Next line",
+  Panah: "Arrows",
   "Posisi pilihan": "Selected position",
   Giliranmu: "Your turn",
   "Lawan melangkah": "Opponent's turn",

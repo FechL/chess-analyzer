@@ -18,6 +18,7 @@ import {
   Flame,
   GraduationCap,
   Lightbulb,
+  Pause,
   Play,
   RotateCcw,
   Search,
@@ -82,6 +83,14 @@ type PuzzleHistoryEntry = {
   rating: number;
   elapsedMs: number;
   outcome: "solved" | "skipped";
+};
+
+type PuzzleSessionSnapshot = {
+  puzzleId: string;
+  theme: string;
+  difficulty: PuzzleDifficulty;
+  elapsedMs: number;
+  started: boolean;
 };
 
 type PuzzleMoveFeedback = {
@@ -537,11 +546,23 @@ export function PuzzlesPage({
 }) {
   const { t } = useI18n();
 
+  const [savedSession] = useState(() =>
+    readStorage<PuzzleSessionSnapshot | undefined>(
+      "kuda-puzzle-session",
+      undefined,
+    ),
+  );
   const [tab, setTab] = useState("puzzle");
-  const [theme, setTheme] = useState("mix");
-  const [difficulty, setDifficulty] = useState<PuzzleDifficulty>("normal");
+  const [theme, setTheme] = useState(savedSession?.theme ?? "mix");
+  const [difficulty, setDifficulty] = useState<PuzzleDifficulty>(
+    savedSession?.difficulty ?? "normal",
+  );
   const [puzzle, setPuzzle] = useState<LichessPuzzle | undefined>(
-    () => cachedPuzzles("mix", "normal")[0],
+    () =>
+      cachedPuzzles(
+        savedSession?.theme ?? "mix",
+        savedSession?.difficulty ?? "normal",
+      )[0],
   );
   const [completed, setCompleted] = useState<string[]>(() =>
     readStorage("kuda-lichess-completed", []),
@@ -553,6 +574,10 @@ export function PuzzlesPage({
   const [streak, setStreak] = useState(() =>
     readStorage("kuda-puzzle-streak", 0),
   );
+  const [started, setStarted] = useState(
+    () => savedSession?.started ?? readStorage("kuda-puzzle-streak", 0) > 0,
+  );
+  const [paused, setPaused] = useState(() => !!savedSession?.started);
   const [best, setBest] = useState(() => readStorage("kuda-puzzle-best", 0));
   const [record, setRecord] = useState(() =>
     readStorage("kuda-puzzle-record", false),
@@ -572,7 +597,16 @@ export function PuzzlesPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const requestId = useRef(0);
-  const puzzleStartedAt = useRef(Date.now());
+  const elapsedRef = useRef(0);
+  const startedRef = useRef(started);
+  const pausedRef = useRef(paused);
+  const firstPuzzleLoad = useRef(true);
+  const puzzleSession = useRef<PuzzleSessionSnapshot | undefined>(undefined);
+  startedRef.current = started;
+  pausedRef.current = paused;
+  puzzleSession.current = puzzle
+    ? { puzzleId: puzzle.id, theme, difficulty, elapsedMs, started }
+    : undefined;
   const recordedPuzzleId = useRef<string | undefined>(undefined);
   const consumedPuzzleIds = useRef(new Set<string>());
   const autoNextTimer = useRef<number | undefined>(undefined);
@@ -623,7 +657,7 @@ export function PuzzlesPage({
       number: (history[0]?.number ?? 0) + 1,
       clean,
       rating: puzzle.rating,
-      elapsedMs: Math.max(0, Date.now() - puzzleStartedAt.current),
+      elapsedMs: Math.max(0, elapsedRef.current),
       outcome,
     };
     setElapsedMs(entry.elapsedMs);
@@ -645,10 +679,31 @@ export function PuzzlesPage({
     try {
       const available = await ensurePuzzles(theme, difficulty);
       if (id !== requestId.current) return;
-      setPuzzle(available[0]);
+      const nextPuzzle = available[0];
+      setPuzzle(nextPuzzle);
       setPuzzleSolved(false);
-      puzzleStartedAt.current = Date.now();
-      setElapsedMs(0);
+      const restored =
+        firstPuzzleLoad.current &&
+        nextPuzzle &&
+        savedSession?.puzzleId === nextPuzzle.id &&
+        savedSession.theme === theme &&
+        savedSession.difficulty === difficulty;
+      const shouldStart = restored
+        ? savedSession.started
+        : firstPuzzleLoad.current
+          ? streak > 0
+          : startedRef.current;
+      const shouldPause = restored
+        ? true
+        : firstPuzzleLoad.current
+          ? !shouldStart
+          : pausedRef.current;
+      const restoredElapsed = restored ? savedSession.elapsedMs : 0;
+      firstPuzzleLoad.current = false;
+      elapsedRef.current = restoredElapsed;
+      setElapsedMs(restoredElapsed);
+      setStarted(shouldStart);
+      setPaused(shouldPause);
       recordedPuzzleId.current = undefined;
       setAttempt(0);
       if (!available.length) setError("Belum ada puzzle baru. Coba tema lain.");
@@ -662,7 +717,7 @@ export function PuzzlesPage({
     const available = cachedPuzzles(theme, difficulty);
     setPuzzle(available[0]);
     setPuzzleSolved(false);
-    puzzleStartedAt.current = Date.now();
+    elapsedRef.current = 0;
     setElapsedMs(0);
     recordedPuzzleId.current = undefined;
     void load();
@@ -671,13 +726,28 @@ export function PuzzlesPage({
     };
   }, [theme, difficulty]);
   useEffect(() => {
-    if (!puzzle || puzzleSolved || busy) return;
-    const updateElapsed = () =>
-      setElapsedMs(Math.max(0, Date.now() - puzzleStartedAt.current));
-    updateElapsed();
-    const timer = window.setInterval(updateElapsed, 250);
+    if (!puzzle || !started || paused || puzzleSolved || busy) return;
+    let lastTick = Date.now();
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      const delta = now - lastTick;
+      lastTick = now;
+      setElapsedMs((current) => {
+        const next = current + delta;
+        elapsedRef.current = next;
+        return next;
+      });
+    }, 250);
     return () => window.clearInterval(timer);
-  }, [puzzle, attempt, puzzleSolved, busy]);
+  }, [puzzle, started, paused, attempt, puzzleSolved, busy]);
+  useEffect(
+    () => () => {
+      if (firstPuzzleLoad.current) return;
+      const current = puzzleSession.current;
+      if (current?.started) writeStorage("kuda-puzzle-session", current);
+    },
+    [],
+  );
   useEffect(
     () => () => {
       if (autoNextTimer.current !== undefined)
@@ -726,7 +796,7 @@ export function PuzzlesPage({
       window.clearTimeout(autoNextTimer.current);
       autoNextTimer.current = undefined;
     }
-    puzzleStartedAt.current = Date.now();
+    elapsedRef.current = 0;
     setElapsedMs(0);
     recordedPuzzleId.current = undefined;
     setPuzzleSolved(false);
@@ -750,6 +820,37 @@ export function PuzzlesPage({
       setRecord(true);
       writeStorage("kuda-puzzle-record", true);
     }
+  };
+  const startOrResumePuzzle = () => {
+    if (!puzzle || puzzleSolved) return;
+    startedRef.current = true;
+    pausedRef.current = false;
+    setStarted(true);
+    setPaused(false);
+    const snapshot = {
+      puzzleId: puzzle.id,
+      theme,
+      difficulty,
+      elapsedMs: elapsedRef.current,
+      started: true,
+    };
+    puzzleSession.current = snapshot;
+    writeStorage("kuda-puzzle-session", snapshot);
+  };
+  const togglePuzzlePause = () => {
+    if (!puzzle || !startedRef.current || puzzleSolved) return;
+    const nextPaused = !pausedRef.current;
+    pausedRef.current = nextPaused;
+    setPaused(nextPaused);
+    const snapshot = {
+      puzzleId: puzzle.id,
+      theme,
+      difficulty,
+      elapsedMs: elapsedRef.current,
+      started: true,
+    };
+    puzzleSession.current = snapshot;
+    writeStorage("kuda-puzzle-session", snapshot);
   };
   const validEvaluation =
     evaluation?.fen === positionFen ? evaluation : undefined;
@@ -830,6 +931,9 @@ export function PuzzlesPage({
                 hint="Cari langkah yang memaksa balasan lawan."
                 startTraining
                 puzzleMode
+                started={started}
+                paused={paused}
+                onStart={startOrResumePuzzle}
                 enableShortcuts={settings.enableShortcuts}
                 evalBar={
                   settings.showEvalBar ? (
@@ -1232,14 +1336,24 @@ export function PuzzlesPage({
                   {t("Analisis posisi")}
                 </button>
               </div>
-              <button
-                className="button primary"
-                disabled={!puzzle || busy}
-                onClick={requestNextPuzzle}
-              >
-                <SkipForward size={15} />
-                {t(puzzleSolved ? "Puzzle berikutnya" : "Lewati puzzle")}
-              </button>
+              <div className="puzzle-footer-actions puzzle-footer-session-actions">
+                <button
+                  className="button secondary"
+                  disabled={!puzzle || busy || puzzleSolved || !started}
+                  onClick={togglePuzzlePause}
+                >
+                  {paused ? <Play size={14} /> : <Pause size={14} />}
+                  {t(paused ? "Lanjutkan" : "Jeda")}
+                </button>
+                <button
+                  className="button primary"
+                  disabled={!puzzle || busy}
+                  onClick={requestNextPuzzle}
+                >
+                  <SkipForward size={15} />
+                  {t(puzzleSolved ? "Puzzle berikutnya" : "Lewati puzzle")}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1303,6 +1417,9 @@ export function LineTrainer({
   explanation,
   startTraining = false,
   puzzleMode = false,
+  started = true,
+  paused = false,
+  onStart,
   enableShortcuts = false,
   evalBar,
   onPositionChange,
@@ -1322,6 +1439,9 @@ export function LineTrainer({
   explanation?: string;
   startTraining?: boolean;
   puzzleMode?: boolean;
+  started?: boolean;
+  paused?: boolean;
+  onStart?: () => void;
   enableShortcuts?: boolean;
   evalBar?: ReactNode;
   onPositionChange?: (fen: string) => void;
@@ -1361,7 +1481,11 @@ export function LineTrainer({
     return c;
   }, [fen, moves, step, alternateFen]);
   const done = step === moves.length;
-  const isOpponent = training && !done && chess.turn() !== color;
+  const isOpponent =
+    training &&
+    !done &&
+    chess.turn() !== color &&
+    (!puzzleMode || (started && !paused));
   const last = chess.history({ verbose: true }).at(-1);
   const displayedFen = preview?.fen ?? chess.fen();
   useEffect(
@@ -1377,7 +1501,7 @@ export function LineTrainer({
     onFeedbackChange?.(showHint && !done ? { kind: "hint" } : moveFeedback);
   }, [moveFeedback, showHint, done, puzzleMode, onFeedbackChange]);
   useEffect(() => {
-    if (!puzzleMode || !enableShortcuts) return;
+    if (!puzzleMode || !enableShortcuts || !started || paused) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
       if (
@@ -1413,7 +1537,15 @@ export function LineTrainer({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [done, enableShortcuts, moves.length, puzzleMode, training]);
+  }, [
+    done,
+    enableShortcuts,
+    moves.length,
+    paused,
+    puzzleMode,
+    started,
+    training,
+  ]);
   useEffect(() => {
     onPositionChange?.(displayedFen);
   }, [displayedFen, onPositionChange]);
@@ -1549,7 +1681,7 @@ export function LineTrainer({
       setPremoves([]);
       return;
     }
-    if (isOpponent) return;
+    if (!started || paused || isOpponent) return;
     const timer = window.setTimeout(() => {
       const [move, ...remaining] = premoves;
       const position = new Chess(chess.fen());
@@ -1562,7 +1694,18 @@ export function LineTrainer({
       setPremoves(accepted ? remaining : []);
     }, 40);
     return () => window.clearTimeout(timer);
-  }, [chess, color, done, isOpponent, premoves, puzzleMode, training, preview]);
+  }, [
+    chess,
+    color,
+    done,
+    isOpponent,
+    paused,
+    premoves,
+    puzzleMode,
+    started,
+    training,
+    preview,
+  ]);
   const queuePremove = (from: string, to: string, promotion = "q") => {
     if (previewBusy.current) return false;
     if (!isOpponent && !premoves.length) return false;
@@ -1611,7 +1754,13 @@ export function LineTrainer({
             }
           : undefined
       }
-      disabled={!training || (!puzzleMode && isOpponent) || done || !!preview}
+      disabled={
+        !training ||
+        (!puzzleMode && isOpponent) ||
+        done ||
+        !!preview ||
+        (puzzleMode && (!started || paused))
+      }
       premove={
         puzzleMode && training && !done && !preview
           ? {
@@ -1694,21 +1843,45 @@ export function LineTrainer({
           <>
             <div className="board-and-eval">
               {evalBar}
-              <div className="board-main">{board}</div>
+              <div
+                className={`board-main puzzle-board-stage${!started || paused ? " is-blurred" : ""}`}
+              >
+                {board}
+                {(!started || paused) && (
+                  <button
+                    className="puzzle-board-overlay"
+                    type="button"
+                    onClick={onStart}
+                    aria-label={
+                      !started
+                        ? t("Klik papan untuk memulai puzzle.")
+                        : t("Puzzle dijeda. Klik papan untuk melanjutkan.")
+                    }
+                  >
+                    <span>
+                      {!started
+                        ? t("Klik papan untuk memulai")
+                        : t("Dijeda · klik untuk melanjutkan")}
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
             <NavigationControls
               ply={step}
               total={moves.length}
               showPosition={false}
-              navigationDisabled={training && !done}
+              navigationDisabled={(training && !done) || !started || paused}
               onChange={setStep}
               onFlip={() => setFlipped((f) => !f)}
-              enableShortcuts={enableShortcuts && (!training || done)}
+              enableShortcuts={
+                enableShortcuts && (!training || done) && started && !paused
+              }
               actions={
                 <IconButton
                   label={t("Petunjuk")}
                   active={showHint}
-                  disabled={done || !!preview}
+                  disabled={done || !!preview || !started || paused}
                   onClick={() => setShowHint((v) => !v)}
                 >
                   <Lightbulb size={16} />

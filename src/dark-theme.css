@@ -675,11 +675,15 @@
 :root[data-color-mode="dark"] .puzzle-feedback:is(.correct, .complete) p {
   color: #b4d6c3;
 }
-:root[data-color-mode="dark"] .puzzle-feedback:is(.correct, .complete) .coach-avatar {
+:root[data-color-mode="dark"]
+  .puzzle-feedback:is(.correct, .complete)
+  .coach-avatar {
   background: #344d43;
   color: var(--dark-success);
 }
-:root[data-color-mode="dark"] .puzzle-feedback:is(.correct, .complete) :is(.coach-label > strong, .coach-move) {
+:root[data-color-mode="dark"]
+  .puzzle-feedback:is(.correct, .complete)
+  :is(.coach-label > strong, .coach-move) {
   color: var(--dark-success);
 }
 :root[data-color-mode="dark"] .puzzle-feedback.wrong .coach-avatar {
@@ -878,4 +882,13 @@
 }
 :root[data-color-mode="dark"] .promotion-picker > div > button:hover {
   background: #526f9580;
+}
+:root[data-color-mode="dark"] .puzzle-board-overlay {
+  background: #0d1725fa;
+  color: #e1ebf8;
+}
+:root[data-color-mode="dark"] .puzzle-board-overlay > span {
+  border-color: #9dbfec40;
+  background: #1c2b3fe8;
+  box-shadow: 0 5px 18px #050a12a6;
 }

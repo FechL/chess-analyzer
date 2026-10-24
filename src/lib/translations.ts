@@ -53,6 +53,10 @@ export const ENGLISH: Record<string, string> = {
   "Gunakan waktu ini": "Use this time control",
   Jeda: "Pause",
   Lanjutkan: "Resume",
+  "Klik papan untuk memulai puzzle.": "Click the board to start the puzzle.",
+  "Klik papan untuk melanjutkan.": "Click the board to resume.",
+  "Klik papan untuk memulai": "Click the board to start",
+  "Dijeda · klik untuk melanjutkan": "Paused · click to resume",
   Kustom: "Custom",
   "≈600 Elo · Masih melewatkan ancaman dan sering memberi peluang taktis.":
     "≈600 Elo · Misses threats and often allows tactical opportunities.",
@@ -369,15 +373,18 @@ export const ENGLISH: Record<string, string> = {
   "Langkah puzzle kurang tepat": "Incorrect move",
   "Langkah puzzle tepat": "Correct move",
   "Balasan terbaik lawan:": "Opponent's best reply:",
-  ". Coba langkah lain dari posisi semula.": ". Try another move from the original position.",
+  ". Coba langkah lain dari posisi semula.":
+    ". Try another move from the original position.",
   "Permainan berakhir setelah langkah ini. Coba langkah lain untuk menemukan solusi puzzle.":
     "This move ends the game. Try another move to find the puzzle solution.",
   "Balasan engine belum tersedia. Coba langkah lain dari posisi semula.":
     "The engine reply is unavailable. Try another move from the original position.",
   "Langkah ini belum menyelesaikan puzzle. Sedang mencari balasan terbaik lawan…":
     "This move does not solve the puzzle. Finding the opponent's best reply…",
-  "Langkah tepat. Lanjutkan solusi Anda.": "Correct move. Continue the solution.",
-  "Semua langkah solusi telah ditemukan.": "You found every move in the solution.",
+  "Langkah tepat. Lanjutkan solusi Anda.":
+    "Correct move. Continue the solution.",
+  "Semua langkah solusi telah ditemukan.":
+    "You found every move in the solution.",
   "Jawaban ditampilkan": "Solution revealed",
   "Jalur selesai!": "Line completed!",
   "Lawan membalas…": "Opponent responding…",

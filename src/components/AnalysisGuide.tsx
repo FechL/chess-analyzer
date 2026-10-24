@@ -1,3 +1,4 @@
+import Title from "./Title";
 import { CircleHelp } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import {
@@ -48,7 +49,7 @@ export default function AnalysisGuide({
         side="bottom"
         aria-label={t("Memahami hasil analisis")}
       >
-        <strong>{t("Memahami hasil analisis")}</strong>
+        <Title as="strong">{t("Memahami hasil analisis")}</Title>
         <div className="analysis-guide-copy">
           <p>
             {t(

@@ -1,3 +1,4 @@
+import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
@@ -723,7 +724,7 @@ export default function OpeningStudy({
     <div className="page analysis-page opening-study-page">
       <div className="workspace-toolbar opening-study-heading">
         <div className="game-title-block">
-          <strong>{opening.name}</strong>
+          <Title as="strong">{opening.name}</Title>
           <span className="opening-repertoire">
             {t(opening.side === "w" ? "Repertoar putih" : "Repertoar hitam")} ·{" "}
             {lines.length} {t("variasi")}
@@ -902,7 +903,7 @@ export default function OpeningStudy({
                   side="bottom"
                   aria-label={t("Panduan mode opening")}
                 >
-                  <strong>{t("Panduan mode opening")}</strong>
+                  <Title as="strong">{t("Panduan mode opening")}</Title>
                   {MODES.map((item) => (
                     <section key={item.id}>
                       <strong>{t(item.label)}</strong>
@@ -924,7 +925,7 @@ export default function OpeningStudy({
               <div className="opening-mode-picker">
                 <div className="opening-current-line">
                   <span className="subtle-pill">{line.eco}</span>
-                  <h2 title={t(line.name)}>{t(line.name)}</h2>
+                  <Title as="h2" title={t(line.name)}>{t(line.name)}</Title>
                   <span>
                     Challenge {lineIndex + 1}/{lines.length}
                   </span>
@@ -977,7 +978,7 @@ export default function OpeningStudy({
               >
                 <div className="opening-review-summary">
                   <span className="small-label">{t("Tes acak")}</span>
-                  <h2>{t("Review opening")}</h2>
+                  <Title as="h2">{t("Review opening")}</Title>
                   <p>
                     {t(
                       "Mainkan line acak yang sudah selesai Learn dan Practice 100%. Setiap line muncul sekali dalam satu tes.",
@@ -1006,7 +1007,7 @@ export default function OpeningStudy({
                         </strong>
                       </div>
                     )}
-                    <h3>{t("Mode tes")}</h3>
+                    <Title as="h3">{t("Mode tes")}</Title>
                     <p>
                       {t("Pilih salah satu, keduanya, atau tanpa batasan.")}
                     </p>
@@ -1094,9 +1095,9 @@ export default function OpeningStudy({
                       <>
                         <div className="opening-current-line">
                           <span className="subtle-pill">{reviewLine.eco}</span>
-                          <h2 title={t(reviewLine.name)}>
+                          <Title as="h2" title={t(reviewLine.name)}>
                             {t(reviewLine.name)}
-                          </h2>
+                          </Title>
                         </div>
                         {reviewFeedback && (
                           <div className="opening-coach retry" role="status">
@@ -1111,7 +1112,7 @@ export default function OpeningStudy({
                           />
                         </div>
                         <div className="notation-heading">
-                          <span>{t("Notasi tes")}</span>
+                          <Title as="span">{t("Notasi tes")}</Title>
                           <span>
                             {Math.ceil(reviewRun.step / 2)}/
                             {Math.ceil(reviewTotal / 2)}
@@ -1270,7 +1271,7 @@ export default function OpeningStudy({
                 {challengeLocked ? (
                   <div className="opening-review-empty" role="status">
                     <LockKeyhole size={30} />
-                    <h2>{t("Challenge terkunci")}</h2>
+                    <Title as="h2">{t("Challenge terkunci")}</Title>
                     <p>
                       Challenge {lineIndex + 1} · {t(line.name)}
                     </p>
@@ -1333,7 +1334,7 @@ export default function OpeningStudy({
                             </span>
                           )}
                           {showAnswer && studyMove ? (
-                            <h3>
+                            <Title as="h3">
                               {browsing
                                 ? `${Math.ceil(visiblePly / 2)}${studyMove.color === "w" ? "." : "…"} `
                                 : `${Math.ceil((step + 1) / 2)}${studyMove.color === "w" ? "." : "…"} `}
@@ -1341,15 +1342,15 @@ export default function OpeningStudy({
                                 san={studyMove.san}
                                 color={studyMove.color}
                               />
-                            </h3>
+                            </Title>
                           ) : mode === "learn" ? (
-                            <h3>
+                            <Title as="h3">
                               {t(
                                 opening.side === "w"
                                   ? "Mainkan langkah putih"
                                   : "Mainkan langkah hitam",
                               )}
-                            </h3>
+                            </Title>
                           ) : null}
                           <p>
                             {feedback
@@ -1378,7 +1379,7 @@ export default function OpeningStudy({
                       />
                     </div>
                     <div className="notation-heading">
-                      <span>{t("Notasi variasi")}</span>
+                      <Title as="span">{t("Notasi variasi")}</Title>
                       <span>
                         {Math.ceil(visiblePly / 2)}/
                         {Math.ceil(line.moves.length / 2)}

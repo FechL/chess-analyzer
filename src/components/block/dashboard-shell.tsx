@@ -2,6 +2,7 @@
 // ObsidianUI Dashboard Shell — MIT. Source: https://www.obsidianui.dev/r/dashboard-shell.json
 "use client";
 import { useI18n } from "@/lib/i18n";
+import { titleCase } from "../../lib/title-case";
 
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
@@ -1508,7 +1509,7 @@ function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
         ) : null,
       )}
       <span className="relative min-w-0 flex-1 truncate text-left">
-        {t(item.label)}
+        {titleCase(t(item.label))}
       </span>
       {t(
         item.count !== undefined && (
@@ -1571,10 +1572,10 @@ function ShellTab({ item, isActive, pillId }: ShellTabProps) {
         aria-hidden
         className="invisible relative col-start-1 row-start-1 font-medium"
       >
-        {t(item.label)}
+        {titleCase(t(item.label))}
       </span>
       <span className="relative col-start-1 row-start-1 group-data-[state=active]:font-medium">
-        {t(item.label)}
+        {titleCase(t(item.label))}
       </span>
     </TabsPrimitive.Trigger>
   );

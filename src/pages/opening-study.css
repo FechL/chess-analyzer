@@ -109,7 +109,6 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 4px 18px 18px;
-  scrollbar-width: thin;
 }
 .opening-current-line {
   display: grid;
@@ -386,7 +385,6 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
 }
 .opening-review-summary,
 .opening-review-setup,
@@ -546,7 +544,6 @@
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
 }
 .opening-variation-item {
   display: flex;
@@ -739,7 +736,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
+
   padding: 18px;
   color: var(--ink);
 }

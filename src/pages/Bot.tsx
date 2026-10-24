@@ -1,3 +1,4 @@
+import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import type { Color } from "chess.js";
@@ -961,7 +962,7 @@ export default function BotPage({
                   side="top"
                   aria-label={t("Pintasan lainnya")}
                 >
-                  <strong>{t("Pintasan lainnya")}</strong>
+                  <Title as="strong">{t("Pintasan lainnya")}</Title>
                   <dl>
                     {[
                       ["Shift+←", "Ke posisi awal"],
@@ -1063,10 +1064,10 @@ export default function BotPage({
                   <>
                     <div className="bot-setup-heading">
                       <BotIcon size={25} />
-                      <h2>{t("Vs Bot")}</h2>
+                      <Title as="h2">{t("Vs Bot")}</Title>
                     </div>
                     <div className="config-group">
-                      <label>{t("Pilih tantangan")}</label>
+                      <Title as="label">{t("Pilih tantangan")}</Title>
                       <div className="bot-challenges">
                         {BOT_LEVELS.map((level, i) => (
                           <button
@@ -1089,7 +1090,7 @@ export default function BotPage({
                       </div>
                     </div>
                     <div className="config-group">
-                      <label>{t("Main sebagai")}</label>
+                      <Title as="label">{t("Main sebagai")}</Title>
                       <div className="segmented bot-color-choices">
                         {(["w", "random", "b"] as const).map((color) => (
                           <button
@@ -1136,7 +1137,7 @@ export default function BotPage({
                       </div>
                     </div>
                     <div className="config-group">
-                      <label>{t("Waktu permainan")}</label>
+                      <Title as="label">{t("Waktu permainan")}</Title>
                       <div className="bot-time-choices">
                         {[180, 300, 600].map((seconds) => (
                           <button
@@ -1198,7 +1199,7 @@ export default function BotPage({
                     </div>
                     <div className="config-group bot-mode-group">
                       <div className="bot-mode-label-row">
-                        <label>{t("Mode")}</label>
+                        <Title as="label">{t("Mode")}</Title>
                         <DashboardPopover>
                           <DashboardPopoverTrigger asChild>
                             <button
@@ -1215,7 +1216,7 @@ export default function BotPage({
                             side="top"
                             aria-label={t("Penjelasan mode bantuan")}
                           >
-                            <strong>{t("Mode bantuan")}</strong>
+                            <Title as="strong">{t("Mode bantuan")}</Title>
                             <dl>
                               {BOT_MODES.map((item) => (
                                 <div key={item.id}>
@@ -1323,7 +1324,7 @@ export default function BotPage({
                 {session.started && (
                   <div className="bot-notation">
                     <div className="notation-heading">
-                      <span>{t("Notasi permainan")}</span>
+                      <Title as="span">{t("Notasi permainan")}</Title>
                       <button
                         className="text-button"
                         onClick={review}
@@ -1369,7 +1370,7 @@ export default function BotPage({
                 )}
                 <div className="engine-details bot-engine-details">
                   <div className="line-heading">
-                    <h3>{t("Variasi terbaik")}</h3>
+                    <Title as="h3">{t("Variasi terbaik")}</Title>
                   </div>
                   {validEvaluation?.lines.length && liveAssistance ? (
                     validEvaluation.lines.map((line, i) => (
@@ -1523,7 +1524,7 @@ export default function BotPage({
               </section>
             ))}
           </div>
-          <h3>{t("Kustom")}</h3>
+          <Title as="h3">{t("Kustom")}</Title>
           <div className="custom-time-inputs">
             <label>
               {t("Menit per pemain")}

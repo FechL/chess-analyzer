@@ -1,3 +1,4 @@
+import Title from "../components/Title";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
@@ -60,12 +61,12 @@ export function OpeningsPage({
       <div className="page-intro">
         <div>
           <div className="eyebrow">{t("OPENING EXPLORER")}</div>
-          <h1>
+          <Title as="h1">
             {t("Langkah pertama.")}
             <br />
             {t("Rencana yang lebih besar")}
             <span>{t(".")}</span>
-          </h1>
+          </Title>
           <p>
             {t(
               "Jangan hanya menghafal. Temukan alasan di balik setiap langkah.",
@@ -86,7 +87,7 @@ export function OpeningsPage({
         <div className="feature-chess-icon">{t("♘")}</div>
         <div>
           <span className="small-label">{t("REKOMENDASI UNTUK MEMULAI")}</span>
-          <h2>{t("Italian Game. Klasik untuk sebuah alasan.")}</h2>
+          <Title as="h2">{t("Italian Game. Klasik untuk sebuah alasan.")}</Title>
           <p>
             {t(
               "Kontrol pusat, kembangkan buah, dan amankan raja. Semua dalam satu opening.",
@@ -173,10 +174,10 @@ export function OpeningsPage({
                     <span>{t(o.side === "w" ? "● Putih" : "● Hitam")}</span>
                     <span>{t(o.level)}</span>
                   </div>
-                  <h3>
+                  <Title as="h3">
                     {t(o.name)}
                     <ArrowRight size={18} />
-                  </h3>
+                  </Title>
                   <p>{t(o.description)}</p>
                   <div className="opening-moves">
                     {t(
@@ -198,7 +199,7 @@ export function OpeningsPage({
         !openings.length && (
           <div className="empty-state">
             <Search size={32} />
-            <h3>{t("Opening belum ditemukan")}</h3>
+            <Title as="h3">{t("Opening belum ditemukan")}</Title>
             <p>{t("Coba nama, kode ECO, atau filter lain.")}</p>
           </div>
         ),
@@ -249,12 +250,12 @@ export function AcademyPage({
       <div className="page-intro">
         <div>
           <div className="eyebrow">{t("AKADEMI KUDA")}</div>
-          <h1>
+          <Title as="h1">
             {t("Pahami satu ide.")}
             <br />
             {t("Naik satu tingkat")}
             <span>{t(".")}</span>
-          </h1>
+          </Title>
           <p>
             {t("Pelajaran singkat. Papan interaktif. Pemahaman yang bertahan.")}
           </p>
@@ -275,11 +276,11 @@ export function AcademyPage({
       <div className="academy-feature">
         <div className="academy-feature-copy">
           <span className="small-label">{t("MULAI DARI FONDASI")}</span>
-          <h2>
+          <Title as="h2">
             {t("Permainan hebat dimulai")}
             <br />
             {t("dari kebiasaan kecil.")}
-          </h2>
+          </Title>
           <p>
             {t(
               "Kuasai pusat, aktifkan buah, dan jaga raja. Jadikan tiga prinsip ini bagian dari setiap permainan.",
@@ -375,7 +376,7 @@ export function AcademyPage({
                 {t(" · ")}
                 {t(l.level)}
               </span>
-              <h3>{t(l.title)}</h3>
+              <Title as="h3">{t(l.title)}</Title>
               <p>{t(l.description)}</p>
               <div className="lesson-bottom">
                 <span>
@@ -427,7 +428,7 @@ export function AcademyPage({
                   {t(selected.minutes)}
                   {t(" menit")}
                 </span>
-                <h3>{t("Ide yang perlu dibawa.")}</h3>
+                <Title as="h3">{t("Ide yang perlu dibawa.")}</Title>
                 <ol>
                   {t(
                     selected.theory.map((idea, i) => (
@@ -523,7 +524,7 @@ export function PuzzlesPage({
     <div className="page puzzle-page">
       <div className="page-intro">
         <div>
-          <h1>{t("Puzzle")}</h1>
+          <Title as="h1">{t("Puzzle")}</Title>
           <p>{t("Temukan langkah terbaik dari permainan nyata di Lichess.")}</p>
         </div>
         <div className="puzzle-counter">
@@ -542,10 +543,10 @@ export function PuzzlesPage({
                     {t("Rating ")}
                     {t(puzzle.rating)}
                   </span>
-                  <h2>
+                  <Title as="h2">
                     {t("Puzzle #")}
                     {t(puzzle.id)}
-                  </h2>
+                  </Title>
                   <a href={puzzle.url} target="_blank" rel="noreferrer">
                     {t("Lichess ↗")}
                   </a>
@@ -607,7 +608,7 @@ export function PuzzlesPage({
         <aside className="puzzle-sidebar">
           <div className="puzzle-sidebar-head">
             <Target size={22} />
-            <h3>{t("Puzzle Lichess")}</h3>
+            <Title as="h3">{t("Puzzle Lichess")}</Title>
             <p>
               {t(
                 "Antrean berisi hingga 5 puzzle dan diisi ulang setelah puzzle selesai.",

@@ -1,3 +1,4 @@
+import Title from "../components/Title";
 import { ExternalLink, Lightbulb } from "lucide-react";
 import type { Opening } from "../data/content";
 import { OPENING_OVERVIEWS } from "../data/opening-overviews";
@@ -34,7 +35,7 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
       aria-labelledby="opening-overview-tab"
     >
       <header className="opening-overview-intro">
-        <h2>{opening.name}</h2>
+        <Title as="h2">{opening.name}</Title>
         <p>{t(opening.description)}</p>
         <div
           className="opening-overview-moves"
@@ -44,15 +45,15 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
         </div>
       </header>
       <section>
-        <h3>{t("Pengertian dasar")}</h3>
+        <Title as="h3">{t("Pengertian dasar")}</Title>
         <p>{overview.basics[language]}</p>
       </section>
       <section>
-        <h3>{t("Sejarah singkat")}</h3>
+        <Title as="h3">{t("Sejarah singkat")}</Title>
         <p>{overview.history[language]}</p>
       </section>
       <section className="opening-lesson-theory">
-        <h3>{t("Rencana opening")}</h3>
+        <Title as="h3">{t("Rencana opening")}</Title>
         <ol>
           {opening.ideas.map((idea, index) => (
             <li key={idea}>
@@ -62,22 +63,22 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
           ))}
         </ol>
         <div className="opening-overview-side-plan">
-          <h4>
+          <Title as="h4">
             <span className="opening-overview-color white" aria-hidden="true" />
             {t("Rencana putih")}
-          </h4>
+          </Title>
           <p>{overview.whitePlan[language]}</p>
         </div>
         <div className="opening-overview-side-plan">
-          <h4>
+          <Title as="h4">
             <span className="opening-overview-color black" aria-hidden="true" />
             {t("Rencana hitam")}
-          </h4>
+          </Title>
           <p>{overview.blackPlan[language]}</p>
         </div>
       </section>
       <section>
-        <h3>{t("Cabang penting")}</h3>
+        <Title as="h3">{t("Cabang penting")}</Title>
         <ul className="opening-overview-branches">
           {overview.branches.map((branch) => (
             <li key={branch}>{branch}</li>
@@ -85,16 +86,16 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
         </ul>
       </section>
       <section>
-        <h3>{t("Tips praktis")}</h3>
+        <Title as="h3">{t("Tips praktis")}</Title>
         <div className="opening-study-tip">
           <Lightbulb size={17} aria-hidden="true" />
           <p>{t(opening.tip)}</p>
         </div>
-        <h4>{t("Yang perlu diwaspadai")}</h4>
+        <Title as="h4">{t("Yang perlu diwaspadai")}</Title>
         <p>{overview.caution[language]}</p>
       </section>
       <section className="opening-overview-sources">
-        <h3>{t("Sumber & kredit")}</h3>
+        <Title as="h3">{t("Sumber & kredit")}</Title>
         <p>
           {t(
             "Ringkasan ditulis ulang untuk materi belajar ini. Baca referensi lengkap melalui tautan berikut.",

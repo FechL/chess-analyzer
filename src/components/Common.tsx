@@ -1,3 +1,4 @@
+import Title from "./Title";
 // i18n: rendered text
 import { pieceAsset, useAppearance } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
@@ -57,7 +58,7 @@ export function Modal({
     >
       <div className="modal-inner">
         <div className="modal-heading">
-          <h2 id="modal-title">{t(title)}</h2>
+          <Title as="h2" id="modal-title">{t(title)}</Title>
           <button
             className="icon-button"
             aria-label={t("Tutup")}

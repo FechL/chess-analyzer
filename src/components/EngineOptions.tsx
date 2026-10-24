@@ -1,3 +1,4 @@
+import Title from "./Title";
 import { useId } from "react";
 import { useI18n } from "../lib/i18n";
 import type { Settings } from "../App";
@@ -28,7 +29,7 @@ export default function EngineOptions({
   return (
     <div className="engine-options">
       <div className="settings-section">
-        <label htmlFor={`${id}-engine`}>{t("Pilih engine")}</label>
+        <Title as="label" htmlFor={`${id}-engine`}>{t("Pilih engine")}</Title>
         <select
           id={`${id}-engine`}
           value={value.engine}
@@ -62,7 +63,7 @@ export default function EngineOptions({
         </label>
       </div>
       <div className="settings-section">
-        <label htmlFor={`${id}-depth`}>{t("Batas depth")}</label>
+        <Title as="label" htmlFor={`${id}-depth`}>{t("Batas depth")}</Title>
         <select
           id={`${id}-depth`}
           value={value.engineDepth}
@@ -85,11 +86,11 @@ export default function EngineOptions({
         </select>
       </div>
       <div className="settings-section">
-        <label htmlFor={`${id}-time`}>
+        <Title as="label" htmlFor={`${id}-time`}>
           {t("Waktu analisis")}
           {t(" ")}
           <strong>{t(`${value.analysisMs / 1000} detik`)}</strong>
-        </label>
+        </Title>
         <input
           id={`${id}-time`}
           type="range"
@@ -159,7 +160,7 @@ export default function EngineOptions({
         </div>
       )}
       <div className="settings-section">
-        <label htmlFor={`${id}-variations`}>{t("Jumlah variasi")}</label>
+        <Title as="label" htmlFor={`${id}-variations`}>{t("Jumlah variasi")}</Title>
         <select
           id={`${id}-variations`}
           value={value.multiPV}

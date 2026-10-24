@@ -1,3 +1,5 @@
+import Title from "./components/Title";
+import { titleCase } from "./lib/title-case";
 // i18n: rendered text
 import { useI18n } from "@/lib/i18n";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
@@ -13,7 +15,6 @@ import {
   FolderHeart,
   GraduationCap,
   Grid2X2,
-  HelpCircle,
   Import,
   LayoutDashboard,
   LibraryBig,
@@ -33,7 +34,6 @@ import {
   X,
 } from "lucide-react";
 import { DashboardShell } from "./components/block/dashboard-shell";
-import AnalysisGuide from "./components/AnalysisGuide";
 import { AppearanceContext, pieceAsset } from "./lib/preferences";
 import { setLanguage } from "./lib/i18n";
 import Analysis from "./pages/Analysis";
@@ -184,7 +184,7 @@ export default function App() {
     return () => window.removeEventListener("hashchange", handler);
   }, []);
   useEffect(() => {
-    document.title = `${activeOpening?.name || t(TITLES[page])} · Kuda`;
+    document.title = `${titleCase(activeOpening?.name || t(TITLES[page]))} · Kuda`;
     setCompleted(readStorage("kuda-lessons", []));
   }, [page, activeOpening?.name, modal, t]);
   useEffect(() => {
@@ -250,9 +250,9 @@ export default function App() {
       id: "learn",
       title: "TUMBUH & BELAJAR",
       items: [
+        { id: "puzzles", label: "Puzzle", icon: Target },
         { id: "openings", label: "Opening explorer", icon: BookOpen },
         { id: "academy", label: "Akademi catur", icon: GraduationCap },
-        { id: "puzzles", label: "Puzzle", icon: Target },
       ],
     },
     {
@@ -293,7 +293,7 @@ export default function App() {
         activeItemId={page}
         onActiveItemChange={navigate}
         title={t(
-          <span className="breadcrumb">
+          <Title as="span" className="breadcrumb">
             <span>{t("Studio")}</span>
             <ChevronRight size={14} />
             {activeOpening ? (
@@ -310,25 +310,12 @@ export default function App() {
             ) : (
               t(TITLES[page])
             )}
-          </span>,
+          </Title>,
         )}
         headerActions={
-          <>
-            {page === "analysis" ? (
-              <AnalysisGuide header />
-            ) : (
-              <button
-                className="icon-button header-help"
-                aria-label={t("Buka panduan")}
-                onClick={() => setModal("help")}
-              >
-                <HelpCircle size={18} />
-              </button>
-            )}
-            <span className="profile-avatar" title={t("Profil lokal")}>
-              {t("K")}
-            </span>
-          </>
+          <span className="profile-avatar" title={t("Profil lokal")}>
+            {t("K")}
+          </span>
         }
         navigationLabel="Navigasi Kuda Chess Studio"
         sidebarFooter={
@@ -337,11 +324,11 @@ export default function App() {
               <span className="sidebar-learning-icon">
                 <Sparkles size={21} />
               </span>
-              <h3>
+              <Title as="h3">
                 {t("Satu langkah")}
                 <br />
                 {t("lebih baik, setiap hari.")}
-              </h3>
+              </Title>
               <p>
                 {t("Luangkan waktu untuk")}
                 <br />
@@ -499,7 +486,7 @@ export default function App() {
           >
             <div className="app-settings">
             <div className="settings-section">
-              <label>{t("Tampilan papan")}</label>
+              <Title as="label">{t("Tampilan papan")}</Title>
               <div className="board-theme-options">
                 {t(
                   (["sage", "walnut", "slate"] as const).map((theme, i) => (
@@ -521,7 +508,7 @@ export default function App() {
               </div>
             </div>
             <div className="settings-section">
-              <label>{t("Tema buah")}</label>
+              <Title as="label">{t("Tema buah")}</Title>
               <div className="piece-theme-options">
                 {t(
                   (["classic", "merida", "celtic"] as const).map((theme) => (
@@ -549,7 +536,7 @@ export default function App() {
               </div>
             </div>
             <div className="settings-section">
-              <label>{t("Tampilan notasi")}</label>
+              <Title as="label">{t("Tampilan notasi")}</Title>
               <div className="board-theme-options settings-choice-options notation-choice-options" role="group" aria-label={t("Tampilan notasi")}>
                 {t(
                   ([
@@ -580,7 +567,7 @@ export default function App() {
               </div>
             </div>
             <div className="settings-section">
-              <label>{t("Mode tampilan")}</label>
+              <Title as="label">{t("Mode tampilan")}</Title>
               <div className="board-theme-options settings-choice-options appearance-choice-options" role="group" aria-label={t("Mode tampilan")}>
                 {t(
                   ([
@@ -605,7 +592,7 @@ export default function App() {
               </div>
             </div>
             <div className="settings-section">
-              <label htmlFor="app-language">{t("Bahasa")}</label>
+              <Title as="label" htmlFor="app-language">{t("Bahasa")}</Title>
               <select
                 id="app-language"
                 value={settings.language}
@@ -692,7 +679,7 @@ export default function App() {
                 <span className="small-label">
                   {t("RUANG KECIL UNTUK PERMAINAN BESAR")}
                 </span>
-                <h3>{t("Belajar dengan memainkan idenya.")}</h3>
+                <Title as="h3">{t("Belajar dengan memainkan idenya.")}</Title>
                 <p>
                   {t(
                     "Mulai dari contoh Opera Game, impor PGN/FEN Anda, atau buat analisis baru. Klik buah lalu petak tujuan; Anda juga bisa menyeret buah.",
@@ -740,7 +727,7 @@ export default function App() {
                   <kbd>{t("Esc")}</kbd>
                   {t(" tutup dialog")}
                 </p>
-                <h3>{t("Pintasan analisis")}</h3>
+                <Title as="h3">{t("Pintasan analisis")}</Title>
                 <ul className="analysis-shortcut-list">
                   {ANALYSIS_SHORTCUTS.map((shortcut) => (
                     <li key={shortcut.key}>
@@ -1056,12 +1043,12 @@ function Library({
       <div className="page-intro">
         <div>
           <div className="eyebrow">{t("KOLEKSI PRIBADI")}</div>
-          <h1>
+          <Title as="h1">
             {t("Permainan berlalu.")}
             <br />
             {t("Pelajarannya tinggal")}
             <span>{t(".")}</span>
-          </h1>
+          </Title>
           <p>
             {t("Simpan permainan yang berarti, dan kunjungi lagi kapan saja.")}
           </p>
@@ -1072,10 +1059,10 @@ function Library({
         </button>
       </div>
       <div className="catalog-toolbar">
-        <h3>
+        <Title as="h3">
           {t(saved.length)}
           {t(" permainan tersimpan")}
-        </h3>
+        </Title>
         <label className="search-input">
           <Search size={16} />
           <input
@@ -1114,7 +1101,7 @@ function Library({
                       }),
                     )}
                   </span>
-                  <h3>{t(s.game.event)}</h3>
+                  <Title as="h3">{t(s.game.event)}</Title>
                   <p>
                     {t(s.game.white)} <span>{t("vs")}</span> {t(s.game.black)}
                   </p>
@@ -1152,13 +1139,13 @@ function Library({
             <div className="empty-icon">
               <LibraryBig size={36} />
             </div>
-            <h2>
+            <Title as="h2">
               {t(
                 search
                   ? "Belum ada yang cocok."
                   : "Halaman untuk perjalananmu.",
               )}
-            </h2>
+            </Title>
             <p>
               {t(
                 search

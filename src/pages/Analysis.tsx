@@ -1,3 +1,4 @@
+import Title from "../components/Title";
 import EngineOptions from "../components/EngineOptions";
 import AnalysisGuide from "../components/AnalysisGuide";
 import CopyGameActions from "../components/CopyGameActions";
@@ -761,7 +762,7 @@ export default function Analysis({
     <div className="page analysis-page">
       <div className="workspace-toolbar">
         <div className="game-title-block">
-          <strong>
+          <Title as="strong">
             {t(
               game.source === "Bebas" || game.source === "Kustom"
                 ? game.source === "Kustom" || game.event.includes("Kustom")
@@ -769,7 +770,7 @@ export default function Analysis({
                   : "Analisis Bebas"
                 : "Impor " + (game.source || "PGN"),
             )}
-          </strong>
+          </Title>
           {t(
             !customEditing && (
               <div className="game-players">
@@ -988,31 +989,26 @@ export default function Analysis({
                           {t(" ")}
                           <AnalysisGuide accuracy />
                         </div>
-                        <button
-                          className="text-button review-action-button"
-                          onClick={runReview}
-                          disabled={status !== "ready" || !game.moves.length}
-                        >
-                          {t(
-                            reviewing ? (
-                              <>
-                                <span>{t("Hentikan ulasan")}</span>
-                                <span>
-                                  {t(progress)}
-                                  {t("%")}
-                                </span>
-                              </>
-                            ) : (
-                              <span>
-                                {t(
-                                  review.length
-                                    ? "Analisis ulang"
-                                    : "Analisis seluruh permainan",
-                                )}
-                              </span>
-                            ),
-                          )}
-                        </button>
+                        {status === "ready" && game.moves.length > 0 && (
+                          <button
+                            className="text-button review-action-button"
+                            onClick={runReview}
+                          >
+                            {t(
+                              reviewing ? (
+                                <>
+                                  <span>{t("Hentikan ulasan")}</span>
+                                  <span>
+                                    {t(progress)}
+                                    {t("%")}
+                                  </span>
+                                </>
+                              ) : (
+                                <span>{t("Analisis ulang")}</span>
+                              ),
+                            )}
+                          </button>
+                        )}
                       </div>
                       <div className="accuracy-scores">
                         <div>
@@ -1064,7 +1060,7 @@ export default function Analysis({
                       )}
                     </div>
                     <div className="notation-heading">
-                      <span>{t("Notasi permainan")}</span>
+                      <Title as="span">{t("Notasi permainan")}</Title>
                       <span>
                         {t(mainGame.moves.length)}
                         {t(" ply")}
@@ -1119,7 +1115,7 @@ export default function Analysis({
                 tab === "engine" && !customEditing && (
                   <div className="engine-details">
                     <div className="line-heading">
-                      <h3>{t("Variasi terbaik")}</h3>
+                      <Title as="h3">{t("Variasi terbaik")}</Title>
                     </div>
                     {t(
                       result?.lines.length ? (
@@ -1171,7 +1167,7 @@ export default function Analysis({
                       ),
                     )}
                     <div className="notation-heading">
-                      <span>{t("Notasi permainan")}</span>
+                      <Title as="span">{t("Notasi permainan")}</Title>
                       <span>
                         {t(mainGame.moves.length)}
                         {t(" ply")}
@@ -1325,7 +1321,7 @@ export default function Analysis({
                 tab === "notes" && !customEditing && (
                   <div className="notes-panel">
                     <MessageSquareText size={27} />
-                    <h3>{t("Ide yang layak diingat.")}</h3>
+                    <Title as="h3">{t("Ide yang layak diingat.")}</Title>
                     <p>
                       {t(
                         "Catatan untuk posisi ini tersimpan otomatis di browser Anda.",
@@ -1373,7 +1369,7 @@ export default function Analysis({
               <div className="card-heading">
                 <div>
                   <TrendingUp size={16} />
-                  <h3>{t("Alur permainan")}</h3>
+                  <Title as="h3">{t("Alur permainan")}</Title>
                 </div>
                 {t(activeVariation && <span>{t("Keluar dari notasi")}</span>)}
               </div>
@@ -1428,7 +1424,7 @@ export default function Analysis({
                   side="top"
                   aria-label={t("Pintasan lainnya")}
                 >
-                  <strong>{t("Pintasan lainnya")}</strong>
+                  <Title as="strong">{t("Pintasan lainnya")}</Title>
                   <dl>
                     {ANALYSIS_SHORTCUTS.filter(
                       (shortcut) => shortcut.shift,

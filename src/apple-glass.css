@@ -829,8 +829,6 @@ kbd {
   flex: 1;
   overflow-x: auto;
   padding-block: 5px;
-  scrollbar-width: thin;
-  scrollbar-color: #a5b3c580 transparent;
 }
 .board-shortcut-hints > span {
   display: inline-flex;
@@ -1076,7 +1074,7 @@ kbd {
 }
 .move-list {
   padding: 7px 11px;
-  scrollbar-color: #d1dff0 transparent;
+
   max-height: 172px;
 }
 .move-number {
@@ -1337,7 +1335,6 @@ kbd {
     0 35px 90px -25px rgb(48 66 101 / 35%);
   -webkit-backdrop-filter: blur(35px) saturate(1.5);
   backdrop-filter: blur(35px) saturate(1.5);
-  scrollbar-color: #d2def0 transparent;
 }
 .modal::backdrop {
   background: rgb(87 108 141 / 24%);
@@ -2356,7 +2353,6 @@ textarea::placeholder {
 .analysis-sidebar .analysis-panel {
   min-height: 0;
   overflow: auto;
-  scrollbar-width: thin;
 }
 .analysis-sidebar .panel-tabs {
   position: sticky;
@@ -2477,7 +2473,7 @@ textarea::placeholder {
 .online-game-list {
   max-height: 310px;
   overflow-y: auto;
-  scrollbar-width: thin;
+
   border: 1px solid #dbe5f2;
   border-radius: 12px;
 }
@@ -3036,7 +3032,7 @@ textarea::placeholder {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  scrollbar-width: thin;
+
   padding: 16px 18px;
 }
 .bot-game-panel .config-group {
@@ -3048,7 +3044,8 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  margin-top: 6px;
+  margin-bottom: 14px;
   color: var(--muted);
 }
 .bot-setup-heading h2 {

@@ -106,8 +106,7 @@
   .text-xs {
   color: var(--dark-subtle);
 }
-:root[data-color-mode="dark"]
-  :is(.sidebar-learning, .help-sources, .study-tip) {
+:root[data-color-mode="dark"] :is(.sidebar-learning, .study-tip) {
   background: linear-gradient(140deg, #2d425ca6, #24364d99);
   border-color: var(--line);
   box-shadow: var(--glass-shadow);
@@ -264,8 +263,7 @@
     .piece-editor-group button,
     .color-choices > button,
     .bot-levels > button,
-    .critical-moment,
-    .icon-button
+    .critical-moment
   ) {
   background: var(--dark-control);
   border-color: var(--line);
@@ -282,8 +280,7 @@
     .piece-theme-options button,
     .color-choices > button,
     .bot-levels > button,
-    .critical-moment,
-    .icon-button
+    .critical-moment
   ):hover:not(:disabled) {
   background: var(--dark-hover);
   border-color: #8baad060;
@@ -296,8 +293,7 @@
     .piece-theme-options button.active,
     .piece-editor-group button.active,
     .color-choices > button.active,
-    .bot-levels > button.active,
-    .icon-button.active
+    .bot-levels > button.active
   ) {
   background: var(--dark-active);
   border-color: var(--dark-active-border);
@@ -308,6 +304,32 @@
 }
 :root[data-color-mode="dark"] .button.primary {
   color: #fff;
+}
+:root[data-color-mode="dark"] .icon-button {
+  background: transparent;
+  border: 0;
+  color: #b5c9e3;
+  box-shadow: none;
+}
+:root[data-color-mode="dark"] .icon-button:hover:not(:disabled),
+:root[data-color-mode="dark"] .icon-button.active {
+  background: #8eb9f023;
+  color: #afd1ff;
+  box-shadow: none;
+}
+:root[data-color-mode="dark"] .help-sources > a {
+  border-color: var(--line);
+  color: var(--green);
+}
+:root[data-color-mode="dark"] .help-sources > a:hover {
+  background: #8eb9f00d;
+}
+:root[data-color-mode="dark"] .help-sources strong,
+:root[data-color-mode="dark"] .help-sources > .section-label {
+  color: var(--ink);
+}
+:root[data-color-mode="dark"] .help-sources span {
+  color: var(--muted);
 }
 :root[data-color-mode="dark"]
   :is(
@@ -443,9 +465,6 @@
 }
 :root[data-color-mode="dark"] .modal-overlay {
   background: #030a1599;
-}
-:root[data-color-mode="dark"] .modal {
-  scrollbar-color: #627e9b transparent;
 }
 
 /* Chess workspace: keep the board palette intact; darken its surrounding chrome. */

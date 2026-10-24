@@ -415,7 +415,11 @@ export default function App() {
         )}
         {t(
           page === "puzzles" && (
-            <PuzzlesPage settings={settings} onAnalyze={analyzePosition} />
+            <PuzzlesPage
+              settings={settings}
+              onSettingsChange={setSettings}
+              onAnalyze={analyzePosition}
+            />
           ),
         )}
         {t(

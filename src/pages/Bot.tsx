@@ -27,6 +27,7 @@ import {
   Modal,
   MoveList,
   NavigationControls,
+  NavigationShortcutHint,
 } from "../components/Common";
 import {
   DashboardPopover,
@@ -903,7 +904,7 @@ export default function BotPage({
                 role="group"
                 aria-label={t("Pintasan permainan")}
               >
-                <span>{t("← → Navigasi")}</span>
+                <NavigationShortcutHint />
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>

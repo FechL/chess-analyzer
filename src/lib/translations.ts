@@ -294,6 +294,53 @@ export const ENGLISH: Record<string, string> = {
   "puzzle selesai": "puzzles solved",
   "puzzle tersimpan": "cached puzzles",
   "Puzzle berikutnya": "Next puzzle",
+  Navigasi: "Navigate",
+  "Riwayat Puzzle": "Puzzle History",
+  "Puzzle #": "Puzzle #",
+  "Puzzle terselesaikan": "Solved",
+  "Selesai dengan kesalahan": "Solved with mistakes",
+  "Puzzle dilewati": "Skipped",
+  entri: "entries",
+  "Panduan puzzle": "Puzzle guide",
+  "Tujuan latihan": "How to solve",
+  "Saat lawan membalas, antrekan hingga lima langkah. Langkah dijalankan saat giliranmu jika masih legal dan tetap dinilai sesuai solusi puzzle. Klik kanan atau tekan Esc untuk membatalkan antrean.":
+    "While the opponent replies, queue up to five moves. Each move runs on your turn if still legal and is checked against the puzzle solution. Right-click or press Esc to cancel the queue.",
+  "Mainkan semua langkah solusi untuk sisi yang ditandai melangkah. Balasan lawan akan bergerak otomatis.":
+    "Find the full solution for the side marked to move. The opponent's replies play automatically.",
+  "Streak dan rekor": "Streak and best",
+  "Penyelesaian tanpa langkah salah menambah streak. Langkah salah atau melewati puzzle mereset streak; rekor terbaik tetap tersimpan.":
+    "A clean solve adds to your streak. A wrong move or skipping resets the current streak; your best streak stays saved.",
+  "Lanjut otomatis dan lewati": "Auto next and skip",
+  "Auto next memuat puzzle berikutnya setelah solusi selesai. Matikan di Opsi jika ingin tetap di posisi akhir. Skip puzzle mencatat durasi lalu mengambil puzzle lain.":
+    "Auto next loads another puzzle after a solve. Turn it off in Options to stay on the final position. Skip puzzle records your time before loading another.",
+  "Riwayat dan waktu": "History and time",
+  "Riwayat di sidebar mencatat puzzle selesai atau dilewati serta waktu sejak puzzle dimuat sampai tindakan tersebut.":
+    "The sidebar history lists solved and skipped puzzles, with the time from loading the puzzle to that action.",
+  "Rating dan bar evaluasi": "Rating and evaluation bar",
+  "Rating adalah perkiraan tingkat puzzle dari Lichess, bukan rating pemain. Bar evaluasi memakai Stockfish lokal dan bisa dimatikan di Opsi.":
+    "The rating estimates puzzle difficulty; it is not a player rating. The evaluation bar uses local Stockfish and can be switched off in Options.",
+  "Koleksi puzzle": "Puzzle collection",
+  "Hingga lima puzzle disimpan sementara di perangkat. Puzzle yang dipakai akan diganti agar antrean terisi kembali.":
+    "Up to five puzzles are cached on this device. Used puzzles are replaced to refill the queue.",
+  "Lihat puzzle ini di Lichess ↗": "View this puzzle on Lichess ↗",
+  "Puzzle yang selesai atau dilewati akan muncul di sini.":
+    "Completed and skipped puzzles will appear here.",
+  "Lanjut otomatis": "Auto next",
+  "Lewati puzzle": "Skip puzzle",
+  "Lewati puzzle ini?": "Skip this puzzle?",
+  "Melewati puzzle ini akan memutus streak Anda. Rekor terbaik tetap tersimpan.":
+    "Skipping this puzzle will break your current streak. Your best streak will stay saved.",
+  "Tetap lewati": "Skip anyway",
+  Puzzle: "Puzzle",
+  Streak: "Streak",
+  Rekor: "Best",
+  "streak berjalan": "current streak",
+  rekor: "best",
+  "Waktu puzzle": "Puzzle time",
+  "waktu puzzle": "puzzle time",
+  melangkah: "to move",
+  "Rating ": "Rating ",
+  "Lihat di Lichess ↗": "View on Lichess ↗",
   "Tema puzzle": "Puzzle theme",
   Campuran: "Mixed",
   "Mat dalam 1 langkah": "Mate in 1",
@@ -306,14 +353,10 @@ export const ENGLISH: Record<string, string> = {
   Normal: "Normal",
   Sulit: "Hard",
   "Sangat sulit": "Very hard",
-  "Antrean berisi hingga 5 puzzle dan diisi ulang setelah puzzle selesai.":
-    "Up to 5 puzzles are cached and refilled when you finish a puzzle.",
   "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.":
     "Find the best move. Check forcing moves, captures, and threats.",
   "Cari langkah yang memaksa balasan lawan.":
     "Look for a move that forces your opponent to respond.",
-  "Puzzle selesai. Semua langkah solusi sudah ditemukan.":
-    "Puzzle complete. You found the entire solution.",
   "Mengambil puzzle dari Lichess…": "Loading puzzles from Lichess…",
   "Pilih tema untuk memulai puzzle.":
     "Choose a theme to start solving puzzles.",
@@ -323,6 +366,18 @@ export const ENGLISH: Record<string, string> = {
   "Tepat. Lanjutkan idemu!": "Correct. Continue your idea!",
   "Langkah legal, tetapi belum sesuai ide latihan. Periksa petunjuk dan coba lagi.":
     "That move is legal, but it does not solve the exercise. Check the hint and try again.",
+  "Langkah puzzle kurang tepat": "Incorrect move",
+  "Langkah puzzle tepat": "Correct move",
+  "Balasan terbaik lawan:": "Opponent's best reply:",
+  ". Coba langkah lain dari posisi semula.": ". Try another move from the original position.",
+  "Permainan berakhir setelah langkah ini. Coba langkah lain untuk menemukan solusi puzzle.":
+    "This move ends the game. Try another move to find the puzzle solution.",
+  "Balasan engine belum tersedia. Coba langkah lain dari posisi semula.":
+    "The engine reply is unavailable. Try another move from the original position.",
+  "Langkah ini belum menyelesaikan puzzle. Sedang mencari balasan terbaik lawan…":
+    "This move does not solve the puzzle. Finding the opponent's best reply…",
+  "Langkah tepat. Lanjutkan solusi Anda.": "Correct move. Continue the solution.",
+  "Semua langkah solusi telah ditemukan.": "You found every move in the solution.",
   "Jawaban ditampilkan": "Solution revealed",
   "Jalur selesai!": "Line completed!",
   "Lawan membalas…": "Opponent responding…",

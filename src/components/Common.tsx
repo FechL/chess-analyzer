@@ -58,7 +58,9 @@ export function Modal({
     >
       <div className="modal-inner">
         <div className="modal-heading">
-          <Title as="h2" id="modal-title">{t(title)}</Title>
+          <Title as="h2" id="modal-title">
+            {t(title)}
+          </Title>
           <button
             className="icon-button"
             aria-label={t("Tutup")}
@@ -105,6 +107,7 @@ export function IconButton({
 export function NavigationControls({
   ply,
   total,
+  showPosition = true,
   navigationLimit = total,
   navigationDisabled = false,
   onChange,
@@ -116,6 +119,7 @@ export function NavigationControls({
 }: {
   ply: number;
   total: number;
+  showPosition?: boolean;
   navigationLimit?: number;
   navigationDisabled?: boolean;
   onChange: (n: number) => void;
@@ -129,19 +133,24 @@ export function NavigationControls({
 
   return (
     <div className="board-controls">
-      <span className="move-position">
-        {t(
-          outsideNotation ? (
-            "- / -"
-          ) : (
-            <>
-              {t("Langkah ")}
-              {t(Math.ceil(ply / 2))}
-              {t("/")}
-              {t(Math.ceil(total / 2))}
-            </>
-          ),
-        )}
+      <span
+        className="move-position"
+        aria-hidden={showPosition ? undefined : true}
+        style={showPosition ? undefined : { visibility: "hidden" }}
+      >
+        {showPosition &&
+          t(
+            outsideNotation ? (
+              "- / -"
+            ) : (
+              <>
+                {t("Langkah ")}
+                {t(Math.ceil(ply / 2))}
+                {t("/")}
+                {t(Math.ceil(total / 2))}
+              </>
+            ),
+          )}
       </span>
       <div className="navigation-buttons">
         {outsideNotation && onReturnToMain && (
@@ -203,6 +212,22 @@ export function NavigationControls({
     </div>
   );
 }
+
+export function NavigationShortcutHint() {
+  const { t } = useI18n();
+  return (
+    <span
+      className="navigation-shortcut-hint"
+      role="img"
+      aria-label={t("Navigasi")}
+      title={t("Navigasi")}
+    >
+      <kbd>← →</kbd>
+      <span>{t("Navigasi")}</span>
+    </span>
+  );
+}
+
 export function PlayerRow({
   name,
   color,

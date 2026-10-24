@@ -36,6 +36,7 @@ type Props = {
   theme?: "sage" | "walnut" | "slate";
   compact?: boolean;
   annotation?: Annotation;
+  moveBadge?: { square: string; symbol: string; label: string; color: string };
   editMode?: boolean;
   onEditSquare?: (square: string, piece?: string, from?: string) => void;
   onDeleteDropSquare?: (square: string) => void;
@@ -66,6 +67,7 @@ export default function Board({
   theme = "sage",
   compact,
   annotation,
+  moveBadge,
   editMode = false,
   onEditSquare,
   onDeleteDropSquare,
@@ -361,6 +363,12 @@ export default function Board({
             [...files].map((file, col) => {
               const square = file + rank;
               const p = displayChess.get(square as Square);
+              const badge =
+                moveBadge?.square === square
+                  ? moveBadge
+                  : annotation && lastMove?.to === square && p
+                    ? LABELS[annotation]
+                    : undefined;
               const pendingSquare = premove?.moves.some(
                 (move) => move.from === square || move.to === square,
               );
@@ -474,13 +482,13 @@ export default function Board({
                     </span>
                   )}
                   {t(
-                    annotation && lastMove?.to === square && p && (
+                    badge && (
                       <span
                         className="piece-category-badge"
-                        style={{ background: LABELS[annotation].color }}
-                        aria-label={t(LABELS[annotation].label)}
+                        style={{ background: badge.color }}
+                        aria-label={t(badge.label)}
                       >
-                        {t(LABELS[annotation].symbol)}
+                        {t(badge.symbol)}
                       </span>
                     ),
                   )}

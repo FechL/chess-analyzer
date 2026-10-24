@@ -23,7 +23,12 @@ import {
   DashboardPopoverTrigger,
   DashboardPopoverContent,
 } from "../components/block/dashboard-shell";
-import { IconButton, MoveList, NavigationControls } from "../components/Common";
+import {
+  IconButton,
+  MoveList,
+  NavigationControls,
+  NavigationShortcutHint,
+} from "../components/Common";
 import { NotationMove } from "../components/Notation";
 import { useI18n } from "../lib/i18n";
 import { readStorage, writeStorage } from "../lib/chess";
@@ -328,6 +333,7 @@ export default function OpeningStudy({
     try {
       const candidate = chess.move({ from, to, promotion });
       if (candidate.san !== expected.san) {
+        playBoardSound("error");
         setMistakes((value) => value + 1);
         setFeedback(
           "Langkah ini berada di luar variasi yang dilatih. Coba lagi.",
@@ -383,6 +389,7 @@ export default function OpeningStudy({
     try {
       const candidate = new Chess(position).move({ from, to, promotion });
       if (candidate.san !== expectedMove.san) {
+        playBoardSound("error");
         setReviewRun((current) => {
           if (current.status !== "active") return current;
           const mistakes = current.mistakes + 1;
@@ -1466,7 +1473,7 @@ export default function OpeningStudy({
         {settings.enableShortcuts && (
           <div className="board-under opening-study-shortcuts">
             <div className="board-shortcut-hints">
-              {tab === "lesson" && <span>{t("← → Navigasi")}</span>}
+              {tab === "lesson" && <NavigationShortcutHint />}
               <span>
                 <kbd>F</kbd> {t("Balik papan")}
               </span>

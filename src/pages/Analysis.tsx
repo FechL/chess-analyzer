@@ -31,7 +31,12 @@ import {
 } from "lucide-react";
 import { NotationLine } from "../components/Notation";
 import Board, { EvalBar } from "../components/Board";
-import { IconButton, MoveList, NavigationControls } from "../components/Common";
+import {
+  IconButton,
+  MoveList,
+  NavigationControls,
+  NavigationShortcutHint,
+} from "../components/Common";
 import {
   DashboardButton,
   DashboardPopover,
@@ -1391,7 +1396,7 @@ export default function Analysis({
                 role="group"
                 aria-label={t("Pintasan analisis")}
               >
-                <span>{t("← → Navigasi")}</span>
+                <NavigationShortcutHint />
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>

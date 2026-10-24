@@ -2,7 +2,8 @@ import Title from "../components/Title";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
   ArrowRight,
@@ -11,22 +12,45 @@ import {
   CheckCheck,
   ChevronLeft,
   ChevronRight,
+  CircleHelp,
   Clock3,
   Flag,
+  Flame,
   GraduationCap,
   Lightbulb,
   Play,
   RotateCcw,
   Search,
+  SkipForward,
   Sparkles,
   Target,
   Trophy,
+  X,
 } from "lucide-react";
-import Board from "../components/Board";
-import { Modal, NavigationControls, ProgressRing } from "../components/Common";
+import Board, { EvalBar } from "../components/Board";
+import {
+  IconButton,
+  Modal,
+  NavigationControls,
+  NavigationShortcutHint,
+  ProgressRing,
+} from "../components/Common";
 import { LESSONS, OPENINGS } from "../data/content";
 import type { Exercise } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
+import type { Evaluation } from "../lib/chess";
+import { useEngine } from "../hooks/useEngine";
+import { playBoardSound } from "../lib/board-sound";
+import { LocalEngine } from "../lib/engine";
+import { findPuzzleReply } from "../lib/puzzle-reply";
+import type { PuzzleReply } from "../lib/puzzle-reply";
+import { appendPremove, executePremove } from "../lib/premove";
+import type { Premove } from "../lib/premove";
+import {
+  DashboardPopover,
+  DashboardPopoverContent,
+  DashboardPopoverTrigger,
+} from "../components/block/dashboard-shell";
 import {
   cachedPuzzles,
   consumePuzzle,
@@ -34,6 +58,50 @@ import {
 } from "../lib/lichess-puzzles";
 import type { LichessPuzzle, PuzzleDifficulty } from "../lib/lichess-puzzles";
 import type { Settings } from "../App";
+
+const PUZZLE_THEMES: [string, string][] = [
+  ["mix", "Campuran"],
+  ["mateIn1", "Mat dalam 1 langkah"],
+  ["fork", "Garpu"],
+  ["pin", "Ikatan"],
+  ["endgame", "Endgame"],
+  ["sacrifice", "Pengorbanan"],
+];
+const PUZZLE_DIFFICULTIES: [PuzzleDifficulty, string][] = [
+  ["easiest", "Sangat mudah"],
+  ["easier", "Mudah"],
+  ["normal", "Normal"],
+  ["harder", "Sulit"],
+  ["hardest", "Sangat sulit"],
+];
+
+type PuzzleHistoryEntry = {
+  id: string;
+  number?: number;
+  clean?: boolean;
+  rating: number;
+  elapsedMs: number;
+  outcome: "solved" | "skipped";
+};
+
+type PuzzleMoveFeedback = {
+  kind: "ready" | "correct" | "wrong" | "complete" | "hint";
+  move?: string;
+  reply?: string;
+  replyStatus?: "searching" | "shown" | "unavailable" | "terminal";
+};
+
+function formatPuzzleDuration(milliseconds: number) {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return minutes ? `${minutes}m ${remainder}s` : `${remainder}s`;
+}
+
+function formatPuzzleClock(milliseconds: number) {
+  const seconds = Math.floor(milliseconds / 1000);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
 export function OpeningsPage({
   settings,
@@ -87,7 +155,9 @@ export function OpeningsPage({
         <div className="feature-chess-icon">{t("♘")}</div>
         <div>
           <span className="small-label">{t("REKOMENDASI UNTUK MEMULAI")}</span>
-          <Title as="h2">{t("Italian Game. Klasik untuk sebuah alasan.")}</Title>
+          <Title as="h2">
+            {t("Italian Game. Klasik untuk sebuah alasan.")}
+          </Title>
           <p>
             {t(
               "Kontrol pusat, kembangkan buah, dan amankan raja. Semua dalam satu opening.",
@@ -458,37 +528,129 @@ export function AcademyPage({
 
 export function PuzzlesPage({
   settings,
+  onSettingsChange,
   onAnalyze,
 }: {
   settings: Settings;
+  onSettingsChange: (settings: Settings) => void;
   onAnalyze: (fen: string, name: string) => void;
 }) {
   const { t } = useI18n();
 
+  const [tab, setTab] = useState("puzzle");
   const [theme, setTheme] = useState("mix");
   const [difficulty, setDifficulty] = useState<PuzzleDifficulty>("normal");
-  const [queue, setQueue] = useState<LichessPuzzle[]>(() =>
-    cachedPuzzles("mix", "normal"),
-  );
   const [puzzle, setPuzzle] = useState<LichessPuzzle | undefined>(
     () => cachedPuzzles("mix", "normal")[0],
   );
   const [completed, setCompleted] = useState<string[]>(() =>
     readStorage("kuda-lichess-completed", []),
   );
+  const [puzzleHistory, setPuzzleHistory] = useState<PuzzleHistoryEntry[]>(() =>
+    readStorage("kuda-puzzle-history", []),
+  );
+  const puzzleHistoryRef = useRef(puzzleHistory);
+  const [streak, setStreak] = useState(() =>
+    readStorage("kuda-puzzle-streak", 0),
+  );
+  const [best, setBest] = useState(() => readStorage("kuda-puzzle-best", 0));
+  const [record, setRecord] = useState(() =>
+    readStorage("kuda-puzzle-record", false),
+  );
+  const [autoNext, setAutoNext] = useState(() =>
+    readStorage("kuda-puzzle-auto-next", true),
+  );
+  const [attempt, setAttempt] = useState(0);
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [moveFeedback, setMoveFeedback] = useState<PuzzleMoveFeedback>({
+    kind: "ready",
+  });
+  const [positionFen, setPositionFen] = useState("");
+  const [evaluation, setEvaluation] = useState<Evaluation>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const requestId = useRef(0);
+  const puzzleStartedAt = useRef(Date.now());
+  const recordedPuzzleId = useRef<string | undefined>(undefined);
+  const consumedPuzzleIds = useRef(new Set<string>());
+  const autoNextTimer = useRef<number | undefined>(undefined);
+  const { engine, status } = useEngine(settings.engine);
+  const replyEngine = useRef<LocalEngine | null>(null);
+  useEffect(
+    () => () => {
+      replyEngine.current?.destroy();
+      replyEngine.current = null;
+    },
+    [settings.engine],
+  );
+  const getOpponentReply = useCallback(
+    (fen: string) =>
+      findPuzzleReply(fen, async (position) => {
+        const instance = (replyEngine.current ??= new LocalEngine(
+          settings.engine,
+        ));
+        try {
+          return await instance.analyze(position, { ms: 350, multiPV: 1 });
+        } catch (error) {
+          if (replyEngine.current === instance) {
+            instance.destroy();
+            replyEngine.current = null;
+          }
+          throw error;
+        }
+      }),
+    [settings.engine],
+  );
+  const consume = (current: LichessPuzzle) => {
+    if (consumedPuzzleIds.current.has(current.id)) return;
+    consumePuzzle(theme, difficulty, current.id);
+    consumedPuzzleIds.current.add(current.id);
+  };
+  const recordAttempt = (
+    outcome: PuzzleHistoryEntry["outcome"],
+    clean?: boolean,
+  ) => {
+    if (!puzzle || recordedPuzzleId.current === puzzle.id) return;
+    recordedPuzzleId.current = puzzle.id;
+    const history = puzzleHistoryRef.current.map((item, index, entries) => ({
+      ...item,
+      number: item.number ?? entries.length - index,
+    }));
+    const entry: PuzzleHistoryEntry = {
+      id: puzzle.id,
+      number: (history[0]?.number ?? 0) + 1,
+      clean,
+      rating: puzzle.rating,
+      elapsedMs: Math.max(0, Date.now() - puzzleStartedAt.current),
+      outcome,
+    };
+    setElapsedMs(entry.elapsedMs);
+    const next = [entry, ...history].slice(0, 100);
+    puzzleHistoryRef.current = next;
+    setPuzzleHistory(next);
+    writeStorage("kuda-puzzle-history", next);
+  };
   const load = async (next = false) => {
+    setShowSkipWarning(false);
+    if (autoNextTimer.current !== undefined) {
+      window.clearTimeout(autoNextTimer.current);
+      autoNextTimer.current = undefined;
+    }
     const id = ++requestId.current;
     setBusy(true);
     setError("");
-    if (next && puzzle) consumePuzzle(theme, difficulty, puzzle.id);
+    if (next && puzzle) consume(puzzle);
     try {
       const available = await ensurePuzzles(theme, difficulty);
       if (id !== requestId.current) return;
-      setQueue(available);
       setPuzzle(available[0]);
+      setPuzzleSolved(false);
+      puzzleStartedAt.current = Date.now();
+      setElapsedMs(0);
+      recordedPuzzleId.current = undefined;
+      setAttempt(0);
       if (!available.length) setError("Belum ada puzzle baru. Coba tema lain.");
     } catch (e) {
       if (id === requestId.current) setError((e as Error).message);
@@ -499,170 +661,634 @@ export function PuzzlesPage({
   useEffect(() => {
     const available = cachedPuzzles(theme, difficulty);
     setPuzzle(available[0]);
-    setQueue(available);
+    setPuzzleSolved(false);
+    puzzleStartedAt.current = Date.now();
+    setElapsedMs(0);
+    recordedPuzzleId.current = undefined;
     void load();
     return () => {
       requestId.current++;
     };
   }, [theme, difficulty]);
-  const complete = () => {
+  useEffect(() => {
+    if (!puzzle || puzzleSolved || busy) return;
+    const updateElapsed = () =>
+      setElapsedMs(Math.max(0, Date.now() - puzzleStartedAt.current));
+    updateElapsed();
+    const timer = window.setInterval(updateElapsed, 250);
+    return () => window.clearInterval(timer);
+  }, [puzzle, attempt, puzzleSolved, busy]);
+  useEffect(
+    () => () => {
+      if (autoNextTimer.current !== undefined)
+        window.clearTimeout(autoNextTimer.current);
+    },
+    [],
+  );
+  const complete = (clean: boolean) => {
     if (!puzzle) return;
+    setShowSkipWarning(false);
+    setPuzzleSolved(true);
+    recordAttempt("solved", clean);
+    playBoardSound("success");
     const next = [...new Set([...completed, puzzle.id])];
     setCompleted(next);
     writeStorage("kuda-lichess-completed", next);
-    consumePuzzle(theme, difficulty, puzzle.id);
-    const id = requestId.current;
-    void ensurePuzzles(theme, difficulty)
-      .then((items) => {
-        if (id === requestId.current) setQueue(items);
-      })
-      .catch((e) => {
-        if (id === requestId.current) setError((e as Error).message);
-      });
+    consume(puzzle);
+    void ensurePuzzles(theme, difficulty).catch((e) => {
+      setError((e as Error).message);
+    });
+    if (autoNext) {
+      autoNextTimer.current = window.setTimeout(() => {
+        autoNextTimer.current = undefined;
+        void load(true);
+      }, 1300);
+    }
   };
+  const goToNextPuzzle = () => {
+    if (!puzzle || busy) return;
+    if (!puzzleSolved) {
+      recordAttempt("skipped");
+      breakStreak();
+    }
+    void load(true);
+  };
+  const requestNextPuzzle = () => {
+    if (!puzzle || busy) return;
+    if (!puzzleSolved && streak >= 1) {
+      setShowSkipWarning(true);
+      return;
+    }
+    goToNextPuzzle();
+  };
+  const retryPuzzle = () => {
+    if (autoNextTimer.current !== undefined) {
+      window.clearTimeout(autoNextTimer.current);
+      autoNextTimer.current = undefined;
+    }
+    puzzleStartedAt.current = Date.now();
+    setElapsedMs(0);
+    recordedPuzzleId.current = undefined;
+    setPuzzleSolved(false);
+    setAttempt((value) => value + 1);
+  };
+  const breakStreak = () => {
+    setShowSkipWarning(false);
+    setRecord(false);
+    writeStorage("kuda-puzzle-record", false);
+    if (streak <= 0) return;
+    setStreak(0);
+    writeStorage("kuda-puzzle-streak", 0);
+  };
+  const growStreak = () => {
+    const next = streak + 1;
+    setStreak(next);
+    writeStorage("kuda-puzzle-streak", next);
+    if (next > best) {
+      setBest(next);
+      writeStorage("kuda-puzzle-best", next);
+      setRecord(true);
+      writeStorage("kuda-puzzle-record", true);
+    }
+  };
+  const validEvaluation =
+    evaluation?.fen === positionFen ? evaluation : undefined;
+  useEffect(() => {
+    if (
+      !settings.showEvalBar ||
+      status !== "ready" ||
+      !engine.current ||
+      !positionFen
+    )
+      return;
+    const instance = engine.current;
+    let active = true;
+    const timer = setTimeout(() => {
+      instance
+        .analyze(positionFen, { ms: 350, multiPV: 1 })
+        .then((value) => {
+          if (active) setEvaluation(value);
+        })
+        .catch(() => {});
+    }, 120);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      instance.stop();
+    };
+  }, [positionFen, status, settings.showEvalBar, settings.engine, engine]);
+  const color = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
+  const activeTheme = PUZZLE_THEMES.find(([id]) => id === theme)?.[1];
+  const activeDifficulty = PUZZLE_DIFFICULTIES.find(
+    ([id]) => id === difficulty,
+  )?.[1];
   return (
-    <div className="page puzzle-page">
-      <div className="page-intro">
-        <div>
-          <Title as="h1">{t("Puzzle")}</Title>
-          <p>{t("Temukan langkah terbaik dari permainan nyata di Lichess.")}</p>
-        </div>
-        <div className="puzzle-counter">
-          <Target size={22} />
-          <strong>{t(completed.length)}</strong>
-          <span>{t("puzzle selesai")}</span>
-        </div>
-      </div>
-      <div className="puzzle-layout">
-        <section className="puzzle-board-card">
-          {t(
-            puzzle ? (
-              <>
-                <div className="puzzle-title">
-                  <span className="subtle-pill">
+    <div className="page analysis-page puzzle-page">
+      <div className="workspace-toolbar">
+        <div className="game-title-block">
+          <Title as="strong">
+            {t(puzzle ? "Puzzle Lichess #" + puzzle.id : "Puzzle Lichess")}
+          </Title>
+          <div className="game-players">
+            {t(
+              puzzle && (
+                <span className="game-player">
+                  <span
+                    className={"player-color player-color-" + color}
+                    aria-hidden="true"
+                  />
+                  <strong>{t(color === "w" ? "Putih" : "Hitam")}</strong>
+                  <span>
+                    {t("melangkah")}
+                    {t(" · ")}
                     {t("Rating ")}
                     {t(puzzle.rating)}
                   </span>
-                  <Title as="h2">
-                    {t("Puzzle #")}
-                    {t(puzzle.id)}
-                  </Title>
-                  <a href={puzzle.url} target="_blank" rel="noreferrer">
-                    {t("Lichess ↗")}
-                  </a>
-                </div>
-                <LineTrainer
-                  key={puzzle.id}
-                  fen={puzzle.fen}
-                  moves={puzzle.solution}
-                  color={puzzle.fen.split(" ")[1] as "w" | "b"}
-                  theme={settings.boardTheme}
-                  title={t(
-                    "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
-                  )}
-                  hint="Cari langkah yang memaksa balasan lawan."
-                  explanation="Puzzle selesai. Semua langkah solusi sudah ditemukan."
-                  startTraining
-                  puzzleMode
-                  onComplete={complete}
-                  onAnalyze={(fen) =>
-                    onAnalyze(fen, "Puzzle Lichess #" + puzzle.id)
-                  }
-                />
-              </>
-            ) : (
-              <div className="puzzle-loading" role="status">
-                {t(
-                  busy
-                    ? "Mengambil puzzle dari Lichess…"
-                    : "Pilih tema untuk memulai puzzle.",
-                )}
-              </div>
-            ),
-          )}
-          <div className="puzzle-navigation">
-            <button
-              className="button primary"
-              disabled={busy}
-              onClick={() => void load(true)}
-            >
-              {t("Puzzle berikutnya ")}
-              <ArrowRight size={15} />
-            </button>
+                </span>
+              ),
+            )}
+            <span className="game-player">
+              <strong>{t(activeTheme ?? "Campuran")}</strong>
+              <span>{t(activeDifficulty ?? "Normal")}</span>
+            </span>
           </div>
+        </div>
+      </div>
+      <div className="analysis-grid">
+        <section className="board-section">
           {t(
-            error && (
-              <div className="error-message" role="alert">
-                {t(error)}
-                <button
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => void load()}
-                >
-                  {t("Coba lagi")}
-                </button>
+            puzzle ? (
+              <LineTrainer
+                key={`${puzzle.id}:${attempt}`}
+                fen={puzzle.fen}
+                moves={puzzle.solution}
+                color={color}
+                theme={settings.boardTheme}
+                title={t(
+                  "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
+                )}
+                hint="Cari langkah yang memaksa balasan lawan."
+                startTraining
+                puzzleMode
+                enableShortcuts={settings.enableShortcuts}
+                evalBar={
+                  settings.showEvalBar ? (
+                    <EvalBar
+                      cp={evaluation?.cp}
+                      mate={evaluation?.mate}
+                      active={!!evaluation}
+                      pending={!!evaluation && !validEvaluation}
+                      flipped={color === "b"}
+                    />
+                  ) : null
+                }
+                onPositionChange={setPositionFen}
+                onFeedbackChange={setMoveFeedback}
+                onFindReply={getOpponentReply}
+                onMistake={breakStreak}
+                onSolve={(clean) => {
+                  if (clean) growStreak();
+                }}
+                onComplete={complete}
+                onAnalyze={(fen) =>
+                  onAnalyze(fen, "Puzzle Lichess #" + puzzle.id)
+                }
+              />
+            ) : (
+              <div className="board-and-eval">
+                <div className="board-main">
+                  <div className="puzzle-loading" role="status">
+                    {t(
+                      busy
+                        ? "Mengambil puzzle dari Lichess…"
+                        : "Pilih tema untuk memulai puzzle.",
+                    )}
+                  </div>
+                </div>
               </div>
             ),
           )}
         </section>
-        <aside className="puzzle-sidebar">
-          <div className="puzzle-sidebar-head">
-            <Target size={22} />
-            <Title as="h3">{t("Puzzle Lichess")}</Title>
-            <p>
+        <div className="analysis-sidebar">
+          <div className="analysis-sidebar-content analysis-panel puzzle-sidebar-surface">
+            <aside className="puzzle-sidebar-body">
+              <div className="panel-tabs">
+                {t(
+                  (
+                    [
+                      ["puzzle", "Puzzle"],
+                      ["options", "Opsi"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      className={tab === value ? "active" : ""}
+                      key={value}
+                      onClick={() => setTab(value)}
+                    >
+                      {t(label)}
+                    </button>
+                  )),
+                )}
+                <DashboardPopover>
+                  <DashboardPopoverTrigger asChild>
+                    <button
+                      className="icon-button puzzle-guide-trigger"
+                      aria-label={t("Panduan puzzle")}
+                      title={t("Panduan puzzle")}
+                    >
+                      <CircleHelp size={15} aria-hidden="true" />
+                    </button>
+                  </DashboardPopoverTrigger>
+                  <DashboardPopoverContent
+                    className="shortcut-help-popover analysis-guide-popover puzzle-guide-popover"
+                    align="end"
+                    side="bottom"
+                    aria-label={t("Panduan puzzle")}
+                  >
+                    <Title as="strong">{t("Panduan puzzle")}</Title>
+                    <div className="analysis-guide-copy">
+                      <p>
+                        <strong>{t("Tujuan latihan")}</strong>
+                        {t(
+                          "Mainkan semua langkah solusi untuk sisi yang ditandai melangkah. Balasan lawan akan bergerak otomatis.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Premove")}</strong>
+                        {t(
+                          "Saat lawan membalas, antrekan hingga lima langkah. Langkah dijalankan saat giliranmu jika masih legal dan tetap dinilai sesuai solusi puzzle. Klik kanan atau tekan Esc untuk membatalkan antrean.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Streak dan rekor")}</strong>
+                        {t(
+                          "Penyelesaian tanpa langkah salah menambah streak. Langkah salah atau melewati puzzle mereset streak; rekor terbaik tetap tersimpan.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Lanjut otomatis dan lewati")}</strong>
+                        {t(
+                          "Auto next memuat puzzle berikutnya setelah solusi selesai. Matikan di Opsi jika ingin tetap di posisi akhir. Skip puzzle mencatat durasi lalu mengambil puzzle lain.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Riwayat dan waktu")}</strong>
+                        {t(
+                          "Riwayat di sidebar mencatat puzzle selesai atau dilewati serta waktu sejak puzzle dimuat sampai tindakan tersebut.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Rating dan bar evaluasi")}</strong>
+                        {t(
+                          "Rating adalah perkiraan tingkat puzzle dari Lichess, bukan rating pemain. Bar evaluasi memakai Stockfish lokal dan bisa dimatikan di Opsi.",
+                        )}
+                      </p>
+                      <p>
+                        <strong>{t("Koleksi puzzle")}</strong>
+                        {t(
+                          "Hingga lima puzzle disimpan sementara di perangkat. Puzzle yang dipakai akan diganti agar antrean terisi kembali.",
+                        )}
+                      </p>
+                      {puzzle && (
+                        <a href={puzzle.url} target="_blank" rel="noreferrer">
+                          {t("Lihat puzzle ini di Lichess ↗")}
+                        </a>
+                      )}
+                      <a
+                        href="https://database.lichess.org/#puzzles"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("Sumber: database puzzle Lichess · CC0 ↗")}
+                      </a>
+                    </div>
+                  </DashboardPopoverContent>
+                </DashboardPopover>
+              </div>
               {t(
-                "Antrean berisi hingga 5 puzzle dan diisi ulang setelah puzzle selesai.",
+                tab === "puzzle" && (
+                  <>
+                    <div className="puzzle-stats">
+                      <div className="puzzle-stat">
+                        <Flame size={17} />
+                        <strong>{t(streak)}</strong>
+                        <span>{t("streak berjalan")}</span>
+                      </div>
+                      <div
+                        className={`puzzle-stat${record ? " is-record" : ""}`}
+                      >
+                        <Trophy size={17} />
+                        <strong>{t(best)}</strong>
+                        <span>{t("rekor")}</span>
+                      </div>
+                      <div
+                        className="puzzle-stat"
+                        role="timer"
+                        aria-label={t("Waktu puzzle")}
+                      >
+                        <Clock3 size={17} />
+                        <strong>
+                          <time>{formatPuzzleClock(elapsedMs)}</time>
+                        </strong>
+                        <span>{t("waktu puzzle")}</span>
+                      </div>
+                    </div>
+                    <div className="puzzle-history">
+                      <div className="notation-heading">
+                        <span>{t("Riwayat Puzzle")}</span>
+                        <span>
+                          {t(puzzleHistory.length)} {t("entri")}
+                        </span>
+                      </div>
+                      <div className="move-list puzzle-history-list">
+                        {puzzleHistory.length ? (
+                          puzzleHistory.map((entry, index) => (
+                            <div
+                              className="puzzle-history-row"
+                              key={`${entry.id}-${index}`}
+                            >
+                              <span className="move-number">
+                                {entry.number ?? puzzleHistory.length - index}.
+                              </span>
+                              <span
+                                className={`puzzle-history-result ${entry.outcome}${entry.clean === false ? " with-mistakes" : ""}`}
+                                aria-label={t(
+                                  entry.outcome === "solved"
+                                    ? entry.clean === false
+                                      ? "Selesai dengan kesalahan"
+                                      : "Puzzle terselesaikan"
+                                    : "Puzzle dilewati",
+                                )}
+                              >
+                                {entry.outcome === "solved"
+                                  ? entry.clean === false
+                                    ? "×"
+                                    : "✓"
+                                  : "↷"}
+                              </span>
+                              <span className="puzzle-history-id">
+                                {t("Puzzle #")}
+                                {entry.id}
+                                <small>{t(entry.rating)}</small>
+                              </span>
+                              <time>
+                                {formatPuzzleDuration(entry.elapsedMs)}
+                              </time>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="puzzle-history-empty">
+                            {t(
+                              "Puzzle yang selesai atau dilewati akan muncul di sini.",
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {t(
+                      error && (
+                        <div className="error-message" role="alert">
+                          {t(error)}
+                          <button
+                            className="text-button"
+                            disabled={busy}
+                            onClick={() => void load()}
+                          >
+                            {t("Coba lagi")}
+                          </button>
+                        </div>
+                      ),
+                    )}
+                  </>
+                ),
               )}
-            </p>
+              {t(
+                tab === "options" && (
+                  <div className="puzzle-options">
+                    <div className="puzzle-filter">
+                      <label htmlFor="puzzle-theme">{t("Tema puzzle")}</label>
+                      <select
+                        id="puzzle-theme"
+                        value={theme}
+                        onChange={(e) => setTheme(e.target.value)}
+                      >
+                        {t(
+                          PUZZLE_THEMES.map(([id, label]) => (
+                            <option key={id} value={id}>
+                              {t(label)}
+                            </option>
+                          )),
+                        )}
+                      </select>
+                    </div>
+                    <div className="puzzle-filter">
+                      <label htmlFor="puzzle-difficulty">
+                        {t("Kesulitan")}
+                      </label>
+                      <select
+                        id="puzzle-difficulty"
+                        value={difficulty}
+                        onChange={(e) =>
+                          setDifficulty(e.target.value as PuzzleDifficulty)
+                        }
+                      >
+                        {t(
+                          PUZZLE_DIFFICULTIES.map(([id, label]) => (
+                            <option key={id} value={id}>
+                              {t(label)}
+                            </option>
+                          )),
+                        )}
+                      </select>
+                    </div>
+                    <div className="puzzle-filter">
+                      <label className="board-sound-setting">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={settings.showEvalBar}
+                          onChange={(e) =>
+                            onSettingsChange({
+                              ...settings,
+                              showEvalBar: e.target.checked,
+                            })
+                          }
+                        />
+                        {t("Bar evaluasi")}
+                      </label>
+                    </div>
+                    <div className="puzzle-filter">
+                      <label className="board-sound-setting">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          checked={autoNext}
+                          onChange={(e) => {
+                            setAutoNext(e.target.checked);
+                            if (
+                              !e.target.checked &&
+                              autoNextTimer.current !== undefined
+                            ) {
+                              window.clearTimeout(autoNextTimer.current);
+                              autoNextTimer.current = undefined;
+                            }
+                            writeStorage(
+                              "kuda-puzzle-auto-next",
+                              e.target.checked,
+                            );
+                          }}
+                        />
+                        {t("Lanjut otomatis")}
+                      </label>
+                    </div>
+                  </div>
+                ),
+              )}
+            </aside>
+            <div className="puzzle-sidebar-footer">
+              <div
+                className={`coach-card puzzle-feedback ${moveFeedback.kind}`}
+                role="status"
+              >
+                <div className="coach-label">
+                  <span className="coach-avatar" aria-hidden="true">
+                    {moveFeedback.kind === "wrong" ? (
+                      <X size={17} />
+                    ) : moveFeedback.kind === "correct" ||
+                      moveFeedback.kind === "complete" ? (
+                      <Check size={17} />
+                    ) : (
+                      <Lightbulb size={17} />
+                    )}
+                  </span>
+                  <strong>
+                    {t(
+                      moveFeedback.kind === "wrong"
+                        ? "Langkah puzzle kurang tepat"
+                        : moveFeedback.kind === "correct"
+                          ? "Langkah puzzle tepat"
+                          : moveFeedback.kind === "complete"
+                            ? "Puzzle terselesaikan"
+                            : moveFeedback.kind === "hint"
+                              ? "Petunjuk"
+                              : "Catatan pelatih",
+                    )}
+                  </strong>
+                  {moveFeedback.move && (
+                    <span className="coach-move">{moveFeedback.move}</span>
+                  )}
+                </div>
+                <p>
+                  {moveFeedback.kind === "wrong" ? (
+                    moveFeedback.reply ? (
+                      <>
+                        {t("Balasan terbaik lawan: ")}
+                        <strong>{moveFeedback.reply}</strong>
+                        {t(". Coba langkah lain dari posisi semula.")}
+                      </>
+                    ) : (
+                      t(
+                        moveFeedback.replyStatus === "terminal"
+                          ? "Permainan berakhir setelah langkah ini. Coba langkah lain untuk menemukan solusi puzzle."
+                          : moveFeedback.replyStatus === "unavailable"
+                            ? "Balasan engine belum tersedia. Coba langkah lain dari posisi semula."
+                            : "Langkah ini belum menyelesaikan puzzle. Sedang mencari balasan terbaik lawan…",
+                      )
+                    )
+                  ) : (
+                    t(
+                      moveFeedback.kind === "correct"
+                        ? "Langkah tepat. Lanjutkan solusi Anda."
+                        : moveFeedback.kind === "complete"
+                          ? "Semua langkah solusi telah ditemukan."
+                          : moveFeedback.kind === "hint"
+                            ? "Cari langkah yang memaksa balasan lawan."
+                            : "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
+                    )
+                  )}
+                </p>
+              </div>
+              <div className="puzzle-footer-actions">
+                <button
+                  className="button secondary"
+                  disabled={!puzzle || busy}
+                  onClick={retryPuzzle}
+                >
+                  <RotateCcw size={14} />
+                  {t("Coba lagi")}
+                </button>
+                <button
+                  className="button secondary"
+                  disabled={!positionFen}
+                  onClick={() =>
+                    positionFen &&
+                    onAnalyze(
+                      positionFen,
+                      "Puzzle Lichess #" + (puzzle?.id ?? ""),
+                    )
+                  }
+                >
+                  <Search size={14} />
+                  {t("Analisis posisi")}
+                </button>
+              </div>
+              <button
+                className="button primary"
+                disabled={!puzzle || busy}
+                onClick={requestNextPuzzle}
+              >
+                <SkipForward size={15} />
+                {t(puzzleSolved ? "Puzzle berikutnya" : "Lewati puzzle")}
+              </button>
+            </div>
           </div>
-          <div className="puzzle-filter">
-            <label htmlFor="puzzle-theme">{t("Tema puzzle")}</label>
-            <select
-              id="puzzle-theme"
-              value={theme}
-              onChange={(e) => setTheme(e.target.value)}
+        </div>
+        {settings.enableShortcuts && (
+          <div className="board-under puzzle-board-under">
+            <div
+              className="board-shortcut-hints"
+              role="group"
+              aria-label={t("Pintasan puzzle")}
             >
-              <option value="mix">{t("Campuran")}</option>
-              <option value="mateIn1">{t("Mat dalam 1 langkah")}</option>
-              <option value="fork">{t("Garpu")}</option>
-              <option value="pin">{t("Ikatan")}</option>
-              <option value="endgame">{t("Endgame")}</option>
-              <option value="sacrifice">{t("Pengorbanan")}</option>
-            </select>
+              <NavigationShortcutHint />
+              <span>
+                <kbd>F</kbd> {t("Balik papan")}
+              </span>
+              <span>
+                <kbd>H</kbd> {t("Petunjuk")}
+              </span>
+            </div>
           </div>
-          <div className="puzzle-filter">
-            <label htmlFor="puzzle-difficulty">{t("Kesulitan")}</label>
-            <select
-              id="puzzle-difficulty"
-              value={difficulty}
-              onChange={(e) =>
-                setDifficulty(e.target.value as PuzzleDifficulty)
-              }
-            >
-              <option value="easiest">{t("Sangat mudah")}</option>
-              <option value="easier">{t("Mudah")}</option>
-              <option value="normal">{t("Normal")}</option>
-              <option value="harder">{t("Sulit")}</option>
-              <option value="hardest">{t("Sangat sulit")}</option>
-            </select>
-          </div>
-          <div className="puzzle-queue-count">
-            <strong>
-              {t(queue.length)}
-              {t("/5")}
-            </strong>{" "}
-            <span>{t("puzzle tersimpan")}</span>
-          </div>
-          <a
-            className="puzzle-source"
-            href="https://database.lichess.org/#puzzles"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("Sumber: database puzzle Lichess · CC0 ↗")}
-          </a>
-        </aside>
+        )}
       </div>
+      {showSkipWarning && (
+        <Modal
+          title={t("Lewati puzzle ini?")}
+          onClose={() => setShowSkipWarning(false)}
+        >
+          <p className="modal-description">
+            {t(
+              "Melewati puzzle ini akan memutus streak Anda. Rekor terbaik tetap tersimpan.",
+            )}
+          </p>
+          <div className="modal-actions">
+            <button
+              className="button secondary"
+              onClick={() => setShowSkipWarning(false)}
+            >
+              {t("Batal")}
+            </button>
+            <button
+              className="button primary"
+              disabled={!puzzle || busy}
+              onClick={goToNextPuzzle}
+            >
+              <SkipForward size={15} />
+              {t("Tetap lewati")}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -677,6 +1303,13 @@ export function LineTrainer({
   explanation,
   startTraining = false,
   puzzleMode = false,
+  enableShortcuts = false,
+  evalBar,
+  onPositionChange,
+  onFeedbackChange,
+  onFindReply,
+  onMistake,
+  onSolve,
   onComplete,
   onAnalyze,
 }: {
@@ -689,7 +1322,14 @@ export function LineTrainer({
   explanation?: string;
   startTraining?: boolean;
   puzzleMode?: boolean;
-  onComplete: () => void;
+  enableShortcuts?: boolean;
+  evalBar?: ReactNode;
+  onPositionChange?: (fen: string) => void;
+  onFeedbackChange?: (feedback: PuzzleMoveFeedback) => void;
+  onFindReply?: (fen: string) => Promise<PuzzleReply | undefined>;
+  onMistake?: () => void;
+  onSolve?: (clean: boolean) => void;
+  onComplete: (clean: boolean) => void;
   onAnalyze: (fen: string) => void;
 }) {
   const { t } = useI18n();
@@ -700,7 +1340,20 @@ export function LineTrainer({
   const [showHint, setShowHint] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [alternateFen, setAlternateFen] = useState<string>();
+  const [flipped, setFlipped] = useState(false);
+  const [premoves, setPremoves] = useState<Premove[]>([]);
+  const [moveFeedback, setMoveFeedback] = useState<PuzzleMoveFeedback>({
+    kind: "ready",
+  });
+  const [preview, setPreview] = useState<
+    Pick<PuzzleReply, "fen" | "from" | "to"> & { mistakeSquare: string }
+  >();
+  const [solvedSquare, setSolvedSquare] = useState<string>();
+  const previewRequest = useRef(0);
+  const previewBusy = useRef(false);
+  const rollbackTimer = useRef<number | undefined>(undefined);
   const counted = useRef(false);
+  const mistaken = useRef(false);
   const chess = useMemo(() => {
     if (alternateFen) return new Chess(alternateFen);
     const c = new Chess(fen);
@@ -710,6 +1363,60 @@ export function LineTrainer({
   const done = step === moves.length;
   const isOpponent = training && !done && chess.turn() !== color;
   const last = chess.history({ verbose: true }).at(-1);
+  const displayedFen = preview?.fen ?? chess.fen();
+  useEffect(
+    () => () => {
+      previewRequest.current++;
+      previewBusy.current = false;
+      window.clearTimeout(rollbackTimer.current);
+    },
+    [],
+  );
+  useEffect(() => {
+    if (!puzzleMode) return;
+    onFeedbackChange?.(showHint && !done ? { kind: "hint" } : moveFeedback);
+  }, [moveFeedback, showHint, done, puzzleMode, onFeedbackChange]);
+  useEffect(() => {
+    if (!puzzleMode || !enableShortcuts) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
+      )
+        return;
+
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === "Escape") {
+        setPremoves([]);
+        return;
+      }
+      const canNavigate = !training || done;
+      if (event.key === "ArrowLeft" && canNavigate) {
+        event.preventDefault();
+        const jumpToStart = event.shiftKey;
+        setStep((current) => (jumpToStart ? 0 : Math.max(0, current - 1)));
+      } else if (event.key === "ArrowRight" && canNavigate) {
+        event.preventDefault();
+        const jumpToEnd = event.shiftKey;
+        setStep((current) =>
+          jumpToEnd ? moves.length : Math.min(moves.length, current + 1),
+        );
+      } else if (!event.shiftKey && event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        setFlipped((current) => !current);
+      } else if (!event.shiftKey && event.key.toLowerCase() === "h" && !done) {
+        event.preventDefault();
+        setShowHint((current) => !current);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [done, enableShortcuts, moves.length, puzzleMode, training]);
+  useEffect(() => {
+    onPositionChange?.(displayedFen);
+  }, [displayedFen, onPositionChange]);
   useEffect(() => {
     if (isOpponent) {
       const timer = setTimeout(() => setStep((s) => s + 1), 550);
@@ -719,26 +1426,96 @@ export function LineTrainer({
   useEffect(() => {
     if (done && training && !revealed && !counted.current) {
       counted.current = true;
-      onComplete();
+      setMoveFeedback((value) => ({ ...value, kind: "complete" }));
+      onComplete(!mistaken.current);
+      onSolve?.(!mistaken.current);
     }
-  }, [done, training, revealed, onComplete]);
+  }, [done, training, revealed, onComplete, onSolve]);
   const reset = (train: boolean) => {
+    previewRequest.current++;
+    previewBusy.current = false;
+    window.clearTimeout(rollbackTimer.current);
+    setPreview(undefined);
+    setSolvedSquare(undefined);
+    setMoveFeedback({ kind: "ready" });
     setTraining(train);
     setStep(0);
     setFeedback("");
     setShowHint(false);
     setRevealed(false);
     setAlternateFen(undefined);
+    setPremoves([]);
     counted.current = false;
+    mistaken.current = false;
+  };
+  const demonstrateMistake = (
+    position: Chess,
+    move: { from: string; to: string; san: string },
+  ) => {
+    const id = ++previewRequest.current;
+    previewBusy.current = true;
+    setPremoves([]);
+    setShowHint(false);
+    setPreview({
+      fen: position.fen(),
+      from: move.from,
+      to: move.to,
+      mistakeSquare: move.to,
+    });
+    setMoveFeedback({
+      kind: "wrong",
+      move: move.san,
+      replyStatus: "searching",
+    });
+    void (async () => {
+      try {
+        const reply = position.isGameOver()
+          ? undefined
+          : await onFindReply?.(position.fen());
+        if (id !== previewRequest.current) return;
+        if (reply) setPreview({ ...reply, mistakeSquare: move.to });
+        setMoveFeedback({
+          kind: "wrong",
+          move: move.san,
+          reply: reply?.san,
+          replyStatus: reply
+            ? "shown"
+            : position.isGameOver()
+              ? "terminal"
+              : "unavailable",
+        });
+      } catch {
+        if (id !== previewRequest.current) return;
+        setMoveFeedback({
+          kind: "wrong",
+          move: move.san,
+          replyStatus: "unavailable",
+        });
+      }
+      if (id !== previewRequest.current) return;
+      rollbackTimer.current = window.setTimeout(() => {
+        if (id !== previewRequest.current) return;
+        setPreview(undefined);
+        previewBusy.current = false;
+        rollbackTimer.current = undefined;
+      }, 1000);
+    })();
   };
   const attempt = (from: string, to: string, promotion = "q") => {
+    if (previewBusy.current) return "illegal";
     try {
       const copy = new Chess(chess.fen());
       const m = copy.move({ from, to, promotion });
       if (m.san === moves[step]) {
         setStep((s) => s + 1);
-        setFeedback("Tepat. Lanjutkan idemu!");
-        return true;
+        if (puzzleMode && step + 1 === moves.length) setSolvedSquare(m.to);
+        setShowHint(false);
+        setMoveFeedback({
+          kind: step + 1 === moves.length ? "complete" : "correct",
+          move: m.san,
+        });
+        setFeedback(puzzleMode ? "" : "Tepat. Lanjutkan idemu!");
+        return "correct";
       }
       // Accept any immediate checkmate when a single-move mate is the exercise objective.
       if (
@@ -748,17 +1525,148 @@ export function LineTrainer({
       ) {
         setAlternateFen(copy.fen());
         setStep(moves.length);
-        setFeedback(`Tepat! ${m.san} juga memberi skakmat.`);
-        return true;
+        if (puzzleMode) setSolvedSquare(m.to);
+        setShowHint(false);
+        setMoveFeedback({ kind: "complete", move: m.san });
+        setFeedback(puzzleMode ? "" : `Tepat! ${m.san} juga memberi skakmat.`);
+        return "correct";
       }
       setFeedback(
         "Langkah legal, tetapi belum sesuai ide latihan. Periksa petunjuk dan coba lagi.",
       );
-      return false;
+      mistaken.current = true;
+      playBoardSound("error");
+      onMistake?.();
+      if (puzzleMode) demonstrateMistake(copy, m);
+      return "wrong";
     } catch {
-      return false;
+      return "illegal";
     }
   };
+  useEffect(() => {
+    if (!premoves.length) return;
+    if (!puzzleMode || !training || done || preview) {
+      setPremoves([]);
+      return;
+    }
+    if (isOpponent) return;
+    const timer = window.setTimeout(() => {
+      const [move, ...remaining] = premoves;
+      const position = new Chess(chess.fen());
+      if (!executePremove(position, move, color)) {
+        setPremoves([]);
+        return;
+      }
+      const accepted =
+        attempt(move.from, move.to, move.promotion) === "correct";
+      setPremoves(accepted ? remaining : []);
+    }, 40);
+    return () => window.clearTimeout(timer);
+  }, [chess, color, done, isOpponent, premoves, puzzleMode, training, preview]);
+  const queuePremove = (from: string, to: string, promotion = "q") => {
+    if (previewBusy.current) return false;
+    if (!isOpponent && !premoves.length) return false;
+    const next = appendPremove(
+      chess.fen(),
+      premoves,
+      color,
+      from,
+      to,
+      promotion,
+    );
+    if (!next) return false;
+    setPremoves(next);
+    return true;
+  };
+  const board = (
+    <Board
+      fen={displayedFen}
+      flipped={puzzleMode ? flipped !== (color === "b") : color === "b"}
+      theme={theme}
+      lastMove={preview ?? last}
+      moveBadge={
+        preview
+          ? {
+              square: preview.mistakeSquare,
+              symbol: "×",
+              label: t("Langkah puzzle kurang tepat"),
+              color: "#cc6464",
+            }
+          : solvedSquare
+            ? {
+                square: solvedSquare,
+                symbol: "✓",
+                label: t("Langkah puzzle benar"),
+                color: "#4b9b68",
+              }
+            : undefined
+      }
+      onMove={
+        training
+          ? (from, to, promotion) => {
+              const outcome = attempt(from, to, promotion);
+              return (
+                outcome === "correct" || (puzzleMode && outcome === "wrong")
+              );
+            }
+          : undefined
+      }
+      disabled={!training || (!puzzleMode && isOpponent) || done || !!preview}
+      premove={
+        puzzleMode && training && !done && !preview
+          ? {
+              color,
+              moves: premoves,
+              onQueue: queuePremove,
+              onCancel: () => setPremoves([]),
+            }
+          : undefined
+      }
+    />
+  );
+  const instructionBar = (
+    <div className="trainer-instruction">
+      <span className="status-dot" />
+      {t(
+        done
+          ? revealed
+            ? "Jawaban ditampilkan"
+            : "Jalur selesai!"
+          : isOpponent
+            ? "Lawan membalas…"
+            : training
+              ? `${color === "w" ? "Putih" : "Hitam"} melangkah`
+              : "Jelajahi urutan langkah",
+      )}
+      <span>
+        {t(step)}
+        {t("/")}
+        {t(moves.length)}
+      </span>
+    </div>
+  );
+  const feedbackBar = (
+    <div
+      className={`exercise-feedback ${done && !revealed ? "success" : ""}`}
+      aria-live="polite"
+    >
+      {t(
+        done ? (
+          <>
+            <CheckCheck size={18} />
+            <span>
+              {t(
+                explanation ||
+                  "Kamu sudah mempelajari jalur ini. Ulangi beberapa kali sampai memahami idenya.",
+              )}
+            </span>
+          </>
+        ) : (
+          feedback || title
+        ),
+      )}
+    </div>
+  );
   return (
     <div className="line-trainer">
       {t(
@@ -781,64 +1689,52 @@ export function LineTrainer({
           </div>
         ),
       )}
-      <div className="trainer-instruction">
-        <span className="status-dot" />
-        {t(
-          done
-            ? revealed
-              ? "Jawaban ditampilkan"
-              : "Jalur selesai!"
-            : isOpponent
-              ? "Lawan membalas…"
-              : training
-                ? `${color === "w" ? "Putih" : "Hitam"} melangkah`
-                : "Jelajahi urutan langkah",
-        )}
-        <span>
-          {t(step)}
-          {t("/")}
-          {t(moves.length)}
-        </span>
-      </div>
-      <Board
-        fen={chess.fen()}
-        flipped={color === "b"}
-        theme={theme}
-        lastMove={last}
-        onMove={training ? attempt : undefined}
-        disabled={!training || isOpponent || done}
-      />
       {t(
-        !training && (
-          <NavigationControls
-            ply={step}
-            total={moves.length}
-            onChange={setStep}
-          />
+        puzzleMode ? (
+          <>
+            <div className="board-and-eval">
+              {evalBar}
+              <div className="board-main">{board}</div>
+            </div>
+            <NavigationControls
+              ply={step}
+              total={moves.length}
+              showPosition={false}
+              navigationDisabled={training && !done}
+              onChange={setStep}
+              onFlip={() => setFlipped((f) => !f)}
+              enableShortcuts={enableShortcuts && (!training || done)}
+              actions={
+                <IconButton
+                  label={t("Petunjuk")}
+                  active={showHint}
+                  disabled={done || !!preview}
+                  onClick={() => setShowHint((v) => !v)}
+                >
+                  <Lightbulb size={16} />
+                </IconButton>
+              }
+            />
+          </>
+        ) : (
+          <>
+            {instructionBar}
+            {board}
+            {t(
+              !training && (
+                <NavigationControls
+                  ply={step}
+                  total={moves.length}
+                  onChange={setStep}
+                />
+              ),
+            )}
+            {feedbackBar}
+          </>
         ),
       )}
-      <div
-        className={`exercise-feedback ${done && !revealed ? "success" : ""}`}
-        aria-live="polite"
-      >
-        {t(
-          done ? (
-            <>
-              <CheckCheck size={18} />
-              <span>
-                {t(
-                  explanation ||
-                    "Kamu sudah mempelajari jalur ini. Ulangi beberapa kali sampai memahami idenya.",
-                )}
-              </span>
-            </>
-          ) : (
-            feedback || title
-          ),
-        )}
-      </div>
       {t(
-        !done && training && (
+        !done && training && !puzzleMode && (
           <div className="trainer-actions">
             <button
               className="text-button"
@@ -853,6 +1749,10 @@ export function LineTrainer({
                 setRevealed(true);
                 setTraining(false);
                 setStep(moves.length);
+                if (!mistaken.current) {
+                  mistaken.current = true;
+                  onMistake?.();
+                }
               }}
             >
               {t("Lihat jawaban")}
@@ -861,7 +1761,7 @@ export function LineTrainer({
         ),
       )}
       {t(
-        showHint && !done && (
+        showHint && !done && !puzzleMode && (
           <div className="hint-box">
             {t(
               hint ||
@@ -871,7 +1771,7 @@ export function LineTrainer({
         ),
       )}
       {t(
-        done && (
+        done && !puzzleMode && (
           <div className="trainer-actions">
             <button className="button secondary" onClick={() => reset(true)}>
               <RotateCcw size={14} />

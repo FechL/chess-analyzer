@@ -2514,8 +2514,7 @@ select {
 }
 
 .line-trainer>.board-controls {
-  margin-left: 0;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .exercise-feedback {
@@ -2955,6 +2954,84 @@ select {
 
 .puzzle-sidebar .study-tip {
   margin-top: 25px;
+}
+
+.puzzle-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  padding: 15px 16px 4px;
+}
+
+.puzzle-stat {
+  display: grid;
+  gap: 3px;
+  justify-items: start;
+  padding: 11px 12px;
+  border: 1px solid #e3e9d8;
+  border-radius: 9px;
+  background: #fbfdf7;
+}
+
+.puzzle-stat > svg {
+  color: #9ab384;
+}
+
+.puzzle-stat strong {
+  font-family: var(--app-font);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  color: #7d9469;
+}
+
+.puzzle-stat span {
+  font-size: 11px;
+  color: #a3b192;
+}
+
+.puzzle-stat.is-record {
+  border-color: #e3c98d;
+  background: #fbf4e2;
+}
+
+.puzzle-stat.is-record > svg {
+  color: #c9a24b;
+}
+
+.puzzle-stat.is-record strong {
+  color: #a3823c;
+}
+
+.puzzle-side-info {
+  display: grid;
+  gap: 12px;
+  padding: 14px 20px 18px;
+}
+
+.puzzle-side-info > p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #a5b294;
+}
+
+.puzzle-side-info .puzzle-queue-count {
+  margin: 0;
+}
+
+.puzzle-options {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0 18px;
+}
+
+.puzzle-options .puzzle-filter {
+  margin: 0 20px 16px;
+}
+
+.puzzle-options .puzzle-source {
+  margin: 4px 20px 0;
 }
 
 .bot-layout {

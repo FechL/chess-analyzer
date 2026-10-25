@@ -24,7 +24,12 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
     {
       name: "Lichess · CC0",
       href: "https://github.com/lichess-org/chess-openings",
-      note: "Database nama, kode ECO, dan variasi latihan",
+      note: "Nama, kode ECO, dan jalur opening yang disaring untuk latihan",
+    },
+    {
+      name: "Stockfish 19",
+      href: "https://github.com/official-stockfish/Stockfish",
+      note: "Pemeriksaan kualitas langkah dan pengembangan cabang latihan",
     },
   ];
   return (

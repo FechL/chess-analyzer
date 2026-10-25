@@ -17,8 +17,14 @@ export const OPENING_ENGLISH: Record<string, string> = {
     "Further reading and historical context",
   "Database nama, kode ECO, dan variasi latihan":
     "Opening names, ECO codes, and training lines",
+  "Nama, kode ECO, dan jalur opening yang disaring untuk latihan":
+    "Opening names, ECO codes, and lines screened for training",
+  "Pemeriksaan kualitas langkah dan pengembangan cabang latihan":
+    "Move quality checks and calculated training continuations",
 
   "Panduan mode opening": "Opening mode guide",
+  "Materi memakai jalur opening Lichess serta cabang latihan yang dikembangkan melalui analisis Stockfish. Setiap jalur diperiksa dari sisi pemain. Latihan mengikuti satu jalur; langkah lain juga bisa benar.":
+    "The material combines Lichess opening lines with practice branches developed through Stockfish analysis. Every line is checked from the learner's side. Practice follows one line; other moves may also be sound.",
   Review: "Review",
   "Tes acak": "Random test",
   "Review opening": "Opening review",

@@ -25,7 +25,7 @@ npm run prepare:engine
 - **Stockfish lokal:** evaluasi putih, mate score, depth, 1–3 variasi UCI dalam SAN, panah saran, waktu analisis 0,2–5 detik per posisi.
 - **Game review:** analisis setiap posisi, estimasi akurasi kedua warna, kategori langkah, grafik evaluasi yang dapat diklik, catatan pelatih berbasis aturan, dan latihan ulang kesalahan menggunakan langkah terbaik hasil engine.
 - **Lawan bot:** empat tingkat kesulitan, putih/hitam/acak, waktu 3/5/10 menit serta preset bullet/blitz/rapid dan waktu kustom dengan increment. Mendukung antrean hingga lima premove, petunjuk (H), undo, navigasi notasi, penanda ancaman lawan, buah tertangkap, dan analisis permainan. Sesi serta jam disimpan secara lokal dan dijeda saat meninggalkan halaman; mode Tanpa Bantuan memblokir Hint/Undo dan engine, Bantuan membuka Hint/Undo, dan Bantuan Penuh membuka tab Engine serta seluruh Opsi. Pengaturan bantuan bot terpisah dari analisis.
-- **Opening explorer:** katalog 12 opening dengan lebih dari 1.100 variasi lokal dari Lichess. Detail opening memakai workspace board dan sidebar penjelasan, pencarian variasi, notasi, serta mode Belajar/Latihan/Review dengan balasan otomatis. Progres dan jadwal pengulangan 1/3/7/14/30 hari tersimpan lokal; langkah yang perlu diperbaiki atau memakai petunjuk tetap masuk antrean review. Setiap opening punya alamat langsung, misalnya `#openings/italian`.
+- **Opening explorer:** katalog 12 opening dengan variasi lokal dari Lichess yang disaring menggunakan Stockfish 19 Full. Setiap challenge berakhir pada langkah pemain; jalur yang berhenti pada langkah lawan dilengkapi balasan hasil analisis engine dengan asal data tercatat. Duplikasi posisi akhir dan prefix berulang digabungkan. Konflik jawaban pemain disaring per posisi dengan mempertahankan line lebih panjang; line yang merugikan pemain lebih dari 1 pion menurut audit juga dihapus. Detail opening memakai workspace board dan sidebar penjelasan, pencarian variasi, notasi, serta Belajar/Latihan/Review. Review menguji line yang sudah selesai Learn dan Practice 100%, dengan opsi nyawa dan timer. Progres tersimpan lokal. Setiap opening punya alamat langsung, misalnya `#openings/italian`.
 - **Akademi:** sembilan pelajaran interaktif tentang pusat, perkembangan, rokade, fork, pin, skakmat baris belakang, promosi, en passant, dan kombinasi Morphy.
 - **Puzzle Lichess:** puzzle permainan nyata dari API resmi Lichess, filter tema dan tingkat kesulitan, rating, petunjuk, solusi, dan progres. Maksimal lima puzzle disimpan per kombinasi filter dan diisi ulang saat puzzle digunakan; pengambilan puzzle baru memerlukan internet, tanpa akun atau API key.
 - **Tampilan:** mode terang (default) atau gelap, tema buah Classic/Merida/Celtic, notasi huruf/gambar/keduanya, dan bahasa Indonesia/Inggris untuk seluruh antarmuka. Ikon kategori langkah pada buah dapat diaktifkan di tab Opsi.
@@ -38,7 +38,11 @@ npm run prepare:engine
 Pada opening trainer, challenge Learn dibuka berurutan setelah line sebelumnya selesai.
 Practice untuk setiap line terbuka setelah Learn line tersebut selesai. Hasil Learn
 menyediakan pilihan langsung Practice atau melanjutkan ke line berikutnya. Panah langkah
-hanya tersedia dalam Learn, aktif secara default, dan bisa dinonaktifkan dari panel Lesson.
+hanya tersedia dalam Learn, aktif secara default, dan bisa dinonaktifkan dari panel Opsi.
+
+Audit sumber, ambang kualitas langkah, dan cara membangun ulang katalog dijelaskan
+di [docs/OPENING_AUDIT.md](docs/OPENING_AUDIT.md). Data hasil audit dan daftar penolakan
+disertakan agar perubahan setiap cabang bisa diperiksa.
 
 ```bash
 npm test
@@ -54,7 +58,7 @@ Stockfish lite memakai jaringan lebih kecil daripada versi penuh. Waktu pencaria
 
 Akurasi menggunakan perubahan estimasi peluang menang dengan kurva publik berbasis centipawn, kemudian fungsi akurasi eksponensial. Kategori langkah adalah heuristik aplikasi; hasilnya **bukan skor resmi Chess.com atau Lichess**. Angka Elo bot merupakan perkiraan tingkat latihan, belum dikalibrasi melalui pertandingan rating. Catatan pelatih memakai aturan dan variasi Stockfish, bukan LLM.
 
-Explorer memakai jalur pengantar terkurasi dan database nama/variasi Lichess CC0. Variasi bernama mencakup pilihan utama, gambit, dan cabang samping; variasi tersebut tidak selalu merupakan rekomendasi langkah terbaik engine. Penjelasan langkah memberi panduan prinsip umum; materi ini tidak menyediakan statistik pertandingan atau komentar khusus untuk setiap posisi. Jam latihan dijalankan di browser, bukan jam kompetisi yang tahan manipulasi.
+Explorer memakai jalur pengantar terkurasi dan database nama/variasi Lichess CC0 yang disaring untuk sisi pemain. Pemeriksaan Stockfish menolak kesalahan besar menurut ambang katalog; ini memakai anggaran pencarian terbatas dan tidak menjamin kesempurnaan teori opening. Lawan masih dapat memainkan gambit yang kurang baik, tetapi respons pemain diperiksa. Kelanjutan yang ditambahkan engine dibedakan dari langkah sumber. Book Move pada Game Analysis tetap memakai database klasifikasi tersendiri. Penjelasan langkah memberi panduan prinsip umum; materi ini tidak menyediakan statistik pertandingan atau komentar khusus untuk setiap posisi. Jam latihan dijalankan di browser, bukan jam kompetisi yang tahan manipulasi.
 
 Data tersimpan dalam `localStorage` pada browser dan origin yang sama. Menghapus data browser dapat menghilangkan progres dan koleksi. Ekspor PGN untuk cadangan permainan; PGN tidak mencakup catatan posisi yang tersimpan terpisah.
 

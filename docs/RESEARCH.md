@@ -43,6 +43,7 @@ Tema khusus: material kaca buram dengan blur dan highlight, latar biru/lilac lem
 Book Move uses a local snapshot of [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings), retrieved 2026-10-21: 3,865 named lines and 8,192 position/move pairs. Data is [CC0](licenses/lichess-openings-CC0.txt). Every prefix of a named opening is indexed, including side to move, castling rights and legal en-passant availability; counters are ignored. This supports transpositions and imported FEN positions. Unlisted moves are not classified as mistakes merely because they are outside the book. Engine accuracy is unchanged.
 
 To regenerate `src/data/opening-book.json`, download the repository's `a.tsv` through `e.tsv` into a directory and run `node scripts/prepare-opening-book.mjs <directory>`. Runtime needs no external API.
+
 # Opening trainer: workspace dan pengulangan (23 Oktober 2026)
 
 - [Chessreps opening catalog](https://www.chessreps.com/openings) mengorganisasi kursus menjadi banyak jalur dan menjelaskan metode pengulangan terjadwal.
@@ -50,3 +51,24 @@ To regenerate `src/data/opening-book.json`, download the repository's `a.tsv` th
 - [Italian Game](https://www.chessreps.com/opening/italian-game) menunjukkan instruksi langkah per langkah dan cabang dari jalur yang sama. Kuda menempatkan board permanen di kiri, penjelasan/notasi dan pemilihan variasi di sidebar kanan.
 - Variasi berasal dari [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings), CC0. Dataset bernama ini menjadi pohon jalur latihan, bukan statistik popularitas atau jaminan kualitas langkah. Jalur duplikat dan prefix yang sudah tercakup dalam cabang lebih panjang digabungkan saat generasi.
 - Pengulangan Kuda memakai interval 1, 3, 7, 14, dan 30 hari setelah hafalan bersih. Percobaan dengan kesalahan atau petunjuk tetap perlu diulang. Belajar ulang materi yang sudah dijadwalkan tidak menghapus jadwalnya.
+
+## Audit kurikulum opening — 25 Oktober 2026
+
+Riset ulang mencakup seluruh 12 opening di katalog, memakai panduan resmi
+Chess.com, sumber Lichess yang dipatok ke revisi tertentu, dan pemeriksaan
+Stockfish 19 Full. Database nama opening juga memuat jebakan serta gambit yang
+buruk; legalitas dan nama ECO saja tidak cukup untuk menjadikannya materi latihan.
+
+Generator kini memeriksa semua langkah sisi pemain, menolak jalur di luar ambang
+kualitas, melengkapi respons pemain jika sumber berakhir pada langkah lawan, dan
+menggabungkan posisi akhir yang sama. Kelanjutan hasil engine dibedakan dari
+langkah sumber. Detail metode, referensi untuk setiap opening, hasil audit, dan
+cara reproduksi ada di [OPENING_AUDIT.md](OPENING_AUDIT.md).
+
+Penyaringan lanjutan mempertahankan satu respons pemain per posisi (termasuk
+transposisi), dengan prioritas jalur pengantar lalu line yang lebih panjang.
+Cabang langkah lawan tetap diperbolehkan. Batas publikasi kini lebih ketat:
+skor pemain pada setiap langkah yang diaudit tidak boleh di bawah −100 cp.
+Kasus Sicilian challenge 8 lama dikonfirmasi ulang pada 3 juta node: posisi
+akhir memberi +126 cp untuk Putih, sedangkan kursus dimainkan sebagai Hitam.
+Rincian konflik, batas evaluasi, dan jumlah akhir tercatat di audit kurikulum.

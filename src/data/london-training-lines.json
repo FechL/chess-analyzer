@@ -1,0 +1,1876 @@
+[
+  {
+    "id": "bfca96e8d142",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...c5 dxc5",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "c5",
+      "dxc5",
+      "Bxc5",
+      "O-O",
+      "Nh5",
+      "c4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "ac8d02a865d1",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...b6 c3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "b6",
+      "c3",
+      "Bb7",
+      "Nbd2",
+      "c5",
+      "Qe2"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "3c947b205481",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...Nbd7 Nbd2",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "Nbd7",
+      "Nbd2",
+      "b6",
+      "a4",
+      "Qe7",
+      "a5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "12a150b45922",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...a5 c4",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "a5",
+      "c4",
+      "dxc4",
+      "Bxc4",
+      "Bxg3",
+      "hxg3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "ea91cf91a7b4",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...g6 Nbd2",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "g6",
+      "Nbd2",
+      "c5",
+      "dxc5",
+      "Bxc5",
+      "c4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "f4ff50d75acb",
+    "eco": "D02",
+    "name": "London System: Classical Setup · 6...Qe7 Nbd2",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "e6",
+      "e3",
+      "Bd6",
+      "Bg3",
+      "O-O",
+      "Bd3",
+      "Qe7",
+      "Nbd2",
+      "Nc6",
+      "Ne5",
+      "Nb4",
+      "Be2"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 11,
+      "curated": true,
+      "training": true,
+      "seedLineId": "dacaabb9178b",
+      "references": ["https://www.chess.com/openings/London-System"],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "1ab8a9d9f253",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System · 5...cxd4 exd4",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "cxd4",
+      "exd4",
+      "Bf5",
+      "Bb5",
+      "Rc8",
+      "O-O"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "20c4c1c91a63",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "9a30677c4ff8",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System · 5...Bg4 c3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "Bg4",
+      "c3",
+      "e6",
+      "Qb3",
+      "Qc8",
+      "Nh4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "20c4c1c91a63",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "92efa6570795",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System · 5...Nh5 dxc5",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "Nh5",
+      "dxc5",
+      "Nxf4",
+      "exf4",
+      "Qa5",
+      "c4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "20c4c1c91a63",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "2b653f576cff",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System · 5...a6 c3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "a6",
+      "c3",
+      "cxd4",
+      "exd4",
+      "Bf5",
+      "Nh4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "20c4c1c91a63",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "0c758b414619",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System · 5...Qb6 dxc5",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "Qb6",
+      "dxc5",
+      "Qxb2",
+      "Rb1",
+      "Qc3",
+      "Bb5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "20c4c1c91a63",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "53149bde80a9",
+    "eco": "D00",
+    "name": "Queen's Pawn Game: Accelerated London System, Steinitz Countergambit, Morris Countergambit Accepted · 3...Nc6 Nc3",
+    "moves": [
+      "d4",
+      "d5",
+      "Bf4",
+      "c5",
+      "e4",
+      "Nc6",
+      "Nc3",
+      "cxd4",
+      "exd5",
+      "dxc3",
+      "dxc6"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ca8b6362678d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "700d269f95b5",
+    "eco": "D00",
+    "name": "Queen's Pawn Game: Accelerated London System, Steinitz Countergambit, Morris Countergambit Accepted · 3...Nf6 e5",
+    "moves": [
+      "d4",
+      "d5",
+      "Bf4",
+      "c5",
+      "e4",
+      "Nf6",
+      "e5",
+      "Nfd7",
+      "c3",
+      "Qb6",
+      "Qd2"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ca8b6362678d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "7efcbd6511b9",
+    "eco": "D00",
+    "name": "Queen's Pawn Game: Accelerated London System, Steinitz Countergambit, Morris Countergambit Accepted · 3...e6 exd5",
+    "moves": [
+      "d4",
+      "d5",
+      "Bf4",
+      "c5",
+      "e4",
+      "e6",
+      "exd5",
+      "exd5",
+      "Nc3",
+      "Nf6",
+      "Nb5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ca8b6362678d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "d09cd01abc2f",
+    "eco": "D00",
+    "name": "Queen's Pawn Game: Accelerated London System, Steinitz Countergambit, Morris Countergambit Accepted · 3...cxd4 Qxd4",
+    "moves": [
+      "d4",
+      "d5",
+      "Bf4",
+      "c5",
+      "e4",
+      "cxd4",
+      "Qxd4",
+      "dxe4",
+      "Qxd8+",
+      "Kxd8",
+      "Nc3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ca8b6362678d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "36a115dd11a9",
+    "eco": "D00",
+    "name": "Queen's Pawn Game: Accelerated London System, Steinitz Countergambit, Morris Countergambit Accepted · 3...Qa5+ Bd2",
+    "moves": [
+      "d4",
+      "d5",
+      "Bf4",
+      "c5",
+      "e4",
+      "Qa5+",
+      "Bd2",
+      "Qc7",
+      "Nc3",
+      "dxe4",
+      "Nb5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ca8b6362678d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "2da1dc204220",
+    "eco": "D01",
+    "name": "Rapport-Jobava System · 3...Bf5 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nc3",
+      "Nf6",
+      "Bf4",
+      "Bf5",
+      "e3",
+      "e6",
+      "Bd3",
+      "c6",
+      "Nf3"
+    ],
+    "aliases": ["Jobava London", "Jobava London System", "London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6e8803237312",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 21,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "0d22f2e58564",
+    "eco": "D01",
+    "name": "Rapport-Jobava System · 3...Bd7 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nc3",
+      "Nf6",
+      "Bf4",
+      "Bd7",
+      "e3",
+      "e6",
+      "Nb5",
+      "Bxb5",
+      "Bxb5+"
+    ],
+    "aliases": ["Jobava London", "Jobava London System", "London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6e8803237312",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 21,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "df116005821e",
+    "eco": "D01",
+    "name": "Rapport-Jobava System · 3...c5 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nc3",
+      "Nf6",
+      "Bf4",
+      "c5",
+      "e3",
+      "cxd4",
+      "exd4",
+      "a6",
+      "Nf3"
+    ],
+    "aliases": ["Jobava London", "Jobava London System", "London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6e8803237312",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "eba6e9510d00",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, with e6 · 3...c5 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "e6",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nf6",
+      "c3",
+      "Bd6",
+      "Bb5+"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "7acc5d7d6aa5",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 21,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "b006497aa917",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, with e6 · 3...Bd6 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "e6",
+      "Bf4",
+      "Bd6",
+      "e3",
+      "Nf6",
+      "Bg3",
+      "c5",
+      "dxc5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "7acc5d7d6aa5",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "97ec7834955d",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, with e6 · 3...Be7 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "e6",
+      "Bf4",
+      "Be7",
+      "e3",
+      "Nf6",
+      "Nbd2",
+      "c5",
+      "c3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "7acc5d7d6aa5",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "519d89209ae1",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, with e6 · 3...Bd7 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "e6",
+      "Bf4",
+      "Bd7",
+      "e3",
+      "c5",
+      "Be2",
+      "Nc6",
+      "O-O"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "7acc5d7d6aa5",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "60c849a24811",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, with e6 · 3...Nd7 e3",
+    "moves": [
+      "d4",
+      "d5",
+      "Nf3",
+      "e6",
+      "Bf4",
+      "Nd7",
+      "e3",
+      "Ngf6",
+      "Nbd2",
+      "Be7",
+      "h4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 5,
+      "curated": true,
+      "training": true,
+      "seedLineId": "7acc5d7d6aa5",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "46f011685169",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...d6 c3",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "c3",
+      "Nh5",
+      "Bg5",
+      "h6",
+      "Bh4"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "8a9f51b40270",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...O-O Be2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "O-O",
+      "Be2",
+      "d6",
+      "h3",
+      "b6",
+      "O-O"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "56e5ccaa48a0",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...c5 c3",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "c5",
+      "c3",
+      "O-O",
+      "dxc5",
+      "Ne4",
+      "Qd5"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "7905e763a147",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...Nh5 Be5",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "Nh5",
+      "Be5",
+      "Nf6",
+      "c3",
+      "d6",
+      "Bg3"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "30065757ad4b",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...d5 Be2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d5",
+      "Be2",
+      "c5",
+      "c3",
+      "Nbd7",
+      "O-O"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "106b6ddddbfa",
+    "eco": "A48",
+    "name": "London System, with Bd3 · 4...a6 Be2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "a6",
+      "Be2",
+      "O-O",
+      "O-O",
+      "d6",
+      "h3"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "72ece67cb318",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "ec4dc02b1482",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...e6 c3",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "e6",
+      "c3",
+      "Bd6",
+      "Bb5+",
+      "Nc6",
+      "Qa4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "2502b2abe487",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...Nc6 Nbd2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "Nc6",
+      "Nbd2",
+      "cxd4",
+      "exd4",
+      "Bf5",
+      "Bb5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "a145ef5cdd89",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...Qb6 c4",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "Qb6",
+      "c4",
+      "Qxb2",
+      "Nbd2",
+      "e6",
+      "cxd5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "7eeaf68fdab5",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...Bg4 Nbd2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "Bg4",
+      "Nbd2",
+      "cxd4",
+      "exd4",
+      "e6",
+      "h3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "b7ec6a448bae",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...cxd4 exd4",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "cxd4",
+      "exd4",
+      "Nc6",
+      "c3",
+      "Bf5",
+      "Qb3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "47af41934c09",
+    "eco": "D02",
+    "name": "London System: Poisoned Pawn Variation · 4...Bd7 Be2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "d5",
+      "Bf4",
+      "c5",
+      "e3",
+      "Bd7",
+      "Be2",
+      "Nc6",
+      "Nbd2",
+      "cxd4",
+      "exd4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 7,
+      "curated": true,
+      "training": true,
+      "seedLineId": "571b5f5e7f4e",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "d4aa7861127d",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...Nh5 Bg5",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "Be2",
+      "Nh5",
+      "Bg5",
+      "h6",
+      "Bh4",
+      "g5",
+      "Nfd2"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6962306c4871",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "7886e64e9ce1",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...Nc6 h3",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "Be2",
+      "Nc6",
+      "h3",
+      "O-O",
+      "Nc3",
+      "a6",
+      "O-O"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6962306c4871",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "eceb4c41fc67",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...Nbd7 c4",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "Be2",
+      "Nbd7",
+      "c4",
+      "Nh5",
+      "Bg5",
+      "h6",
+      "Bh4"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6962306c4871",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "006295ed3aa7",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...c5 Nc3",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "Be2",
+      "c5",
+      "Nc3",
+      "cxd4",
+      "exd4",
+      "O-O",
+      "O-O"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6962306c4871",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "ed90da38467a",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...b6 c4",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "Be2",
+      "b6",
+      "c4",
+      "Bb7",
+      "O-O",
+      "O-O",
+      "Qc2"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "6962306c4871",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "73060b786cec",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...O-O Be2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "h3",
+      "O-O",
+      "Be2",
+      "b6",
+      "O-O",
+      "Nbd7",
+      "a4"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "e4ce7b26c5db",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 20,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "be0016ba25bf",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...Nc6 Bc4",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "h3",
+      "Nc6",
+      "Bc4",
+      "O-O",
+      "O-O",
+      "Ne4",
+      "Bh2"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "e4ce7b26c5db",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "05f239bdd3c3",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...b6 Bb5+",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "h3",
+      "b6",
+      "Bb5+",
+      "c6",
+      "Be2",
+      "Bb7",
+      "c4"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "e4ce7b26c5db",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "67b3eca7738e",
+    "eco": "A48",
+    "name": "London System, with Be2 · 5...c6 Nbd2",
+    "moves": [
+      "d4",
+      "Nf6",
+      "Nf3",
+      "g6",
+      "Bf4",
+      "Bg7",
+      "e3",
+      "d6",
+      "h3",
+      "c6",
+      "Nbd2",
+      "O-O",
+      "Be2",
+      "c5",
+      "O-O"
+    ],
+    "aliases": ["London vs King's Indian Setup"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "e4ce7b26c5db",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "5cd848f47aad",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, Pterodactyl Variation · 5...Nf6 Nc3",
+    "moves": [
+      "d4",
+      "g6",
+      "Nf3",
+      "Bg7",
+      "Bf4",
+      "c5",
+      "c3",
+      "cxd4",
+      "cxd4",
+      "Nf6",
+      "Nc3",
+      "Qa5",
+      "Bd2",
+      "d5",
+      "h3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ac5b274c0a4d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "142c17155271",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, Pterodactyl Variation · 5...d6 Nc3",
+    "moves": [
+      "d4",
+      "g6",
+      "Nf3",
+      "Bg7",
+      "Bf4",
+      "c5",
+      "c3",
+      "cxd4",
+      "cxd4",
+      "d6",
+      "Nc3",
+      "Nf6",
+      "h3",
+      "a6",
+      "e4"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ac5b274c0a4d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "4f65d54cffea",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, Pterodactyl Variation · 5...a6 Nc3",
+    "moves": [
+      "d4",
+      "g6",
+      "Nf3",
+      "Bg7",
+      "Bf4",
+      "c5",
+      "c3",
+      "cxd4",
+      "cxd4",
+      "a6",
+      "Nc3",
+      "Nf6",
+      "e4",
+      "d6",
+      "Be2"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ac5b274c0a4d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "10c02ab71f7f",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, Pterodactyl Variation · 5...d5 e3",
+    "moves": [
+      "d4",
+      "g6",
+      "Nf3",
+      "Bg7",
+      "Bf4",
+      "c5",
+      "c3",
+      "cxd4",
+      "cxd4",
+      "d5",
+      "e3",
+      "Nf6",
+      "Nc3",
+      "Nc6",
+      "h3"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ac5b274c0a4d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  },
+  {
+    "id": "f3a2f0c76d80",
+    "eco": "D02",
+    "name": "Queen's Pawn Game: London System, Pterodactyl Variation · 5...Qb6 Nc3",
+    "moves": [
+      "d4",
+      "g6",
+      "Nf3",
+      "Bg7",
+      "Bf4",
+      "c5",
+      "c3",
+      "cxd4",
+      "cxd4",
+      "Qb6",
+      "Nc3",
+      "Nf6",
+      "e4",
+      "O-O",
+      "e5"
+    ],
+    "aliases": ["London Training"],
+    "source": {
+      "bookPly": 9,
+      "curated": true,
+      "training": true,
+      "seedLineId": "ac5b274c0a4d",
+      "references": [
+        "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a"
+      ],
+      "continuation": {
+        "engine": "Stockfish 19 Full",
+        "depth": 19,
+        "nodes": 3000000,
+        "plies": 6,
+        "multiPv": 6
+      }
+    }
+  }
+]

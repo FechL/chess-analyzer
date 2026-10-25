@@ -1,0 +1,149 @@
+{
+  "version": 3,
+  "sourceCommit": "a6189a30dc273ccb21fc2536a9a2fefd5592a67a",
+  "sourceHashes": {
+    "a.tsv": "3282e4c9155289a29224f9a85fba0decb46efa35c2fa5e39662d2ac48fb0f793",
+    "b.tsv": "1d5ed134ebbd87915ead5683416e37583bb3e5ae3582b4d8cb5cb4aa7ef4f623",
+    "c.tsv": "45e843c7b7e79a0d04d5bda879c9bd23f5a10974488bd8615e4f4c5d0749986f",
+    "d.tsv": "1cf4057a8aece94f27bb3f278ad410ee2844831a642364eeceaafa091dbcceda",
+    "e.tsv": "48c6f6645b031a5937c8386839debab0e2e48837251687ba1afb6369677f8546"
+  },
+  "supplementalSources": {
+    "src/data/london-training-lines.json": "73f302cfa8880f984daaca89034d3d31be9d0bc4cee2b5fd88e0cdc25a71ee68"
+  },
+  "engine": "Stockfish 19 (one thread, 64 MiB hash)",
+  "screenNodes": 60000,
+  "confirmationNodes": 500000,
+  "continuationNodes": 500000,
+  "maxLossCp": 100,
+  "maxDeficitCp": 150,
+  "sources": {
+    "openings": "https://github.com/lichess-org/chess-openings/tree/a6189a30dc273ccb21fc2536a9a2fefd5592a67a",
+    "engine": "https://github.com/official-stockfish/Stockfish",
+    "methodology": "docs/OPENING_AUDIT.md"
+  },
+  "families": {
+    "italian": {
+      "input": 110,
+      "accepted": 18,
+      "continuations": 13,
+      "duplicates": 1,
+      "prefixes": 0,
+      "rejected": 9,
+      "conflicts": 82,
+      "deficits": 0
+    },
+    "sicilian": {
+      "input": 248,
+      "accepted": 42,
+      "continuations": 30,
+      "duplicates": 3,
+      "prefixes": 0,
+      "rejected": 6,
+      "conflicts": 186,
+      "deficits": 11
+    },
+    "queens-gambit": {
+      "input": 201,
+      "accepted": 51,
+      "continuations": 39,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 4,
+      "conflicts": 146,
+      "deficits": 0
+    },
+    "london": {
+      "input": 64,
+      "accepted": 42,
+      "continuations": 39,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 0,
+      "conflicts": 22,
+      "deficits": 0
+    },
+    "ruy-lopez": {
+      "input": 155,
+      "accepted": 73,
+      "continuations": 64,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 11,
+      "conflicts": 71,
+      "deficits": 0
+    },
+    "caro-kann": {
+      "input": 70,
+      "accepted": 35,
+      "continuations": 30,
+      "duplicates": 0,
+      "prefixes": 1,
+      "rejected": 3,
+      "conflicts": 29,
+      "deficits": 2
+    },
+    "french": {
+      "input": 122,
+      "accepted": 43,
+      "continuations": 33,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 7,
+      "conflicts": 64,
+      "deficits": 8
+    },
+    "kings-indian": {
+      "input": 74,
+      "accepted": 32,
+      "continuations": 27,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 0,
+      "conflicts": 41,
+      "deficits": 1
+    },
+    "scandinavian": {
+      "input": 31,
+      "accepted": 3,
+      "continuations": 1,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 5,
+      "conflicts": 20,
+      "deficits": 3
+    },
+    "scotch": {
+      "input": 39,
+      "accepted": 8,
+      "continuations": 5,
+      "duplicates": 0,
+      "prefixes": 0,
+      "rejected": 7,
+      "conflicts": 24,
+      "deficits": 0
+    },
+    "petrov": {
+      "input": 34,
+      "accepted": 16,
+      "continuations": 11,
+      "duplicates": 1,
+      "prefixes": 0,
+      "rejected": 2,
+      "conflicts": 14,
+      "deficits": 1
+    },
+    "english": {
+      "input": 118,
+      "accepted": 33,
+      "continuations": 27,
+      "duplicates": 0,
+      "prefixes": 1,
+      "rejected": 4,
+      "conflicts": 80,
+      "deficits": 0
+    }
+  },
+  "repertoirePolicy": "One learner response per position; intro first, then longest line; existing order breaks ties.",
+  "maxTrainingDeficitCp": 100
+}

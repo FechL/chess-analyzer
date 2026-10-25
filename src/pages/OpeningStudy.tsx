@@ -203,7 +203,7 @@ export default function OpeningStudy({
   const filteredLines = useMemo(() => {
     const query = search.trim().toLowerCase();
     return lines.filter((item) =>
-      `${item.name} ${item.eco} ${item.moves.join(" ")}`
+      `${item.name} ${item.aliases?.join(" ") || ""} ${item.eco} ${item.moves.join(" ")}`
         .toLowerCase()
         .includes(query),
     );
@@ -922,6 +922,14 @@ export default function OpeningStudy({
                     <p>
                       {t(
                         "Tes acak dari line yang sudah dipelajari dan diselesaikan dengan Practice 100%. Setiap line muncul sekali per sesi. Nyawa dan timer bisa diaktifkan bersama atau terpisah.",
+                      )}
+                    </p>
+                  </section>
+                  <section>
+                    <strong>{t("Materi opening")}</strong>
+                    <p>
+                      {t(
+                        "Materi memakai jalur opening Lichess serta cabang latihan yang dikembangkan melalui analisis Stockfish. Setiap jalur diperiksa dari sisi pemain. Latihan mengikuti satu jalur; langkah lain juga bisa benar.",
                       )}
                     </p>
                   </section>

@@ -8,6 +8,27 @@ export type OpeningLine = {
   eco: string;
   name: string;
   moves: string[];
+  aliases?: string[];
+  intro?: boolean;
+  source?: {
+    bookPly: number;
+    curated?: boolean;
+    training?: boolean;
+    seedLineId?: string;
+    references?: string[];
+    continuation?: {
+      engine: string;
+      depth: number;
+      nodes: number;
+      plies?: number;
+      multiPv?: number;
+    };
+  };
+  quality?: {
+    checkedMoves: number;
+    maxLossCp: number;
+    minScoreCp: number;
+  };
 };
 export type OpeningMode = "learn" | "practice" | "review";
 export type LineProgress = {
@@ -28,17 +49,9 @@ const DAY = 86_400_000;
 const INTERVALS = [1, 3, 7, 14, 30];
 
 export function openingLines(opening: Opening): OpeningLine[] {
-  return [
-    {
-      id: `${opening.id}-intro`,
-      eco: opening.eco,
-      name: "Jalur pengantar",
-      moves: opening.moves,
-    },
-    ...(courses[opening.id] || []).filter(
-      (line) => line.moves.join(" ") !== opening.moves.join(" "),
-    ),
-  ];
+  // Introductions are included in the audited data, so they obey the same
+  // quality checks and always finish after the learner's response.
+  return courses[opening.id] || [];
 }
 
 export function recordOpeningAttempt(

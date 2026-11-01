@@ -1,4 +1,5 @@
 import Title from "../components/Title";
+import { saveGameAccuracy } from "../lib/game-accuracy";
 import EngineOptions from "../components/EngineOptions";
 import AnalysisGuide from "../components/AnalysisGuide";
 import CopyGameActions from "../components/CopyGameActions";
@@ -223,8 +224,10 @@ export default function Analysis({
     else if (tab === "editor") setTab("review");
   }, [customEditing]);
   useEffect(() => {
-    if (review.length)
+    if (review.length) {
       writeStorage("kuda-last-review", { pgn: toPgn(mainGame), items: review });
+      saveGameAccuracy(mainGame, review);
+    }
   }, [mainGame, review]);
   const bookMoves = useMemo(
     () =>

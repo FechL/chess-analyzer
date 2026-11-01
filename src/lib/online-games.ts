@@ -69,6 +69,22 @@ async function readRemote(
   }
 }
 
+export async function verifiedPlayerUsername(
+  source: "chesscom" | "lichess",
+  input: string,
+  signal: AbortSignal,
+): Promise<string> {
+  const username = normalizeUsername(input);
+  const url =
+    source === "chesscom"
+      ? `https://api.chess.com/pub/player/${encodeURIComponent(username)}`
+      : `https://lichess.org/api/user/${encodeURIComponent(username)}`;
+  const profile = JSON.parse(await readRemote(url, signal));
+  if (typeof profile.username !== "string")
+    throw new Error("Format profil pemain tidak dikenali.");
+  return normalizeUsername(profile.username);
+}
+
 export async function chessArchives(
   username: string,
   signal: AbortSignal,
@@ -112,6 +128,16 @@ export async function chessMonth(
       const game = parseGame(item.pgn);
       game.source = "Chess.com";
       game.timeControl ||= item.time_control;
+      if (
+        !/^\d+$/.test(game.whiteElo || "") &&
+        Number.isFinite(item.white?.rating)
+      )
+        game.whiteElo = String(item.white.rating);
+      if (
+        !/^\d+$/.test(game.blackElo || "") &&
+        Number.isFinite(item.black?.rating)
+      )
+        game.blackElo = String(item.black.rating);
       if (!game.moves.length || game.result === "*") continue;
       games.push({
         id: item.url,
@@ -156,6 +182,16 @@ export async function lichessGames(
     try {
       const game = parseGame(item.pgn);
       game.source = "Lichess";
+      if (
+        !/^\d+$/.test(game.whiteElo || "") &&
+        Number.isFinite(item.players?.white?.rating)
+      )
+        game.whiteElo = String(item.players.white.rating);
+      if (
+        !/^\d+$/.test(game.blackElo || "") &&
+        Number.isFinite(item.players?.black?.rating)
+      )
+        game.blackElo = String(item.players.black.rating);
       if (!game.timeControl && item.clock)
         game.timeControl =
           String(item.clock.initial) + "+" + String(item.clock.increment || 0);

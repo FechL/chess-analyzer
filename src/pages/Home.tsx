@@ -1,10 +1,8 @@
 import {
   ArrowRight,
   BookOpen,
-  Grid2X2,
   Swords,
   Target,
-  FolderHeart,
   GraduationCap,
 } from "lucide-react";
 import { useI18n } from "../lib/i18n";
@@ -27,12 +25,6 @@ export default function HomePage({
   const { t } = useI18n();
   const activities = [
     {
-      id: "analysis",
-      title: "Analisis permainan",
-      icon: Grid2X2,
-      text: "Telusuri permainan dan temukan langkah yang lebih baik.",
-    },
-    {
       id: "bot",
       title: "Lawan bot",
       icon: Swords,
@@ -49,6 +41,12 @@ export default function HomePage({
       title: "Opening explorer",
       icon: BookOpen,
       text: "Pelajari opening, lalu latih variasinya dari ingatan.",
+    },
+    {
+      id: "academy",
+      title: "Akademi catur",
+      icon: GraduationCap,
+      text: "Pelajari dasar catur dan tingkatkan keterampilanmu.",
     },
   ];
   return (
@@ -72,7 +70,6 @@ export default function HomePage({
           draggable={false}
         />
       </section>
-      <HomeGames saved={saved} onLoad={onLoad} />
       <div className="home-activities">
         {activities.map(({ id, title, icon: Icon, text }) => (
           <button
@@ -80,43 +77,21 @@ export default function HomePage({
             className="home-activity"
             onClick={() => onNavigate(id)}
           >
-            <span className="home-activity-icon">
-              <Icon size={24} />
+            <span className="home-activity-icon" aria-hidden="true">
+              <Icon />
             </span>
             <Title as="h2">{t(title)}</Title>
             <p>{t(text)}</p>
+            {id === "academy" && (
+              <small className="home-academy-progress">
+                {completedCount} {t("pelajaran selesai")}
+              </small>
+            )}
             <ArrowRight size={17} className="home-activity-arrow" />
           </button>
         ))}
       </div>
-      <div className="home-personal">
-        <button
-          className="home-personal-link"
-          onClick={() => onNavigate("library")}
-        >
-          <FolderHeart size={21} />
-          <span>
-            <Title as="strong">{t("Koleksi permainan")}</Title>
-            <small>
-              {saved.length} {t("permainan tersimpan")}
-            </small>
-          </span>
-          <ArrowRight size={16} />
-        </button>
-        <button
-          className="home-personal-link"
-          onClick={() => onNavigate("academy")}
-        >
-          <GraduationCap size={21} />
-          <span>
-            <Title as="strong">{t("Akademi catur")}</Title>
-            <small>
-              {completedCount} {t("pelajaran selesai")}
-            </small>
-          </span>
-          <ArrowRight size={16} />
-        </button>
-      </div>
+      <HomeGames saved={saved} onLoad={onLoad} />
     </div>
   );
 }

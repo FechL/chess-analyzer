@@ -12,6 +12,7 @@ export type SavedPlayer = {
   username: string;
 };
 export type PlayerGameFeed = {
+  visibleLimit?: number;
   games: OnlineGame[];
   archives: string[];
   archiveIndex: number;
@@ -19,6 +20,29 @@ export type PlayerGameFeed = {
   initialized: boolean;
   exhausted: boolean;
 };
+export type GameDateFilter = { day?: number; month?: number; year?: number };
+
+export function matchesGameDate(timestamp: number, filter: GameDateFilter) {
+  const date = new Date(timestamp);
+  return (
+    (!filter.day || date.getUTCDate() === filter.day) &&
+    (!filter.month || date.getUTCMonth() + 1 === filter.month) &&
+    (!filter.year || date.getUTCFullYear() === filter.year)
+  );
+}
+
+function dateBounds(filter: GameDateFilter) {
+  if (!filter.year) return;
+  const month = filter.month ? filter.month - 1 : 0;
+  const day = filter.month && filter.day ? filter.day : 1;
+  const start = Date.UTC(filter.year, month, day);
+  const end = filter.month
+    ? filter.day
+      ? Date.UTC(filter.year, month, day + 1)
+      : Date.UTC(filter.year, month + 1, 1)
+    : Date.UTC(filter.year + 1, 0, 1);
+  return { start, end };
+}
 
 export function savedPlayer(
   source: SavedPlayer["source"],
@@ -33,7 +57,8 @@ export async function loadPlayerGames(
   player: SavedPlayer,
   signal: AbortSignal,
   previous?: PlayerGameFeed,
-  target = 10,
+  target = 100,
+  filter: GameDateFilter = {},
 ): Promise<PlayerGameFeed> {
   const feed: PlayerGameFeed = previous
     ? {
@@ -49,11 +74,22 @@ export async function loadPlayerGames(
         exhausted: false,
       };
   if (player.source === "chesscom" && !feed.initialized) {
-    feed.archives = await chessArchives(player.username, signal);
+    feed.archives = (await chessArchives(player.username, signal)).filter(
+      (url) => {
+        const [year, month] = url.split("/").slice(-2).map(Number);
+        return (
+          (!filter.year || year === filter.year) &&
+          (!filter.month || month === filter.month)
+        );
+      },
+    );
     signal.throwIfAborted();
     feed.initialized = true;
     feed.exhausted = !feed.archives.length;
   }
+  const bounds = dateBounds(filter);
+  if (player.source === "lichess" && !feed.initialized && bounds)
+    feed.next = bounds.end - 1;
   while (feed.games.length < target && !feed.exhausted) {
     signal.throwIfAborted();
     let games: OnlineGame[];
@@ -69,10 +105,15 @@ export async function loadPlayerGames(
       feed.initialized = true;
       feed.exhausted = page.next === undefined || page.next === feed.next;
       feed.next = page.next;
+      if (bounds && page.next !== undefined && page.next < bounds.start)
+        feed.exhausted = true;
     }
     feed.games = [
       ...new Map(
-        [...feed.games, ...games].map((game) => [game.id, game]),
+        [
+          ...feed.games,
+          ...games.filter((game) => matchesGameDate(game.date, filter)),
+        ].map((game) => [game.id, game]),
       ).values(),
     ].sort((a, b) => b.date - a.date);
   }

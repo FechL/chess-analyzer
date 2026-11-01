@@ -55,6 +55,21 @@ let networkQueue: Promise<unknown> = Promise.resolve();
 export function cachedPuzzles(theme: string, difficulty: string) {
   return readStorage<LichessPuzzle[]>(storageKey(theme, difficulty), []);
 }
+
+// Legacy history entries only stored an ID. Backfill their position on demand.
+// https://lichess.org/api#tag/Puzzles/operation/apiPuzzleId
+export async function puzzleById(id: string, signal: AbortSignal) {
+  if (!/^[a-zA-Z0-9]{5}$/.test(id))
+    throw new Error("Data puzzle Lichess tidak valid.");
+  const response = await fetch(`https://lichess.org/api/puzzle/${id}`, {
+    signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+    credentials: "omit",
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok)
+    throw new Error("Puzzle Lichess belum dapat diambil. Coba lagi nanti.");
+  return parseLichessPuzzle(await response.json());
+}
 export function consumePuzzle(theme: string, difficulty: string, id: string) {
   const queue = cachedPuzzles(theme, difficulty).filter(
     (item) => item.id !== id,

@@ -533,11 +533,17 @@
 }
 .opening-variation-status {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   padding: 0 18px 12px;
   color: var(--muted);
   font-size: 10px;
+  white-space: nowrap;
+}
+.opening-variation-status .opening-continue-learn {
+  margin-left: auto;
+  padding: 0;
+  font-size: inherit;
   white-space: nowrap;
 }
 .opening-variation-list {

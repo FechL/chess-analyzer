@@ -7,6 +7,15 @@ export type OnlineGame = {
   date: number;
   speed: string;
 };
+
+export function gameForUsername(game: GameData, username: string): GameData {
+  const searched = username.trim().toLowerCase();
+  return {
+    ...game,
+    perspective:
+      searched && game.black.trim().toLowerCase() === searched ? "b" : "w",
+  };
+}
 export function normalizeUsername(value: string) {
   const username = value.trim();
   if (!/^[a-zA-Z0-9_-]{1,50}$/.test(username))

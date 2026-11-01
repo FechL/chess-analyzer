@@ -3614,3 +3614,82 @@ textarea::placeholder {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* The notation scrolls independently; coach notes stay at the panel's bottom. */
+.analysis-sidebar .analysis-panel.is-review {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.analysis-sidebar .analysis-panel.is-review > :not(.move-list) {
+  flex-shrink: 0;
+}
+.analysis-sidebar .analysis-panel.is-review > .move-list {
+  flex: 1 1 0;
+  min-height: 0;
+  max-height: none;
+}
+@media (max-width: 1050px) {
+  .analysis-sidebar .analysis-panel.is-review > .move-list {
+    flex: 0 1 auto;
+    min-height: 160px;
+    max-height: 360px;
+  }
+}
+
+.puzzle-history-link {
+  color: #347fcc;
+  text-decoration: none;
+}
+.puzzle-history-link:hover,
+.puzzle-history-link[aria-current="true"] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.puzzle-history-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+:root[data-color-mode="dark"] .puzzle-history-link {
+  color: #8bbdff;
+}
+.puzzle-footer-session-actions.is-history {
+  grid-template-columns: 1fr;
+}
+
+.piece-editor-turn {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.piece-editor-turn > strong {
+  font-size: 12px;
+}
+.piece-editor-turn .segmented > button {
+  flex: 1;
+}
+
+.bot-player .chess-clock.clock-low,
+:root[data-color-mode="dark"] .bot-player .chess-clock.clock-low {
+  color: #c43636;
+  background: #ffe3e3;
+  border-color: #e79797;
+}
+:root[data-color-mode="dark"] .bot-player .chess-clock.clock-low {
+  color: #ffb0b0;
+  background: #612c35;
+  border-color: #a35360;
+}
+.bot-game-panel.is-playing {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.bot-game-panel.is-playing > .bot-notation {
+  min-height: 0;
+  margin-top: 0;
+}
+.bot-game-panel.is-playing > .bot-game-actions {
+  margin: 0 -18px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line);
+}

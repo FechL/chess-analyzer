@@ -53,6 +53,7 @@ import { findBookMove } from "../lib/opening-book";
 import { pieceAsset } from "../lib/preferences";
 import { appendPremove, executePremove } from "../lib/premove";
 import { clockSeconds } from "../lib/move-time";
+import { playBoardSound } from "../lib/board-sound";
 import {
   BOT_LEVELS,
   BOT_MODES,
@@ -155,6 +156,19 @@ export default function BotPage({
   const lastMove = visibleHistory.at(-1);
   const running = session.started && !ended && !session.paused;
   const unlimited = session.control.seconds === 0;
+  const warnedClocks = useRef(new Set<Color>());
+  useEffect(() => {
+    if (!session.started) warnedClocks.current.clear();
+    if (!running || unlimited) return;
+    let alert = false;
+    for (const color of ["w", "b"] as const) {
+      if (session.clocks[color] > 0 && session.clocks[color] < 60 && !warnedClocks.current.has(color)) {
+        warnedClocks.current.add(color);
+        alert = true;
+      }
+    }
+    if (alert) playBoardSound("warning");
+  }, [session.started, session.clocks, running, unlimited]);
   const available = running && atLatest;
   const clockTick = useRef<{ fen: string; last: number } | undefined>(
     undefined,
@@ -464,6 +478,7 @@ export default function BotPage({
   ]);
 
   function start(restart = false) {
+    warnedClocks.current.clear();
     stopWork();
     reviewGeneration.current++;
     setGameOverDismissed(false);
@@ -719,7 +734,7 @@ export default function BotPage({
     return (
       <time
         aria-label={t(color === "w" ? "Sisa waktu putih" : "Sisa waktu hitam")}
-        className={`chess-clock ${available && chess.turn() === color ? "clock-active" : ""}`}
+        className={`chess-clock ${available && chess.turn() === color ? "clock-active" : ""}${session.started && !unlimited && session.clocks[color] < 60 ? " clock-low" : ""}`}
       >
         {unlimited
           ? "∞"
@@ -1060,7 +1075,7 @@ export default function BotPage({
               </button>
             </div>
             {tab === "game" ? (
-              <div className="bot-game-panel">
+              <div className={`bot-game-panel${session.started ? " is-playing" : ""}`}>
                 {!session.started && (
                   <>
                     <div className="bot-setup-heading">
@@ -1253,6 +1268,37 @@ export default function BotPage({
                     </div>
                   </>
                 )}
+                {(error || engineError) && (
+                  <div className="error-message" role="alert">
+                    {t(error || engineError)}
+                  </div>
+                )}
+                {session.started && (
+                  <div className="bot-notation">
+                    <div className="notation-heading">
+                      <Title as="span">{t("Notasi permainan")}</Title>
+                      <button
+                        className="text-button"
+                        onClick={review}
+                        disabled={!history.length}
+                      >
+                        {t("Analisis")} <ArrowRight size={12} />
+                      </button>
+                    </div>
+                    <MoveList
+                      moves={history.map((move) => move.san)}
+                      durations={session.moveDurations}
+                      ply={ply}
+                      onChange={navigate}
+                      review={
+                        permissions.engine
+                          ? retainReview(positionReviews, history)
+                          : []
+                      }
+                      startFen={history[0]?.before || new Chess().fen()}
+                    />
+                  </div>
+                )}
                 <div className="bot-game-actions">
                   <button
                     className="button primary full"
@@ -1317,37 +1363,6 @@ export default function BotPage({
                     </div>
                   )}
                 </div>
-                {(error || engineError) && (
-                  <div className="error-message" role="alert">
-                    {t(error || engineError)}
-                  </div>
-                )}
-                {session.started && (
-                  <div className="bot-notation">
-                    <div className="notation-heading">
-                      <Title as="span">{t("Notasi permainan")}</Title>
-                      <button
-                        className="text-button"
-                        onClick={review}
-                        disabled={!history.length}
-                      >
-                        {t("Analisis")} <ArrowRight size={12} />
-                      </button>
-                    </div>
-                    <MoveList
-                      moves={history.map((move) => move.san)}
-                      durations={session.moveDurations}
-                      ply={ply}
-                      onChange={navigate}
-                      review={
-                        permissions.engine
-                          ? retainReview(positionReviews, history)
-                          : []
-                      }
-                      startFen={history[0]?.before || new Chess().fen()}
-                    />
-                  </div>
-                )}
               </div>
             ) : tab === "engine" && permissions.engine ? (
               <>

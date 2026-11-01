@@ -9,6 +9,7 @@ export type GameVariation = {
   parentId?: string;
 };
 export type GameData = {
+  perspective?: "w" | "b";
   startFen: string;
   moves: string[];
   white: string;

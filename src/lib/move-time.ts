@@ -38,6 +38,15 @@ export function formatMoveDuration(seconds: number) {
     : remainder + "s";
 }
 
+export function formatAnalysisClock(clock: string) {
+  const seconds = clockSeconds(clock);
+  if (seconds === undefined) return clock;
+  const whole = formatPgnTime(Math.floor(seconds));
+  return seconds > 0 && seconds < 1
+    ? `${whole},${Math.floor(seconds * 10)}`
+    : whole;
+}
+
 export function formatPgnTime(value: number): string {
   const millis = Math.round(Math.max(0, value) * 1000);
   const hours = Math.floor(millis / 3600000);

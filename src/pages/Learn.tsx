@@ -56,8 +56,14 @@ import {
   cachedPuzzles,
   consumePuzzle,
   ensurePuzzles,
+  puzzleById,
 } from "../lib/lichess-puzzles";
 import type { LichessPuzzle, PuzzleDifficulty } from "../lib/lichess-puzzles";
+import {
+  appendPuzzleHistory,
+  normalizePuzzleHistory,
+} from "../lib/puzzle-history";
+import type { PuzzleHistoryEntry } from "../lib/puzzle-history";
 import type { Settings } from "../App";
 
 const PUZZLE_THEMES: [string, string][] = [
@@ -75,15 +81,6 @@ const PUZZLE_DIFFICULTIES: [PuzzleDifficulty, string][] = [
   ["harder", "Sulit"],
   ["hardest", "Sangat sulit"],
 ];
-
-type PuzzleHistoryEntry = {
-  id: string;
-  number?: number;
-  clean?: boolean;
-  rating: number;
-  elapsedMs: number;
-  outcome: "solved" | "skipped";
-};
 
 type PuzzleSessionSnapshot = {
   puzzleId: string;
@@ -568,8 +565,11 @@ export function PuzzlesPage({
     readStorage("kuda-lichess-completed", []),
   );
   const [puzzleHistory, setPuzzleHistory] = useState<PuzzleHistoryEntry[]>(() =>
-    readStorage("kuda-puzzle-history", []),
+    normalizePuzzleHistory(readStorage("kuda-puzzle-history", [])),
   );
+  const [historyEntry, setHistoryEntry] = useState<PuzzleHistoryEntry>();
+  const [historyAttempt, setHistoryAttempt] = useState(0);
+  const historyRequest = useRef<AbortController | undefined>(undefined);
   const puzzleHistoryRef = useRef(puzzleHistory);
   const [streak, setStreak] = useState(() =>
     readStorage("kuda-puzzle-streak", 0),
@@ -648,25 +648,55 @@ export function PuzzlesPage({
   ) => {
     if (!puzzle || recordedPuzzleId.current === puzzle.id) return;
     recordedPuzzleId.current = puzzle.id;
-    const history = puzzleHistoryRef.current.map((item, index, entries) => ({
-      ...item,
-      number: item.number ?? entries.length - index,
-    }));
     const entry: PuzzleHistoryEntry = {
       id: puzzle.id,
-      number: (history[0]?.number ?? 0) + 1,
       clean,
       rating: puzzle.rating,
       elapsedMs: Math.max(0, elapsedRef.current),
       outcome,
+      puzzle,
     };
     setElapsedMs(entry.elapsedMs);
-    const next = [entry, ...history].slice(0, 100);
+    const next = appendPuzzleHistory(puzzleHistoryRef.current, entry);
     puzzleHistoryRef.current = next;
     setPuzzleHistory(next);
     writeStorage("kuda-puzzle-history", next);
   };
+  const openHistory = async (entry: PuzzleHistoryEntry) => {
+    historyRequest.current?.abort();
+    if (autoNextTimer.current !== undefined) {
+      window.clearTimeout(autoNextTimer.current);
+      autoNextTimer.current = undefined;
+    }
+    setShowSkipWarning(false);
+    setError("");
+    setHistoryEntry(entry);
+    setHistoryAttempt(0);
+    if (entry.puzzle) return;
+    const controller = new AbortController();
+    historyRequest.current = controller;
+    try {
+      const snapshot = await puzzleById(entry.id, controller.signal);
+      if (controller.signal.aborted) return;
+      const next = puzzleHistoryRef.current.map((item) =>
+        item.id === entry.id ? { ...item, puzzle: snapshot } : item,
+      );
+      puzzleHistoryRef.current = next;
+      setPuzzleHistory(next);
+      writeStorage("kuda-puzzle-history", next);
+      setHistoryEntry({ ...entry, puzzle: snapshot });
+    } catch (error) {
+      if (!controller.signal.aborted) setError((error as Error).message);
+    }
+  };
+  const returnToActivePuzzle = () => {
+    historyRequest.current?.abort();
+    setHistoryEntry(undefined);
+    setError("");
+  };
   const load = async (next = false) => {
+    historyRequest.current?.abort();
+    setHistoryEntry(undefined);
     setShowSkipWarning(false);
     if (autoNextTimer.current !== undefined) {
       window.clearTimeout(autoNextTimer.current);
@@ -726,7 +756,8 @@ export function PuzzlesPage({
     };
   }, [theme, difficulty]);
   useEffect(() => {
-    if (!puzzle || !started || paused || puzzleSolved || busy) return;
+    if (!puzzle || !started || paused || puzzleSolved || busy || historyEntry)
+      return;
     let lastTick = Date.now();
     const timer = window.setInterval(() => {
       const now = Date.now();
@@ -739,9 +770,10 @@ export function PuzzlesPage({
       });
     }, 250);
     return () => window.clearInterval(timer);
-  }, [puzzle, started, paused, attempt, puzzleSolved, busy]);
+  }, [puzzle, started, paused, attempt, puzzleSolved, busy, historyEntry]);
   useEffect(
     () => () => {
+      historyRequest.current?.abort();
       if (firstPuzzleLoad.current) return;
       const current = puzzleSession.current;
       if (current?.started) writeStorage("kuda-puzzle-session", current);
@@ -768,7 +800,7 @@ export function PuzzlesPage({
     void ensurePuzzles(theme, difficulty).catch((e) => {
       setError((e as Error).message);
     });
-    if (autoNext) {
+    if (autoNext && !historyEntry) {
       autoNextTimer.current = window.setTimeout(() => {
         autoNextTimer.current = undefined;
         void load(true);
@@ -792,6 +824,10 @@ export function PuzzlesPage({
     goToNextPuzzle();
   };
   const retryPuzzle = () => {
+    if (historyEntry) {
+      setHistoryAttempt((value) => value + 1);
+      return;
+    }
     if (autoNextTimer.current !== undefined) {
       window.clearTimeout(autoNextTimer.current);
       autoNextTimer.current = undefined;
@@ -878,7 +914,9 @@ export function PuzzlesPage({
       instance.stop();
     };
   }, [positionFen, status, settings.showEvalBar, settings.engine, engine]);
-  const color = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
+  const viewedPuzzle = historyEntry ? historyEntry.puzzle : puzzle;
+  const color = (viewedPuzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
+  const activeColor = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
   const activeTheme = PUZZLE_THEMES.find(([id]) => id === theme)?.[1];
   const activeDifficulty = PUZZLE_DIFFICULTIES.find(
     ([id]) => id === difficulty,
@@ -888,11 +926,17 @@ export function PuzzlesPage({
       <div className="workspace-toolbar">
         <div className="game-title-block">
           <Title as="strong">
-            {t(puzzle ? "Puzzle Lichess #" + puzzle.id : "Puzzle Lichess")}
+            {t(
+              historyEntry
+                ? "Puzzle Lichess #" + historyEntry.id
+                : puzzle
+                  ? "Puzzle Lichess #" + puzzle.id
+                  : "Puzzle Lichess",
+            )}
           </Title>
           <div className="game-players">
             {t(
-              puzzle && (
+              viewedPuzzle && (
                 <span className="game-player">
                   <span
                     className={"player-color player-color-" + color}
@@ -903,7 +947,7 @@ export function PuzzlesPage({
                     {t("melangkah")}
                     {t(" · ")}
                     {t("Rating ")}
-                    {t(puzzle.rating)}
+                    {t(viewedPuzzle.rating)}
                   </span>
                 </span>
               ),
@@ -917,31 +961,24 @@ export function PuzzlesPage({
       </div>
       <div className="analysis-grid">
         <section className="board-section">
-          {t(
-            puzzle ? (
+          {historyEntry &&
+            (historyEntry.puzzle ? (
               <LineTrainer
-                key={`${puzzle.id}:${attempt}`}
-                fen={puzzle.fen}
-                moves={puzzle.solution}
+                key={`history:${historyEntry.number}:${historyEntry.id}:${historyAttempt}`}
+                fen={historyEntry.puzzle.fen}
+                moves={historyEntry.puzzle.solution}
                 color={color}
                 theme={settings.boardTheme}
-                title={t(
-                  "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
-                )}
-                hint="Cari langkah yang memaksa balasan lawan."
+                title={t("Mainkan ulang puzzle")}
                 startTraining
                 puzzleMode
-                started={started}
-                paused={paused}
-                onStart={startOrResumePuzzle}
                 enableShortcuts={settings.enableShortcuts}
                 evalBar={
                   settings.showEvalBar ? (
                     <EvalBar
-                      cp={evaluation?.cp}
-                      mate={evaluation?.mate}
-                      active={!!evaluation}
-                      pending={!!evaluation && !validEvaluation}
+                      cp={validEvaluation?.cp}
+                      mate={validEvaluation?.mate}
+                      active={!!validEvaluation}
                       flipped={color === "b"}
                     />
                   ) : null
@@ -949,29 +986,73 @@ export function PuzzlesPage({
                 onPositionChange={setPositionFen}
                 onFeedbackChange={setMoveFeedback}
                 onFindReply={getOpponentReply}
-                onMistake={breakStreak}
-                onSolve={(clean) => {
-                  if (clean) growStreak();
-                }}
-                onComplete={complete}
+                onComplete={() => playBoardSound("success")}
                 onAnalyze={(fen) =>
-                  onAnalyze(fen, "Puzzle Lichess #" + puzzle.id)
+                  onAnalyze(fen, "Puzzle Lichess #" + historyEntry.id)
                 }
               />
             ) : (
-              <div className="board-and-eval">
-                <div className="board-main">
-                  <div className="puzzle-loading" role="status">
-                    {t(
-                      busy
-                        ? "Mengambil puzzle dari Lichess…"
-                        : "Pilih tema untuk memulai puzzle.",
-                    )}
+              <div className="board-main puzzle-loading" role="status">
+                {t(error || "Mengambil puzzle dari Lichess…")}
+              </div>
+            ))}
+          <div hidden={!!historyEntry}>
+            {t(
+              puzzle ? (
+                <LineTrainer
+                  key={`${puzzle.id}:${attempt}`}
+                  fen={puzzle.fen}
+                  moves={puzzle.solution}
+                  color={activeColor}
+                  theme={settings.boardTheme}
+                  title={t(
+                    "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
+                  )}
+                  hint="Cari langkah yang memaksa balasan lawan."
+                  startTraining
+                  puzzleMode
+                  started={started}
+                  paused={paused || !!historyEntry}
+                  onStart={startOrResumePuzzle}
+                  enableShortcuts={settings.enableShortcuts && !historyEntry}
+                  evalBar={
+                    settings.showEvalBar ? (
+                      <EvalBar
+                        cp={evaluation?.cp}
+                        mate={evaluation?.mate}
+                        active={!!evaluation}
+                        pending={!!evaluation && !validEvaluation}
+                        flipped={activeColor === "b"}
+                      />
+                    ) : null
+                  }
+                  onPositionChange={historyEntry ? undefined : setPositionFen}
+                  onFeedbackChange={historyEntry ? undefined : setMoveFeedback}
+                  onFindReply={getOpponentReply}
+                  onMistake={breakStreak}
+                  onSolve={(clean) => {
+                    if (clean) growStreak();
+                  }}
+                  onComplete={complete}
+                  onAnalyze={(fen) =>
+                    onAnalyze(fen, "Puzzle Lichess #" + puzzle.id)
+                  }
+                />
+              ) : (
+                <div className="board-and-eval">
+                  <div className="board-main">
+                    <div className="puzzle-loading" role="status">
+                      {t(
+                        busy
+                          ? "Mengambil puzzle dari Lichess…"
+                          : "Pilih tema untuk memulai puzzle.",
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ),
-          )}
+              ),
+            )}
+          </div>
         </section>
         <div className="analysis-sidebar">
           <div className="analysis-sidebar-content analysis-panel puzzle-sidebar-surface">
@@ -1040,6 +1121,7 @@ export function PuzzlesPage({
                         {t(
                           "Riwayat di sidebar mencatat puzzle selesai atau dilewati serta waktu sejak puzzle dimuat sampai tindakan tersebut.",
                         )}
+                        {t("Klik tautan riwayat untuk meninjau posisi dan solusi. Hingga 100 puzzle disimpan lengkap di perangkat. Timer puzzle aktif berhenti selama meninjau riwayat; streak tidak berubah.")}
                       </p>
                       <p>
                         <strong>{t("Rating dan bar evaluasi")}</strong>
@@ -1092,7 +1174,11 @@ export function PuzzlesPage({
                       >
                         <Clock3 size={17} />
                         <strong>
-                          <time>{formatPuzzleClock(elapsedMs)}</time>
+                          <time>
+                            {formatPuzzleClock(
+                              historyEntry?.elapsedMs ?? elapsedMs,
+                            )}
+                          </time>
                         </strong>
                         <span>{t("waktu puzzle")}</span>
                       </div>
@@ -1130,11 +1216,23 @@ export function PuzzlesPage({
                                     : "✓"
                                   : "↷"}
                               </span>
-                              <span className="puzzle-history-id">
+                              <a
+                                className="puzzle-history-id puzzle-history-link"
+                                href="#puzzles"
+                                aria-current={
+                                  historyEntry?.number === entry.number
+                                    ? "true"
+                                    : undefined
+                                }
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  void openHistory(entry);
+                                }}
+                              >
                                 {t("Puzzle #")}
                                 {entry.id}
                                 <small>{t(entry.rating)}</small>
-                              </span>
+                              </a>
                               <time>
                                 {formatPuzzleDuration(entry.elapsedMs)}
                               </time>
@@ -1156,7 +1254,11 @@ export function PuzzlesPage({
                           <button
                             className="text-button"
                             disabled={busy}
-                            onClick={() => void load()}
+                            onClick={() =>
+                              historyEntry
+                                ? void openHistory(historyEntry)
+                                : void load()
+                            }
                           >
                             {t("Coba lagi")}
                           </button>
@@ -1315,7 +1417,7 @@ export function PuzzlesPage({
               <div className="puzzle-footer-actions">
                 <button
                   className="button secondary"
-                  disabled={!puzzle || busy}
+                  disabled={historyEntry ? !historyEntry.puzzle : !puzzle || busy}
                   onClick={retryPuzzle}
                 >
                   <RotateCcw size={14} />
@@ -1323,12 +1425,13 @@ export function PuzzlesPage({
                 </button>
                 <button
                   className="button secondary"
-                  disabled={!positionFen}
+                  disabled={!positionFen || (!!historyEntry && !historyEntry.puzzle)}
                   onClick={() =>
                     positionFen &&
                     onAnalyze(
                       positionFen,
-                      "Puzzle Lichess #" + (puzzle?.id ?? ""),
+                      "Puzzle Lichess #" +
+                        (historyEntry?.id ?? puzzle?.id ?? ""),
                     )
                   }
                 >
@@ -1336,23 +1439,37 @@ export function PuzzlesPage({
                   {t("Analisis posisi")}
                 </button>
               </div>
-              <div className="puzzle-footer-actions puzzle-footer-session-actions">
-                <button
-                  className="button secondary"
-                  disabled={!puzzle || busy || puzzleSolved || !started}
-                  onClick={togglePuzzlePause}
-                >
-                  {paused ? <Play size={14} /> : <Pause size={14} />}
-                  {t(paused ? "Lanjutkan" : "Jeda")}
-                </button>
-                <button
-                  className="button primary"
-                  disabled={!puzzle || busy}
-                  onClick={requestNextPuzzle}
-                >
-                  <SkipForward size={15} />
-                  {t(puzzleSolved ? "Puzzle berikutnya" : "Lewati puzzle")}
-                </button>
+              <div
+                className={`puzzle-footer-actions puzzle-footer-session-actions${historyEntry ? " is-history" : ""}`}
+              >
+                {historyEntry ? (
+                  <button
+                    className="button primary"
+                    onClick={returnToActivePuzzle}
+                  >
+                    <ArrowRight size={15} />
+                    {t("Kembali ke puzzle aktif")}
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="button secondary"
+                      disabled={!puzzle || busy || puzzleSolved || !started}
+                      onClick={togglePuzzlePause}
+                    >
+                      {paused ? <Play size={14} /> : <Pause size={14} />}
+                      {t(paused ? "Lanjutkan" : "Jeda")}
+                    </button>
+                    <button
+                      className="button primary"
+                      disabled={!puzzle || busy}
+                      onClick={requestNextPuzzle}
+                    >
+                      <SkipForward size={15} />
+                      {t(puzzleSolved ? "Puzzle berikutnya" : "Lewati puzzle")}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

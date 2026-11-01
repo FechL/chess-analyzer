@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { emptyGame, parseGame, toPgn } from "./chess";
-import { formatMoveDuration, moveDurations } from "./move-time";
+import { formatAnalysisClock, formatMoveDuration, moveDurations } from "./move-time";
+
+describe("analysis player clocks", () => {
+  it("hides fractions when at least one second remains", () => {
+    expect(formatAnalysisClock("0:04:58.75")).toBe("0:04:58");
+    expect(formatAnalysisClock("0:00:01.999")).toBe("0:00:01");
+  });
+  it("shows one decimal after a comma only below one second", () => {
+    expect(formatAnalysisClock("0:00:00.765")).toBe("0:00:00,7");
+    expect(formatAnalysisClock("0:00:00.999")).toBe("0:00:00,9");
+    expect(formatAnalysisClock("0:00:00.04")).toBe("0:00:00,0");
+    expect(formatAnalysisClock("0:00:00")).toBe("0:00:00");
+  });
+});
 
 describe("thinking time per move", () => {
   it("uses each player's own clock and includes the increment", () => {

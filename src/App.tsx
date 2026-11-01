@@ -99,7 +99,7 @@ const DEFAULT_SETTINGS: Settings = {
   enableShortcuts: true,
   showPieceAnnotation: true,
   notationStyle: "letters",
-  language: "id",
+  language: "en",
   colorMode: "system",
   pieceTheme: "classic",
 };

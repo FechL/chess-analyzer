@@ -41,7 +41,7 @@ export function useBoardSound() {
 }
 
 export function playBoardSound(
-  kind: BoardTransition["sound"] | "success" | "error",
+  kind: BoardTransition["sound"] | "success" | "error" | "warning",
 ) {
   if (!enabled()) return;
   unlockBoardSound();
@@ -74,6 +74,10 @@ export function playBoardSound(
       error: [
         [220, 0, 0.12],
         [147, 0.12, 0.18],
+      ],
+      warning: [
+        [880, 0, 0.12],
+        [880, 0.2, 0.16],
       ],
       end: [
         [523, 0, 0.1],

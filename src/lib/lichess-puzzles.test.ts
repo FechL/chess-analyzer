@@ -4,6 +4,7 @@ import {
   consumePuzzle,
   ensurePuzzles,
   parseLichessPuzzle,
+  puzzleById,
 } from "./lichess-puzzles";
 const record = {
   game: { pgn: "e4 e5 Nf3 Nc6" },
@@ -37,6 +38,29 @@ describe("Lichess puzzle conversion", () => {
 
 describe("Lichess puzzle queue", () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it("loads a legacy history snapshot from the single-puzzle endpoint", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response(JSON.stringify(record)));
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const puzzle = await puzzleById("abc12", controller.signal);
+    expect(puzzle.solution).toEqual(["Bb5", "a6"]);
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "https://lichess.org/api/puzzle/abc12",
+    );
+  });
+
+  it("does not overwrite history when a legacy snapshot cannot be fetched", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+    );
+    await expect(
+      puzzleById("abc12", new AbortController().signal),
+    ).rejects.toThrow("belum dapat diambil");
+  });
 
   it("deduplicates refills and never restores a puzzle consumed during a pending request", async () => {
     const storage = new Map<string, string>();

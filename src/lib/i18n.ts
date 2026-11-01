@@ -5,11 +5,11 @@ const eventName = "kuda-language-change";
 function readLanguage(): Language {
   try {
     return JSON.parse(localStorage.getItem("kuda-settings") || "{}")
-      .language === "en"
-      ? "en"
-      : "id";
+      .language === "id"
+      ? "id"
+      : "en";
   } catch {
-    return "id";
+    return "en";
   }
 }
 let language: Language = readLanguage();
@@ -153,7 +153,7 @@ export function useI18n() {
   const locale = useSyncExternalStore(
     subscribe,
     () => language,
-    () => "id" as Language,
+    () => "en" as Language,
   );
   const t = useCallback(<T>(value: T): T => translate(value, locale), [locale]);
   return { t, language: locale };

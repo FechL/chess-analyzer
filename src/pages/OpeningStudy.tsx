@@ -56,6 +56,9 @@ import OpeningOverview from "./OpeningOverview";
 import { playBoardSound } from "../lib/board-sound";
 import { useEngine } from "../hooks/useEngine";
 import { useBoardAnimation } from "../lib/board-animation";
+import { LocalEngine } from "../lib/engine";
+import { findPuzzleReply } from "../lib/puzzle-reply";
+import type { PuzzleReply } from "../lib/puzzle-reply";
 import type { Evaluation } from "../lib/chess";
 import "./opening-study.css";
 
@@ -156,6 +159,13 @@ export default function OpeningStudy({
     readStorage("kuda-opening-learn-arrows", true),
   );
   const [feedback, setFeedback] = useState("");
+  const [mistakePreview, setMistakePreview] = useState<
+    Pick<PuzzleReply, "fen" | "from" | "to"> & { mistakeSquare: string }
+  >();
+  const mistakeRequest = useRef(0);
+  const mistakeBusy = useRef(false);
+  const mistakeTimer = useRef<number | undefined>(undefined);
+  const replyEngine = useRef<LocalEngine | null>(null);
   const [result, setResult] = useState<LineProgress>();
   const [reviewOptions, setReviewOptions] = useState<ReviewOptions>(() =>
     readStorage(`kuda-opening-review-options-${opening.id}`, {
@@ -247,6 +257,21 @@ export default function OpeningStudy({
     writeStorage(`kuda-opening-review-options-${opening.id}`, reviewOptions);
   }, [opening.id, reviewOptions]);
   useEffect(() => {
+    setMistakePreview(undefined);
+    mistakeBusy.current = false;
+    return () => {
+      mistakeRequest.current++;
+      mistakeBusy.current = false;
+      window.clearTimeout(mistakeTimer.current);
+    };
+  }, [tab, line.id, mode, viewPly, settings.engine]);
+  useEffect(() => () => {
+    mistakeRequest.current++;
+    window.clearTimeout(mistakeTimer.current);
+    replyEngine.current?.destroy();
+    replyEngine.current = null;
+  }, [settings.engine]);
+  useEffect(() => {
     if (tab !== "lesson" || browsing || challengeLocked || finished || userTurn)
       return;
     const timer = setTimeout(() => {
@@ -283,6 +308,10 @@ export default function OpeningStudy({
   ]);
 
   function begin(nextLine: OpeningLine, nextMode = mode) {
+    mistakeRequest.current++;
+    window.clearTimeout(mistakeTimer.current);
+    mistakeBusy.current = false;
+    setMistakePreview(undefined);
     completionRecorded.current = false;
     setLineId(nextLine.id);
     setMode(nextMode);
@@ -322,13 +351,13 @@ export default function OpeningStudy({
     setFeedback("");
   }
   function hint() {
-    if (finished || browsing || challengeLocked || !userTurn || hintShown)
+    if (finished || browsing || challengeLocked || !userTurn || hintShown || mistakeBusy.current)
       return;
     setHintShown(true);
     setHints((value) => value + 1);
   }
   function playMove(from: string, to: string, promotion = "q") {
-    if (finished || browsing || challengeLocked || !userTurn) return false;
+    if (finished || browsing || challengeLocked || !userTurn || mistakeBusy.current) return false;
     const chess = new Chess(fen);
     try {
       const candidate = chess.move({ from, to, promotion });
@@ -338,7 +367,34 @@ export default function OpeningStudy({
         setFeedback(
           "Langkah ini berada di luar variasi yang dilatih. Coba lagi.",
         );
-        return false;
+        const id = ++mistakeRequest.current;
+        mistakeBusy.current = true;
+        setHintShown(false);
+        setMistakePreview({ fen: chess.fen(), from: candidate.from, to: candidate.to, mistakeSquare: candidate.to });
+        void (async () => {
+          try {
+            const reply = await findPuzzleReply(chess.fen(), (position) => {
+              const instance = (replyEngine.current ??= new LocalEngine(settings.engine));
+              return instance.analyze(position, { ms: 350, multiPV: 1 });
+            });
+            if (id !== mistakeRequest.current) return;
+            if (reply) {
+              setMistakePreview({ ...reply, mistakeSquare: candidate.to });
+              setFeedback(`${t("Balasan terbaik lawan: ")}${reply.san}${t(". Coba langkah lain dari posisi semula.")}`);
+            }
+          } catch {
+            if (id !== mistakeRequest.current) return;
+            replyEngine.current?.destroy();
+            replyEngine.current = null;
+          }
+          if (id !== mistakeRequest.current) return;
+          mistakeTimer.current = window.setTimeout(() => {
+            if (id !== mistakeRequest.current) return;
+            setMistakePreview(undefined);
+            mistakeBusy.current = false;
+          }, 1000);
+        })();
+        return true;
       }
     } catch {
       return false;
@@ -658,7 +714,7 @@ export default function OpeningStudy({
       ? overviewPosition.positions[overviewPly]
       : showingVariation && previewPosition
         ? previewPosition.positions[previewPosition.moves.length]
-        : fen;
+        : tab === "lesson" && mistakePreview ? mistakePreview.fen : fen;
   const hasEvaluationTab = ["overview", "lines", "lesson", "review"].includes(
     tab,
   );
@@ -757,7 +813,7 @@ export default function OpeningStudy({
                 theme={settings.boardTheme}
                 onMove={reviewing ? playReviewMove : playMove}
                 lastMove={
-                  reviewing
+                  tab === "lesson" && mistakePreview ? mistakePreview : reviewing
                     ? reviewMoves[reviewRun.step - 1]
                     : showingOverview
                       ? overviewPosition.moves[overviewPly - 1]
@@ -765,6 +821,12 @@ export default function OpeningStudy({
                         ? previewPosition.moves[previewPosition.moves.length - 1]
                       : moves[visiblePly - 1]
                 }
+                moveBadge={tab === "lesson" && mistakePreview ? {
+                  square: mistakePreview.mistakeSquare,
+                  symbol: "×",
+                  label: t("Langkah latihan kurang tepat"),
+                  color: "#cc6464",
+                } : undefined}
                 disabled={
                   reviewing
                     ? !reviewCanMove
@@ -772,7 +834,7 @@ export default function OpeningStudy({
                       ? true
                     : showingLines
                         ? true
-                      : browsing || finished || challengeLocked || !userTurn
+                      : browsing || finished || challengeLocked || !userTurn || !!mistakePreview
                 }
                 arrow={
                   tab === "lesson" &&
@@ -781,6 +843,7 @@ export default function OpeningStudy({
                   !browsing &&
                   !finished &&
                   !challengeLocked &&
+                  !mistakePreview &&
                   userTurn &&
                   expected
                     ? `${expected.from}${expected.to}`
@@ -1165,6 +1228,15 @@ export default function OpeningStudy({
                 <div className="opening-variation-status" role="status">
                   <span>Learn: {learnedCount}/{lines.length}</span>
                   <span>Practice: {practicedCount}/{lines.length}</span>
+                  <button
+                    className="text-button opening-continue-learn"
+                    onClick={() => {
+                      if (mode !== "learn") changeMode("learn");
+                      setTab("lesson");
+                    }}
+                  >
+                    {t("Lanjutkan Learn")}
+                  </button>
                 </div>
                 <div className="opening-variation-list">
                   {filteredLines.slice(0, listLimit).map((item) => {

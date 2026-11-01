@@ -2,10 +2,11 @@
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, LoaderCircle, Search } from "lucide-react";
-import type { GameData } from "../lib/chess";
+import { readStorage, writeStorage, type GameData } from "../lib/chess";
 import {
   chessArchives,
   chessMonth,
+  gameForUsername,
   importPgnUrl,
   lichessGames,
   normalizeUsername,
@@ -24,7 +25,11 @@ export default function OnlineImport({
 }) {
   const { t } = useI18n();
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() =>
+    source === "url"
+      ? ""
+      : readStorage<string>(`kuda-import-username-${source}`, ""),
+  );
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -114,7 +119,12 @@ export default function OnlineImport({
             spellCheck={false}
             disabled={busy}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              const username = e.target.value;
+              setInput(username);
+              if (source !== "url")
+                writeStorage(`kuda-import-username-${source}`, username);
+            }}
             placeholder={t(
               source === "url"
                 ? "https://situs.com/permainan.pgn"
@@ -229,7 +239,7 @@ export default function OnlineImport({
                       key={item.id}
                       className="online-game-item"
                       disabled={busy}
-                      onClick={() => onLoad(item.game)}
+                      onClick={() => onLoad(gameForUsername(item.game, query))}
                     >
                       <span className="online-game-players">
                         <strong>{t(item.game.white)}</strong>

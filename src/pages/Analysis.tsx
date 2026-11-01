@@ -15,7 +15,6 @@ import {
   Check,
   ChevronDown,
   CircleHelp,
-  Cpu,
   Flag,
   Lightbulb,
   LoaderCircle,
@@ -60,7 +59,8 @@ import {
   writeStorage,
 } from "../lib/chess";
 import type { Evaluation, GameData, ReviewMove } from "../lib/chess";
-import { moveDurations } from "../lib/move-time";
+import { formatAnalysisClock, moveDurations } from "../lib/move-time";
+import { mainlineReturnPly } from "../lib/variation-navigation";
 import { findBookMove } from "../lib/opening-book";
 import {
   ANALYSIS_SHORTCUTS,
@@ -179,7 +179,7 @@ export default function Analysis({
     )
       setActiveVariationId(undefined);
   }, [activeVariation, mainGame.moves, ply]);
-  const [flipped, setFlipped] = useState(false);
+  const [flipped, setFlipped] = useState(mainGame.perspective === "b");
   const [tab, setTab] = useState("review");
   const [editorPiece, setEditorPiece] = useState<string>();
   const [editorSquare, setEditorSquare] = useState<string>();
@@ -373,7 +373,7 @@ export default function Analysis({
           else if (shortcut.action === "return") {
             stopReview();
             setActiveVariationId(undefined);
-            setPly(mainGame.moves.length);
+            setPly(mainlineReturnPly(mainGame, activeVariation));
           }
         }
         return;
@@ -400,7 +400,7 @@ export default function Analysis({
     onSave,
     customEditing,
     activeVariation,
-    mainGame.moves.length,
+    mainGame,
   ]);
   const stopReview = () => {
     reviewId.current++;
@@ -684,7 +684,7 @@ export default function Analysis({
   const playerClock = (color: "w" | "b") => {
     for (let i = Math.min(ply, history.length) - 1; i >= 0; i--) {
       if (history[i].color === color && game.moveTimes?.[i])
-        return game.moveTimes[i];
+        return formatAnalysisClock(game.moveTimes[i]);
     }
     return "—";
   };
@@ -703,23 +703,6 @@ export default function Analysis({
       ? (items.reduce((s, r) => s + r.accuracy, 0) / items.length).toFixed(1)
       : "—";
   };
-  const classificationCounts = (
-    [
-      "brilliant",
-      "best",
-      "excellent",
-      "good",
-      "miss",
-      "inaccuracy",
-      "mistake",
-      "blunder",
-    ] as const
-  )
-    .map((key) => ({
-      key,
-      count: mainReview.filter((item) => item.annotation === key).length,
-    }))
-    .filter(({ count }) => count > 0);
   const coachText = currentBook
     ? `${currentMove.san} adalah Book Move dalam ${currentBook.name} (${currentBook.eco}).`
     : currentReview
@@ -915,7 +898,7 @@ export default function Analysis({
             onReturnToMain={() => {
               stopReview();
               setActiveVariationId(undefined);
-              setPly(mainGame.moves.length);
+              setPly(mainlineReturnPly(mainGame, activeVariation));
             }}
             onChange={setPly}
             onFlip={() => setFlipped((f) => !f)}
@@ -935,7 +918,9 @@ export default function Analysis({
         </section>
         <div className="analysis-sidebar">
           <div className="analysis-sidebar-content">
-            <aside className="analysis-panel">
+            <aside
+              className={`analysis-panel${tab === "review" && !customEditing ? " is-review" : ""}`}
+            >
               <div className="panel-tabs">
                 {t(
                   (customEditing
@@ -959,24 +944,6 @@ export default function Analysis({
                 <AnalysisGuide />
               </div>
               {t(
-                !customEditing && (tab === "review" || tab === "engine") && (
-                  <div className="engine-status">
-                    <div className="engine-chip">
-                      <Cpu size={15} />
-                      <strong>{t("Stockfish 19")}</strong>
-                      <span>{t(settings.engine)}</span>
-                    </div>
-                    <button
-                      className="text-button engine-settings-link"
-                      onClick={() => setTab("options")}
-                    >
-                      {t("Ganti engine ")}
-                      <ArrowRight size={13} />
-                    </button>
-                  </div>
-                ),
-              )}
-              {t(
                 !customEditing && (error || engineError) && (
                   <div className="error-message" role="alert">
                     {t(error || engineError)}
@@ -992,7 +959,6 @@ export default function Analysis({
                         <div className="section-label">
                           {t("AKURASI PERMAINAN")}
                           {t(" ")}
-                          <AnalysisGuide accuracy />
                         </div>
                         {status === "ready" && game.moves.length > 0 && (
                           <button
@@ -1041,28 +1007,7 @@ export default function Analysis({
                           </div>
                         ),
                       )}
-                      {t(
-                        classificationCounts.length > 0 && (
-                          <div
-                            className="classification-summary"
-                            tabIndex={0}
-                            role="region"
-                            aria-label={t("Ringkasan penilaian langkah")}
-                          >
-                            {t(
-                              classificationCounts.map(({ key, count }) => (
-                                <div key={key}>
-                                  <span style={{ color: LABELS[key].color }}>
-                                    {t(LABELS[key].symbol)}
-                                  </span>
-                                  <strong>{t(count)}</strong>
-                                  <small>{t(LABELS[key].label)}</small>
-                                </div>
-                              )),
-                            )}
-                          </div>
-                        ),
-                      )}
+
                     </div>
                     <div className="notation-heading">
                       <Title as="span">{t("Notasi permainan")}</Title>
@@ -1194,6 +1139,28 @@ export default function Analysis({
               {t(
                 customEditing && (
                   <div className="piece-editor">
+                    <div className="piece-editor-turn">
+                      <strong>{t("Giliran pertama")}</strong>
+                      <div className="segmented" role="group" aria-label={t("Giliran pertama")}>
+                        {(["w", "b"] as const).map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            className={game.startFen.split(" ")[1] === color ? "active" : ""}
+                            aria-pressed={game.startFen.split(" ")[1] === color}
+                            onClick={() => {
+                              const fields = game.startFen.split(" ");
+                              fields[1] = color;
+                              fields[3] = "-";
+                              fields[4] = "0";
+                              setGame({ ...game, startFen: fields.join(" ") });
+                            }}
+                          >
+                            {t(color === "w" ? "Putih" : "Hitam")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <p>
                       {t(
                         "Pilih buah lalu klik petak, atau seret buah ke papan.",
@@ -1590,18 +1557,6 @@ function EvaluationChart({
           )),
         )}
       </div>
-      {t(
-        showMoveIndicator && (
-          <div className="chart-axis">
-            <span>
-              {t("Langkah ")}
-              {t(Math.ceil(ply / 2))}
-              {t("/")}
-              {t(Math.ceil(total / 2))}
-            </span>
-          </div>
-        ),
-      )}
     </div>
   );
 }

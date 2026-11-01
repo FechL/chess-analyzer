@@ -78,7 +78,7 @@ export type Settings = {
   colorMode: "light" | "dark" | "system";
   pieceTheme: "classic" | "merida" | "celtic";
 };
-type SavedGame = { id: string; date: string; game: GameData };
+export type SavedGame = { id: string; date: string; game: GameData };
 const TITLES: Record<string, string> = {
   home: "Beranda",
   analysis: "Analisis permainan",
@@ -337,7 +337,7 @@ export default function App() {
           </div>
         }
       >
-        {page === "home" && <HomePage onNavigate={navigate} savedCount={saved.length} completedCount={completed.length} />}
+        {page === "home" && <HomePage onNavigate={navigate} saved={saved} onLoad={load} completedCount={completed.length} />}
         {t(
           page === "analysis" && (
             <Analysis

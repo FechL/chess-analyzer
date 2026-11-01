@@ -9,14 +9,19 @@ import {
 } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import Title from "../components/Title";
+import HomeGames from "../components/HomeGames";
+import type { SavedGame } from "../App";
+import type { GameData } from "../lib/chess";
 
 export default function HomePage({
   onNavigate,
-  savedCount,
+  saved,
+  onLoad,
   completedCount,
 }: {
   onNavigate: (page: string) => void;
-  savedCount: number;
+  saved: SavedGame[];
+  onLoad: (game: GameData) => void;
   completedCount: number;
 }) {
   const { t } = useI18n();
@@ -67,6 +72,7 @@ export default function HomePage({
           draggable={false}
         />
       </section>
+      <HomeGames saved={saved} onLoad={onLoad} />
       <div className="home-activities">
         {activities.map(({ id, title, icon: Icon, text }) => (
           <button
@@ -92,7 +98,7 @@ export default function HomePage({
           <span>
             <Title as="strong">{t("Koleksi permainan")}</Title>
             <small>
-              {savedCount} {t("permainan tersimpan")}
+              {saved.length} {t("permainan tersimpan")}
             </small>
           </span>
           <ArrowRight size={16} />

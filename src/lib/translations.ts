@@ -1,6 +1,14 @@
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  Beranda: "Home",
+  "Satu langkah lebih baik.": "One move better.",
+  "Ruang untuk bermain, memahami, dan berkembang.": "A place to play, understand, and improve.",
+  "Buka papan analisis": "Open analysis board",
+  "Telusuri permainan dan temukan langkah yang lebih baik.": "Explore your games and find better moves.",
+  "Pilih lawan dan latih permainan dengan ritmemu sendiri.": "Choose an opponent and practice at your own pace.",
+  "Asah taktik lewat posisi dari permainan nyata.": "Sharpen your tactics with positions from real games.",
+  "Pelajari opening, lalu latih variasinya dari ingatan.": "Learn openings, then practice their lines from memory.",
   ...OPENING_ENGLISH,
   "Vs Bot": "Vs Bot",
   Mode: "Mode",

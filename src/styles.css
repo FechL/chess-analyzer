@@ -4490,7 +4490,8 @@ select {
   height: 39px;
 }
 
-.kuda-shell>aside>div:first-child>div:first-child>span:first-child {
+.kuda-shell>aside>div:first-child>div:first-child>span:first-child,
+.shell-brand-link>span:first-child {
   width: 42px;
   height: 42px;
   overflow: visible;

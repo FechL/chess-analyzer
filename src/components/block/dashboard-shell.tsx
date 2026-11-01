@@ -671,7 +671,8 @@ export type DashboardShellProps = Omit<
   ComponentProps<"div">,
   "title" | "children" | "ref"
 > & {
-  brand: { name: string; description?: string; logo?: ReactNode };
+  brand: { name: string; description?: string; logo?: ReactNode; href?: string };
+  hideHeader?: boolean;
   navigation: DashboardShellNavSection[];
   /** Low-emphasis items pinned under the navigation, such as Invite or Help. */
   secondaryNavigation?: DashboardShellNavItem[];
@@ -760,6 +761,7 @@ export function DashboardShell({
   defaultActiveItemId,
   onActiveItemChange,
   title,
+  hideHeader = false,
   headingLevel = 1,
   status,
   statusTone = "success",
@@ -938,7 +940,21 @@ export function DashboardShell({
     navigationLabel,
   };
 
-  const renderHeader = (tabList?: ReactNode) => (
+  const renderHeader = (tabList?: ReactNode) => hideHeader ? (
+    <>
+      <Heading id={titleId} className="sr-only">{t(title)}</Heading>
+      <DashboardButton
+        ref={menuButtonRef}
+        variant="secondary"
+        size="icon"
+        className="shell-mobile-navigation fixed bottom-4 left-4 z-30 @2xl/dashboard-shell:hidden"
+        aria-label={t("Buka navigasi")}
+        aria-expanded={isDrawerOpen}
+        aria-controls={isDrawerOpen ? drawerId : undefined}
+        onClick={() => setIsDrawerOpen(true)}
+      ><Menu aria-hidden /></DashboardButton>
+    </>
+  ) : (
     <header className="shrink-0">
       <div className="flex items-center justify-between gap-2 px-4 py-3.5">
         <div className="flex min-w-0 items-center gap-2">
@@ -1305,6 +1321,7 @@ const SidebarContent = memo(function SidebarContent({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 border-b border-(--obsidian-dashboard-shell-border) bg-(--obsidian-dashboard-shell-panel) p-3">
+        <a href={brand.href} onClick={onClose} className="shell-brand-link flex min-w-0 flex-1 items-center gap-2" aria-label={brand.href ? `${brand.name} · ${t("Beranda")}` : undefined}>
         {t(
           brand.logo && (
             <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden">
@@ -1324,6 +1341,7 @@ const SidebarContent = memo(function SidebarContent({
             ),
           )}
         </div>
+        </a>
         {t(
           onClose && (
             <DashboardButton

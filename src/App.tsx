@@ -8,7 +8,7 @@ import {
   ArrowRight,
   BookOpen,
   Check,
-  ChevronRight,
+  House,
   CircleHelp,
   Cpu,
   Download,
@@ -40,6 +40,7 @@ import Analysis from "./pages/Analysis";
 import { setBoardSound, useBoardSound } from "./lib/board-sound";
 import { setBoardAnimation, useBoardAnimation } from "./lib/board-animation";
 import BotPage from "./pages/Bot";
+import HomePage from "./pages/Home";
 import { AcademyPage, OpeningsPage, PuzzlesPage } from "./pages/Learn";
 import { Modal, ProgressRing } from "./components/Common";
 import OnlineImport from "./components/OnlineImport";
@@ -79,6 +80,7 @@ export type Settings = {
 };
 type SavedGame = { id: string; date: string; game: GameData };
 const TITLES: Record<string, string> = {
+  home: "Beranda",
   analysis: "Analisis permainan",
   bot: "Lawan bot",
   openings: "Opening explorer",
@@ -118,10 +120,10 @@ export default function App() {
   const boardSound = useBoardSound();
   const boardAnimation = useBoardAnimation();
   const [route, setRoute] = useState(
-    () => location.hash.slice(1) || "analysis",
+    () => location.hash.slice(1) || "home",
   );
   const routePage = route.split("/")[0];
-  const page = TITLES[routePage] ? routePage : "analysis";
+  const page = TITLES[routePage] ? routePage : "home";
   const activeOpening =
     page === "openings"
       ? OPENINGS.find((opening) => opening.id === route.split("/")[1])
@@ -178,7 +180,7 @@ export default function App() {
   useEffect(() => {
     const handler = () => {
       const next = location.hash.slice(1);
-      setRoute(next || "analysis");
+      setRoute(next || "home");
     };
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
@@ -242,6 +244,7 @@ export default function App() {
       id: "workspace",
       title: "RUANG BERMAIN",
       items: [
+        { id: "home", label: "Beranda", icon: House },
         { id: "analysis", label: "Analisis permainan", icon: Grid2X2 },
         { id: "bot", label: "Lawan bot", icon: Swords },
       ],
@@ -272,12 +275,14 @@ export default function App() {
   return (
     <AppearanceContext.Provider value={settings}>
       <DashboardShell
+        hideHeader
         className="kuda-shell"
         defaultSidebarWidth={232}
         minSidebarWidth={205}
         maxSidebarWidth={300}
         brand={{
           name: "kuda",
+          href: "#home",
           description: "CHESS STUDIO",
           logo: (
             <span className="brand-icon">
@@ -292,31 +297,7 @@ export default function App() {
         ]}
         activeItemId={page}
         onActiveItemChange={navigate}
-        title={t(
-          <Title as="span" className="breadcrumb">
-            <span>{t("Studio")}</span>
-            <ChevronRight size={14} />
-            {activeOpening ? (
-              <>
-                <button
-                  className="breadcrumb-link"
-                  onClick={() => navigate("openings")}
-                >
-                  {t("Opening explorer")}
-                </button>
-                <ChevronRight size={14} />
-                <span aria-current="page">{activeOpening.name}</span>
-              </>
-            ) : (
-              t(TITLES[page])
-            )}
-          </Title>,
-        )}
-        headerActions={
-          <span className="profile-avatar" title={t("Profil lokal")}>
-            {t("K")}
-          </span>
-        }
+        title={t(TITLES[page])}
         navigationLabel="Navigasi Kuda Chess Studio"
         sidebarFooter={
           <div className="sidebar-footer-content">
@@ -356,6 +337,7 @@ export default function App() {
           </div>
         }
       >
+        {page === "home" && <HomePage onNavigate={navigate} savedCount={saved.length} completedCount={completed.length} />}
         {t(
           page === "analysis" && (
             <Analysis

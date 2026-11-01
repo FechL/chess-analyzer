@@ -715,6 +715,7 @@ export default function BotPage({
     if (human === "w") game.blackElo = String(current.elo);
     else game.whiteElo = String(current.elo);
     game.event = `Latihan vs ${current.name}`;
+    game.source = "Bot";
     game.timeControl = unlimited
       ? "-"
       : `${session.control.seconds}+${session.control.increment}`;

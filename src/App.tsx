@@ -1,4 +1,7 @@
 import Title from "./components/Title";
+import LibraryGames from "./components/LibraryGames";
+import { filterLibrary } from "./lib/library-filter";
+import type { LibraryKind } from "./lib/library-filter";
 import { titleCase } from "./lib/title-case";
 // i18n: rendered text
 import { useI18n } from "@/lib/i18n";
@@ -18,6 +21,7 @@ import {
   Import,
   LayoutDashboard,
   LibraryBig,
+  List,
   Monitor,
   Plus,
   RotateCcw,
@@ -25,6 +29,7 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  Star,
   Sun,
   Moon,
   Swords,
@@ -78,7 +83,7 @@ export type Settings = {
   colorMode: "light" | "dark" | "system";
   pieceTheme: "classic" | "merida" | "celtic";
 };
-export type SavedGame = { id: string; date: string; game: GameData };
+export type SavedGame = { id: string; date: string; game: GameData; favorite?: boolean };
 const TITLES: Record<string, string> = {
   home: "Beranda",
   analysis: "Analisis permainan",
@@ -409,6 +414,7 @@ export default function App() {
             <Library
               saved={saved}
               onLoad={load}
+              onToggleFavorite={(id) => setSaved((items) => items.map((item) => item.id === id ? {...item, favorite: !item.favorite} : item))}
               onDelete={(id) => {
                 setSaved((s) => s.filter((g) => g.id !== id));
                 notify("Permainan dihapus dari koleksi.");
@@ -1009,21 +1015,25 @@ function Library({
   onLoad,
   onDelete,
   onImport,
+  onToggleFavorite,
 }: {
   saved: SavedGame[];
   onLoad: (g: GameData) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string) => void;
   onImport: () => void;
 }) {
   const { t } = useI18n();
 
+  const [view, setView] = useState<"cards" | "table">("cards");
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<SavedGame>();
-  const filtered = saved.filter((s) =>
-    `${s.game.event} ${s.game.white} ${s.game.black}`
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
+  const [favorites, setFavorites] = useState(false);
+  const [kind, setKind] = useState<LibraryKind>("all");
+  const [from, setFrom] = useState("");
+  const [until, setUntil] = useState("");
+  const hasFilters = !!(search || favorites || kind !== "all" || from || until);
+  const filtered = filterLibrary(saved, {search, favorites, kind, from, until});
   return (
     <div className="page library-page">
       <div className="page-intro">
@@ -1044,11 +1054,37 @@ function Library({
           {t(" Impor permainan")}
         </button>
       </div>
-      <div className="catalog-toolbar">
+      <div className="catalog-toolbar library-toolbar">
+      <div className="library-filters">
+        <button className="button secondary library-favorite-filter" aria-pressed={favorites} onClick={() => setFavorites((value) => !value)}>
+          <Star size={15} fill={favorites ? "currentColor" : "none"} />
+          {t("Favorit")}
+        </button>
+        <label>
+          {t("Jenis permainan")}
+          <select value={kind} onChange={(event) => setKind(event.target.value as LibraryKind)}>
+            {([ ["all", "Semua jenis"], ["live", "Live"], ["bot", "Lawan bot"], ["free", "Analisis bebas"], ["chesscom", "Chess.com"], ["lichess", "Lichess"], ["pgn", "PGN"], ["fen", "FEN"], ["collection", "Koleksi"] ] as const).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
+          </select>
+        </label>
+        <label>
+          {t("Disimpan sejak")}
+          <input type="date" value={from} max={until || undefined} onChange={(event) => setFrom(event.target.value)} />
+        </label>
+        <label>
+          {t("Disimpan hingga")}
+          <input type="date" value={until} min={from || undefined} onChange={(event) => setUntil(event.target.value)} />
+        </label>
+        {hasFilters && <button className="text-button" onClick={() => {setSearch(""); setFavorites(false); setKind("all"); setFrom(""); setUntil("");}}>{t("Hapus filter")}</button>}
+      </div>
         <Title as="h3">
           {t(saved.length)}
           {t(" permainan tersimpan")}
         </Title>
+        <div className="library-toolbar-actions">
+        <div className="library-view-toggle" role="group" aria-label={t("Tampilan koleksi")}>
+          <button className="icon-button" aria-pressed={view === "cards"} title={t("Tampilan card")} aria-label={t("Tampilan card")} onClick={() => setView("cards")}><Grid2X2 size={16} /></button>
+          <button className="icon-button" aria-pressed={view === "table"} title={t("Tampilan tabel")} aria-label={t("Tampilan tabel")} onClick={() => setView("table")}><List size={17} /></button>
+        </div>
         <label className="search-input">
           <Search size={16} />
           <input
@@ -1058,68 +1094,11 @@ function Library({
             aria-label={t("Cari koleksi")}
           />
         </label>
+        </div>
       </div>
       {t(
         filtered.length ? (
-          <div className="library-grid">
-            {t(
-              filtered.map((s) => (
-                <article className="saved-game-card" key={s.id}>
-                  <div className="saved-card-top">
-                    <span className="saved-game-icon">
-                      <FolderHeart size={23} />
-                    </span>
-                    <span className="subtle-pill">{t(s.game.result)}</span>
-                    <button
-                      className="icon-button"
-                      aria-label={t(`Hapus ${s.game.event}`)}
-                      onClick={() => setDeleting(s)}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                  <span className="small-label">
-                    {t(
-                      new Date(s.date).toLocaleDateString(t("id-ID"), {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      }),
-                    )}
-                  </span>
-                  <Title as="h3">{t(s.game.event)}</Title>
-                  <p>
-                    {t(s.game.white)} <span>{t("vs")}</span> {t(s.game.black)}
-                  </p>
-                  <div className="saved-card-bottom">
-                    <span>
-                      {t(s.game.moves.length)}
-                      {t(" ply")}
-                    </span>
-                    <button
-                      className="text-button"
-                      onClick={() =>
-                        downloadFile(
-                          `${s.game.event.replace(/[^a-zA-Z0-9]/g, "-")}.pgn`,
-                          toPgn(s.game),
-                        )
-                      }
-                    >
-                      <Download size={14} />
-                      {t(" PGN")}
-                    </button>
-                    <button
-                      className="button secondary"
-                      onClick={() => onLoad(s.game)}
-                    >
-                      {t("Buka ")}
-                      <ArrowRight size={14} />
-                    </button>
-                  </div>
-                </article>
-              )),
-            )}
-          </div>
+          <LibraryGames games={filtered} view={view} onLoad={onLoad} onDelete={setDeleting} onToggleFavorite={onToggleFavorite} />
         ) : (
           <div className="empty-state library-empty">
             <div className="empty-icon">
@@ -1127,31 +1106,27 @@ function Library({
             </div>
             <Title as="h2">
               {t(
-                search
+                hasFilters
                   ? "Belum ada yang cocok."
                   : "Halaman untuk perjalananmu.",
               )}
             </Title>
             <p>
               {t(
-                search
-                  ? "Coba nama pemain atau kata kunci lain."
+                hasFilters
+                  ? "Coba ubah filter atau kata kunci pencarian."
                   : "Buka ruang analisis, lalu klik Simpan. Permainanmu akan tersusun di sini.",
               )}
             </p>
+            {!saved.length && (
             <button className="button primary" onClick={onImport}>
               {t("Impor permainan pertama ")}
               <ArrowRight size={16} />
             </button>
+            )}
           </div>
         ),
       )}
-      <p className="content-note">
-        <ShieldCheck size={14} />
-        {t(
-          " Koleksi disimpan di browser ini. Unduh PGN untuk mencadangkan permainan.",
-        )}
-      </p>
       {t(
         deleting && (
           <Modal

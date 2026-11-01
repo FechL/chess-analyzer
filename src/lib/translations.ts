@@ -2,6 +2,24 @@ import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
   Beranda: "Home",
+  "Tampilan koleksi": "Library view",
+  "Tampilan card": "Card view",
+  "Tampilan tabel": "Table view",
+  "Tanggal disimpan": "Date saved",
+  Aksi: "Actions",
+  Pemain: "Players",
+  Hasil: "Result",
+  "Unduh PGN": "Download PGN",
+  "Buka permainan": "Open game",
+  Favorit: "Favorites",
+  "Tambah ke favorit": "Add to favorites",
+  "Hapus dari favorit": "Remove from favorites",
+  "Jenis permainan": "Game type",
+  "Semua jenis": "All types",
+  "Disimpan sejak": "Saved from",
+  "Disimpan hingga": "Saved until",
+  "Hapus filter": "Clear filters",
+  "Coba ubah filter atau kata kunci pencarian.": "Try changing the filters or search keywords.",
   "Permainan pemain tersimpan": "Saved player games",
   "Permainan terbaru": "Recent Games",
   "Tambah pemain": "Add player",
@@ -320,8 +338,8 @@ export const ENGLISH: Record<string, string> = {
   "Hapus dari koleksi?": "Remove from library?",
   "akan dihapus dari penyimpanan koleksi lokal.":
     "will be removed from your local game library.",
-  "Koleksi disimpan di browser ini. Unduh PGN untuk mencadangkan permainan.":
-    "Your library is stored in this browser. Download PGN files to back up your games.",
+  "Koleksi disimpan di browser ini. Salin PGN untuk mencadangkan permainan.":
+    "Your library is stored in this browser. Copy PGN to back up your games.",
   "Belum ada yang cocok.": "No matching games.",
   "Coba nama pemain atau kata kunci lain.":
     "Try another player name or keyword.",

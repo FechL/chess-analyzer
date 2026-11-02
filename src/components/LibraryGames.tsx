@@ -101,7 +101,7 @@ export default function LibraryGames({
   );
 
   return (
-    <div className="library-table-wrap">
+    <div className="library-table-wrap" role="region" aria-label={t("Koleksi permainan")} tabIndex={0}>
       <table className="library-table">
         <thead>
           <tr>

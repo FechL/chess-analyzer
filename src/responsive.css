@@ -1,0 +1,195 @@
+/* Mobile overrides live together; desktop board/panel alignment stays unchanged. */
+@media (max-width: 760px) {
+  .kuda-shell { width: 100%; height: 100dvh; min-height: 0; }
+  .kuda-shell > section { max-width: 100%; min-width: 0; }
+  .kuda-shell .page {
+    width: 100%; min-width: 0;
+    padding: 18px max(12px, env(safe-area-inset-right)) calc(80px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .shell-mobile-navigation {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    left: max(12px, env(safe-area-inset-left));
+    min-width: 44px; min-height: 44px;
+  }
+  .page :is(.board-section, .board-main, .board-under, .analysis-sidebar, .bot-board-area, .bot-sidebar, .opening-study-sidebar) { min-width: 0; max-width: 100%; }
+  .page :is(.analysis-grid, .bot-workspace, .opening-study-grid) { grid-template-columns: minmax(0, 1fr); column-gap: 0; row-gap: 14px; }
+  .analysis-grid > .board-section, .bot-workspace > .bot-board-area { width: 100%; margin-inline: 0; }
+  .page .board-and-eval { gap: 6px; }
+  .page .eval-bar { width: 18px; min-width: 18px; flex: 0 0 18px; }
+  .page .board-controls { width: 100%; margin-left: 0; padding: 0 4px; gap: 3px; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .page .navigation-buttons { --navigation-gap: 0px; gap: 0; }
+  .page .board-controls .icon-button { width: 28px; min-width: 28px; height: 36px; padding: 4px; }
+  .page .board-control-actions { gap: 0; min-width: 0; }
+  .page .board-controls .move-position { font-size: 10px; }
+  .page .board-under, .bot-workspace > .bot-board-under { margin-left: 0; gap: 8px; flex-wrap: wrap; }
+  .board-shortcut-hints { flex-wrap: wrap; gap: 6px 10px; }
+  .page :is(.board-export-actions, .bot-export-actions) { flex-wrap: wrap; gap: 12px; justify-content: flex-end; }
+
+  /* Panels follow the board instead of keeping desktop absolute heights. */
+  .page .analysis-sidebar-content { position: static; display: flex; flex-direction: column; gap: 12px; }
+  .analysis-sidebar .analysis-panel { width: 100%; min-width: 0; }
+  .analysis-sidebar .analysis-panel.is-review { min-height: 400px; max-height: 650px; }
+  .analysis-sidebar .analysis-panel.is-review > .move-list { min-height: 160px; flex: 1 1 auto; overflow-y: auto; }
+  .puzzle-page .analysis-sidebar .puzzle-sidebar-surface { display: flex; flex-direction: column; min-height: 500px; max-height: 720px; }
+  .puzzle-page .analysis-panel .puzzle-history-list { flex: 1 1 auto; min-height: 140px; max-height: 360px; }
+  .bot-workspace .bot-sidebar { width: 100%; margin-inline: 0; }
+  .bot-workspace .bot-side-panel { position: static; min-height: 380px; max-height: 740px; }
+  .opening-study-page .opening-study-sidebar { width: 100%; margin-inline: 0; }
+  .opening-study-page .opening-study-sidebar .opening-study-panel { position: static; min-height: 480px; max-height: 720px; }
+  .page .panel-tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .page .panel-tabs > button { flex-shrink: 0; }
+  .opening-study-page .opening-result-actions .button { min-width: 0; white-space: normal; line-height: 1.5; padding: 8px 5px; font-size: 10px; }
+
+  .analysis-page .workspace-toolbar { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .analysis-page .game-title-block { width: 100%; min-width: 0; }
+  .analysis-page .game-players { flex-wrap: wrap; gap: 8px 12px; }
+  .analysis-page .game-player { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+  .analysis-page .game-player > span:not(.player-color) { overflow-wrap: anywhere; }
+  .workspace-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .workspace-actions .button { min-height: 38px; }
+  .bot-player-header { gap: 8px; }
+  .bot-player-header .bot-player { flex: 1 1 0; flex-wrap: wrap; min-width: 0; }
+  .bot-player-meta { flex-wrap: wrap; }
+  .bot-player strong { overflow-wrap: anywhere; }
+
+  .page-intro { flex-wrap: wrap; gap: 18px; }
+  .page-intro > div { min-width: 0; max-width: 100%; }
+  .home-activities, .home-game-panels, .opening-grid, .lesson-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-welcome { gap: 12px; }
+  .home-knight { width: 72px; }
+  .home-game-row[data-recent-game] { gap: 6px; padding-inline: 12px; }
+  .home-game-row[data-recent-game] > .home-recent-control { flex: 0 0 78px; }
+  .home-recent-player { gap: 4px; }
+  .home-recent-player strong { font-size: 11px; }
+  .home-recent-rating { font-size: 9px; }
+  .home-player-form { grid-template-columns: minmax(80px, 1fr) minmax(0, 1.6fr) 34px 34px; gap: 6px; padding-inline: 12px; }
+  .home-player-selector { padding-inline: 12px; }
+  .home-games-heading { padding-inline: 12px; }
+  .home-library-pagination { padding-inline: 12px; max-width: 100%; }
+
+  .page .catalog-toolbar { flex-wrap: wrap; max-width: 100%; gap: 10px; }
+  .catalog-toolbar > .segmented { max-width: 100%; min-width: 0; overflow-x: auto; }
+  .catalog-toolbar .segmented > button { flex-shrink: 0; }
+  .academy-toolbar .segmented.wrap { flex: 0 1 auto; max-width: 100%; }
+  .academy-toolbar .search-input { flex: 0 1 240px; max-width: 100%; }
+  .library-toolbar-actions { width: min(240px, 100%); }
+  .library-toolbar-actions .search-input { width: 100%; max-width: 100%; }
+  .library-table-wrap { width: 100%; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+  .library-table { min-width: 760px; }
+  .library-table :is(th, td) { padding: 12px; }
+
+  .modal, .modal.wide { width: calc(100% - 24px); max-width: 560px; max-height: calc(100dvh - 24px); }
+  .modal .modal-inner { padding: 16px; }
+  .modal .study-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .modal .line-trainer { min-width: 0; }
+  .modal .modal-heading h2 { font-size: 18px; overflow-wrap: anywhere; }
+  .modal :is(.new-game-options, .custom-time-inputs) { grid-template-columns: minmax(0, 1fr); }
+  .modal input:not([type="checkbox"]):not([type="radio"]), .modal select { font-size: 16px; }
+  .toast.keyboard-toggle-toast { max-width: calc(100vw - 24px); right: 12px; bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
+
+@media (max-width: 380px) {
+  .home-knight { display: none; }
+  .page .board-controls .icon-button { width: 26px; min-width: 26px; }
+  .home-game-row[data-recent-game] > .home-recent-control { flex-basis: 68px; }
+  .home-game-row[data-recent-game] > .home-recent-accuracy { font-size: 9px; }
+  .home-recent-time { gap: 3px; }
+}
+
+@media (max-width: 760px) {
+  /* Review has its own flow on phones; desktop flex heights are board-dependent. */
+  .analysis-page .analysis-sidebar,
+  .analysis-page .analysis-sidebar-content { width: 100%; min-width: 0; }
+  .analysis-page .analysis-sidebar .analysis-panel.is-review { align-items: stretch; height: auto; min-height: 0; max-height: none; }
+  .analysis-page .analysis-panel.is-review > :not(.move-list) { min-width: 0; }
+  .analysis-page .analysis-panel.is-review .review-overview { padding: 14px 12px 0; }
+  .analysis-page .review-overview-heading { flex-wrap: wrap; gap: 8px 12px; }
+  .analysis-page .review-overview-heading .section-label { letter-spacing: .04em; font-size: 10px; }
+  .analysis-page .review-overview-heading .review-action-button { font-size: 11px; }
+  .analysis-page .accuracy-scores { display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); gap: 12px; }
+  .analysis-page .accuracy-scores > div { display: grid; min-width: 0; grid-template-columns: 8px minmax(0, 1fr); gap: 7px; }
+  .analysis-page .accuracy-scores strong { grid-column: 1 / -1; margin: 0; font-size: 26px; letter-spacing: -.04em; }
+  .analysis-page .accuracy-scores .score-divider { margin: 0; height: 42px; }
+  .analysis-page .analysis-panel.is-review > .move-list { align-self: stretch; flex: none; height: auto; min-height: 0; max-height: 360px; padding-inline: 6px; overflow-y: auto; }
+  .analysis-page .notation-heading { flex-wrap: wrap; gap: 6px; padding-inline: 12px; }
+  .analysis-page .move-row { grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr); gap: 3px; }
+  .analysis-page .move-cell { flex-wrap: wrap; gap: 4px; padding: 8px 5px; min-height: 36px; font-size: 12px; }
+  .analysis-page .notation-variation { padding-inline: 7px; margin-inline: 0; min-width: 0; }
+  .analysis-page .notation-variation-children { margin-left: 5px; }
+  .analysis-page .coach-card { margin: 10px; padding: 12px; }
+  .analysis-page .coach-label { flex-wrap: wrap; min-width: 0; }
+  .analysis-page .coach-card p { font-size: 12px; overflow-wrap: anywhere; }
+  .board-shortcut-hints, .navigation-shortcut-hint { display: none; }
+}
+
+@media (max-width: 760px) {
+  .page :is(.analysis-grid, .bot-workspace, .opening-study-grid) { row-gap: 6px; }
+  .page .board-under:empty { display: none; margin: 0; }
+  .analysis-page:not(.puzzle-page) .analysis-grid:has(> .board-under:empty) > .analysis-sidebar { grid-row: 2; }
+  .analysis-page:not(.puzzle-page) .analysis-grid:has(> .board-under:empty) > .analysis-export-actions { grid-row: 3; }
+  .bot-workspace:has(> .bot-board-under:empty) > .bot-sidebar { grid-row: 3; }
+  .bot-workspace:has(> .bot-board-under:empty) > .bot-export-actions { grid-row: 4; }
+}
+
+@media (max-width: 760px) {
+  .page .analysis-sidebar-content { gap: 6px; }
+}
+
+@media (max-width: 760px) {
+  .bot-workspace .bot-side-panel { align-items: stretch; }
+  .bot-side-panel > :is(.panel-tabs, .bot-game-panel) { width: 100%; min-width: 0; align-self: stretch; }
+  .bot-game-panel > .config-group { min-width: 0; width: 100%; }
+  .bot-game-panel > .bot-notation { min-width: 0; width: auto; align-self: stretch; }
+  .bot-player-header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 8px; }
+  .bot-player-header .bot-player { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; width: 100%; }
+  .bot-player-header .bot-player > .chess-clock { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 52px; height: 36px; margin: 0; padding: 6px 5px; font-size: 12px; line-height: 1; }
+  .bot-player-header .bot-player > .bot-player-info { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 18px 18px; height: 36px; align-items: start; flex: 1 1 0; min-width: 0; gap: 0; }
+  .bot-player-header .human-player .bot-captures { margin-left: 0; }
+  .bot-player-header .opponent-player .bot-captures { order: 0; margin-right: 0; }
+  .bot-player-header .opponent-player .bot-player-info > strong { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: 3px 5px; margin-left: auto; }
+  .bot-player-header .bot-assistance-label { display: inline; }
+  .bot-player-header .opponent-player .bot-opponent-elo { display: inline; order: -1; }
+
+}
+
+@media (max-width: 760px) {
+  .bot-player-header .bot-captures { flex-wrap: nowrap; height: 18px; min-height: 18px; min-width: 0; margin: 0; transform: none; }
+  .bot-player-header .bot-captures img { flex-shrink: 0; }
+  .bot-player-header .bot-captures img + img { margin-left: -4px; }
+}
+
+@media (max-width: 760px) {
+  .bot-player-header .bot-player-info > strong { margin-top: 0; line-height: 1.5; font-size: 11px; }
+  .bot-player-header .bot-player-info > strong small { font-size: 8px; }
+  .bot-player-header .bot-captures img { min-width: 0; flex-shrink: 1; }
+}
+
+@media (max-width: 760px) {
+  .bot-player-header .bot-player-info > strong { grid-column: 1; grid-row: 1; transform: none; }
+  .bot-player-header .bot-player-info > .bot-captures { grid-column: 1; grid-row: 2; }
+  .bot-player-header .bot-player-info:has(> .bot-captures:empty) > strong { grid-row: 1 / -1; align-self: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bot-player-header .bot-player-info > strong { transition: none; }
+}
+
+@media (min-width: 761px) {
+  .bot-player-header .bot-player { align-items: center; }
+  .bot-player-header .bot-player > .chess-clock { display: inline-flex; align-items: center; justify-content: center; height: 42px; margin-block: 0; }
+  .bot-player-header .bot-player > .bot-player-info { grid-template-columns: minmax(0, 1fr); grid-template-rows: 22px 20px; height: 42px; gap: 0; }
+  .bot-player-header .bot-player-info > strong { grid-column: 1; grid-row: 1; align-self: center; }
+  .bot-player-header .bot-player-info > .bot-captures { grid-column: 1; grid-row: 2; transform: none; }
+  .bot-player-header .bot-player-info:has(> .bot-captures:empty) > strong { grid-row: 1 / -1; align-self: center; }
+}
+
+@media (max-width: 760px) {
+  .page .board-and-eval { flex-direction: column-reverse; align-items: stretch; gap: 5px; }
+  .page .board-and-eval > .board-main { width: 100%; flex: 0 0 auto; }
+  .kuda-shell .page .board-and-eval > .eval-bar { flex: 0 0 14px; width: 100%; min-width: 0; height: 14px; min-height: 14px; margin: 0; border-radius: 5px; transform: none; }
+  .page .board-and-eval > .eval-bar .white-eval { height: 100%; transform: scaleX(var(--white-fraction, .5)); transform-origin: left; box-shadow: none; }
+  .page .board-and-eval > .eval-bar.flipped .white-eval { transform-origin: right; }
+  .page .board-and-eval > .eval-bar > span { top: 50%; bottom: auto; left: auto; right: 5px; transform: translateY(-50%); line-height: 1; font-size: 9px; }
+  .page .board-and-eval > .eval-bar > span.positive { left: 5px; right: auto; }
+  .page .board-and-eval > .eval-bar.flipped > span { left: 5px; right: auto; }
+  .page .board-and-eval > .eval-bar.flipped > span.positive { left: auto; right: 5px; }
+}

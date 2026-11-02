@@ -5,6 +5,7 @@ import "./styles.css";
 import "./apple-glass.css";
 import "./dark-theme.css";
 import "./scrollbars.css";
+import "./responsive.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

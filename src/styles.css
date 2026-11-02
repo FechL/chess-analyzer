@@ -4721,3 +4721,7 @@ select {
   width: auto;
   accent-color: var(--green);
 }
+
+/* Claim a touch gesture before the browser starts scrolling. Empty/read-only
+   squares retain normal page scrolling; movable pieces use pointer capture. */
+.chessboard .square[data-piece-draggable] { touch-action: none; }

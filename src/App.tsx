@@ -1,5 +1,6 @@
 import Title from "./components/Title";
 import LibraryGames from "./components/LibraryGames";
+import { useMobileLayout } from "./hooks/useMobileLayout";
 import { filterLibrary } from "./lib/library-filter";
 import type { LibraryKind } from "./lib/library-filter";
 import { titleCase } from "./lib/title-case";
@@ -11,6 +12,7 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  ChartNoAxesCombined,
   House,
   CircleHelp,
   Cpu,
@@ -142,6 +144,13 @@ export default function App() {
     ...DEFAULT_SETTINGS,
     ...readStorage("kuda-settings", {}),
   }));
+  const mobileLayout = useMobileLayout();
+  const pageSettings = mobileLayout ? { ...settings, enableShortcuts: false } : settings;
+  const updatePageSettings = (next: Settings) => setSettings((current) => ({
+    ...next,
+    // Disabling shortcuts for a small screen must not overwrite the saved preference.
+    enableShortcuts: mobileLayout ? current.enableShortcuts : next.enableShortcuts,
+  }));
   const [saved, setSaved] = useState<SavedGame[]>(() =>
     readStorage("kuda-library", []),
   );
@@ -249,7 +258,7 @@ export default function App() {
       title: "RUANG BERMAIN",
       items: [
         { id: "home", label: "Beranda", icon: House },
-        { id: "analysis", label: "Analisis permainan", icon: Grid2X2 },
+        { id: "analysis", label: "Analisis permainan", icon: ChartNoAxesCombined },
         { id: "bot", label: "Lawan bot", icon: Swords },
       ],
     },
@@ -348,8 +357,8 @@ export default function App() {
               key={revision}
               game={game}
               setGame={setGame}
-              settings={settings}
-              onSettingsChange={setSettings}
+              settings={pageSettings}
+              onSettingsChange={updatePageSettings}
               onSave={save}
               onImport={() => setModal("import")}
               onNewGame={() => setModal("new-game")}
@@ -364,7 +373,7 @@ export default function App() {
         {t(
           page === "bot" && (
             <BotPage
-              settings={settings}
+              settings={pageSettings}
               analysisFen={analysisFen}
               onReview={load}
             />
@@ -383,27 +392,27 @@ export default function App() {
                 <OpeningStudy
                   key={activeOpening.id}
                   opening={activeOpening}
-                  settings={settings}
-                  onSettingsChange={setSettings}
+                  settings={pageSettings}
+                  onSettingsChange={updatePageSettings}
                 />
               </Suspense>
             ) : (
               <OpeningsPage
-                settings={settings}
+                settings={pageSettings}
                 onOpenOpening={(id) => navigate(`openings/${id}`)}
               />
             )),
         )}
         {t(
           page === "academy" && (
-            <AcademyPage settings={settings} onAnalyze={analyzePosition} />
+            <AcademyPage settings={pageSettings} onAnalyze={analyzePosition} />
           ),
         )}
         {t(
           page === "puzzles" && (
             <PuzzlesPage
-              settings={settings}
-              onSettingsChange={setSettings}
+              settings={pageSettings}
+              onSettingsChange={updatePageSettings}
               onAnalyze={analyzePosition}
             />
           ),
@@ -630,6 +639,7 @@ export default function App() {
                 {t("Suara")}
               </label>
             </div>
+            {!mobileLayout && (
             <div className="settings-section">
               <label className="board-sound-setting">
                 <input
@@ -641,6 +651,7 @@ export default function App() {
                 {t("Aktifkan pintasan keyboard")}
               </label>
             </div>
+            )}
             <div className="settings-section">
               <button
                 className="button secondary"
@@ -710,6 +721,7 @@ export default function App() {
                     {t(" simpan permainan dan ekspor PGN.")}
                   </li>
                 </ul>
+                {!mobileLayout && (<>
                 <p>
                   <kbd>{t("←")}</kbd> <kbd>{t("→")}</kbd>
                   {t(" navigasi langkah · ")}
@@ -726,6 +738,7 @@ export default function App() {
                     </li>
                   ))}
                 </ul>
+                </>)}
                 <div className="study-tip">
                   <ShieldCheck size={18} />
                   <p>

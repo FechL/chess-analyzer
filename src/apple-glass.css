@@ -3219,11 +3219,11 @@ textarea::placeholder {
   flex-wrap: wrap;
   align-items: center;
   gap: 1px;
-  min-height: 0;
+  min-height: 20px;
   transform: translateY(-2px);
 }
 .bot-captures:empty {
-  display: none;
+  display: flex;
 }
 .opponent-player .bot-captures {
   justify-content: flex-end;
@@ -3268,7 +3268,8 @@ textarea::placeholder {
 }
 .bot-game-panel .config-group {
   flex-shrink: 0;
-  margin-bottom: 16px;
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 .bot-setup-heading {
   flex-shrink: 0;
@@ -3619,6 +3620,7 @@ textarea::placeholder {
 .analysis-sidebar .analysis-panel.is-review {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   overflow: hidden;
 }
 .analysis-sidebar .analysis-panel.is-review > :not(.move-list) {

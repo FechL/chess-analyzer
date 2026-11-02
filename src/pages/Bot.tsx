@@ -5,7 +5,6 @@ import type { Color } from "chess.js";
 import {
   ArrowLeft,
   ArrowRight,
-  Bot as BotIcon,
   CircleHelp,
   Cpu,
   Flag,
@@ -794,26 +793,17 @@ export default function BotPage({
         <div className="bot-player-header">
           <div className="bot-player human-player">
             {clock(human)}
-            <div>
-              <strong>
-                {t("Anda")}{" "}
-                <small>({t(human === "w" ? "Putih" : "Hitam")})</small>
-              </strong>
-              <div className="bot-player-meta">
-                <span>{t(mode.label)}</span>
-                {captures(human)}
-              </div>
+            <div className="bot-player-info">
+              <strong>{t("Anda")} <small className="bot-assistance-label">({t(mode.label)})</small></strong>
+              {captures(human)}
             </div>
           </div>
           <div className="bot-player opponent-player">
-            <div>
+            <div className="bot-player-info">
               <strong>
-                {current.name} <small>(≈{current.elo} Elo)</small>
+                <span className="bot-opponent-name">{current.name}</span>{" "}<small className="bot-opponent-elo">(≈{current.elo} Elo)</small>
               </strong>
-              <div className="bot-player-meta opponent-player-meta">
-                {captures(opponent)}
-                <span>{t(current.title)}</span>
-              </div>
+              {captures(opponent)}
             </div>
             {clock(opponent)}
           </div>
@@ -1079,10 +1069,6 @@ export default function BotPage({
               <div className={`bot-game-panel${session.started ? " is-playing" : ""}`}>
                 {!session.started && (
                   <>
-                    <div className="bot-setup-heading">
-                      <BotIcon size={25} />
-                      <Title as="h2">{t("Vs Bot")}</Title>
-                    </div>
                     <div className="config-group">
                       <Title as="label">{t("Pilih tantangan")}</Title>
                       <div className="bot-challenges">

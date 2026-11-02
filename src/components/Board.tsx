@@ -83,6 +83,30 @@ export default function Board({
   const draggedMove = useRef<
     { fen: string; from: string; to: string } | undefined
   >(undefined);
+  const touchDrag = useRef<{
+    pointerId: number;
+    from: string;
+    fen: string;
+    startX: number;
+    startY: number;
+    moved: boolean;
+    element: HTMLButtonElement;
+    image: HTMLImageElement | null;
+  } | undefined>(undefined);
+  const ignoreTouchClick = useRef(false);
+  const cancelTouchDrag = () => {
+    const drag = touchDrag.current;
+    touchDrag.current = undefined;
+    if (!drag) return;
+    if (drag.image) drag.image.style.transform = "";
+    drag.element.style.zIndex = "";
+    if (drag.element.hasPointerCapture(drag.pointerId))
+      drag.element.releasePointerCapture(drag.pointerId);
+  };
+  useEffect(() => {
+    cancelTouchDrag();
+    return cancelTouchDrag;
+  }, [fen, flipped, disabled, editMode]);
   const [marks, setMarks] = useState<Mark[]>([]);
   const [drawing, setDrawing] = useState<Mark>();
   const gesture = useRef<Mark | undefined>(undefined);
@@ -376,6 +400,10 @@ export default function Board({
                 premove?.moves
                   .map((move) => move.to)
                   .lastIndexOf(square as Square) ?? -1;
+              const canDrag =
+                !!p &&
+                (editMode ||
+                  (!disabled && !!onMove && p.color === interactiveColor));
               const dark = (file.charCodeAt(0) - 97 + Number(rank)) % 2 === 1;
               const isLegal = legal.some((m) => m.to === square);
               const check =
@@ -389,9 +417,76 @@ export default function Board({
                     `${square}${p ? ` ${p.color === "w" ? "putih" : "hitam"} ${NAMES[p.type]}` : ""}`,
                   )}
                   data-square={square}
-                  onClick={() =>
-                    editMode ? onEditSquare?.(square) : choose(square)
-                  }
+                  data-piece-draggable={canDrag || undefined}
+                  onClick={() => {
+                    if (ignoreTouchClick.current) {
+                      ignoreTouchClick.current = false;
+                      return;
+                    }
+                    if (editMode) onEditSquare?.(square);
+                    else choose(square);
+                  }}
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "mouse") return;
+                    ignoreTouchClick.current = false;
+                    if (!canDrag || promotion || touchDrag.current) return;
+                    touchDrag.current = {
+                      pointerId: e.pointerId,
+                      from: square,
+                      fen,
+                      startX: e.clientX,
+                      startY: e.clientY,
+                      moved: false,
+                      element: e.currentTarget,
+                      image: e.currentTarget.querySelector("img"),
+                    };
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                  }}
+                  onPointerMove={(e) => {
+                    const drag = touchDrag.current;
+                    if (!drag || drag.pointerId !== e.pointerId) return;
+                    const dx = e.clientX - drag.startX;
+                    const dy = e.clientY - drag.startY;
+                    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+                    e.preventDefault();
+                    if (!drag.moved) {
+                      drag.moved = true;
+                      clearMarks();
+                      if (!editMode && p)
+                        setSelection({
+                          square,
+                          fen: displayFen,
+                          piece: p.type,
+                        });
+                    }
+                    drag.element.style.zIndex = "10";
+                    if (drag.image)
+                      drag.image.style.transform = `translate(${dx}px, ${dy}px)`;
+                  }}
+                  onPointerUp={(e) => {
+                    const drag = touchDrag.current;
+                    if (!drag || drag.pointerId !== e.pointerId) return;
+                    const destination = squareAt(e.clientX, e.clientY);
+                    cancelTouchDrag();
+                    if (!drag.moved) return;
+                    e.preventDefault();
+                    ignoreTouchClick.current = true;
+                    if (drag.fen !== fen) return;
+                    if (editMode) {
+                      if (destination && destination !== drag.from)
+                        onEditSquare?.(destination, undefined, drag.from);
+                      else if (!destination) onDeleteDropSquare?.(drag.from);
+                    } else if (destination && destination !== drag.from)
+                      attempt(drag.from, destination, true);
+                  }}
+                  onPointerCancel={(e) => {
+                    if (touchDrag.current?.pointerId === e.pointerId)
+                      cancelTouchDrag();
+                  }}
+                  onLostPointerCapture={(e) => {
+                    if (touchDrag.current?.pointerId === e.pointerId)
+                      cancelTouchDrag();
+                  }}
                   onDragOver={(e) => {
                     if (editMode || !disabled) {
                       e.preventDefault();
@@ -441,13 +536,12 @@ export default function Board({
                         }
                         src={pieceAsset(p.color, p.type, pieceTheme)}
                         alt={t("")}
-                        draggable={
-                          editMode ||
-                          (!disabled &&
-                            !!onMove &&
-                            p.color === interactiveColor)
-                        }
+                        draggable={canDrag}
                         onDragStart={(e) => {
+                          if (touchDrag.current) {
+                            e.preventDefault();
+                            return;
+                          }
                           clearMarks();
                           if (editMode) {
                             e.dataTransfer.effectAllowed = "move";

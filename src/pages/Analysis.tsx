@@ -773,9 +773,9 @@ export default function Analysis({
                       <span className="game-player" key={color}>
                         <span
                           className={"player-color player-color-" + color}
-                          aria-hidden="true"
+                          role="img"
+                          aria-label={t(color === "w" ? "Putih" : "Hitam")}
                         />
-                        <strong>{t(color === "w" ? "Putih" : "Hitam")}</strong>
                         <span>
                           {t(name)}
                           {t(elo ? " (" + elo + ")" : "")}
@@ -801,7 +801,6 @@ export default function Analysis({
               </div>
             ),
           )}
-          <div className="board-turn-status">{t(gameStatus(position))}</div>
         </div>
         <div className="workspace-actions">
           {t(

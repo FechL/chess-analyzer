@@ -2996,6 +2996,7 @@ textarea::placeholder {
 }
 .puzzle-board-stage {
   position: relative;
+  border-radius: 16px;
 }
 .puzzle-board-stage.is-blurred > .board-and-eval {
   filter: blur(32px) brightness(0.42);
@@ -3012,6 +3013,7 @@ textarea::placeholder {
   width: 100%;
   place-items: center;
   border: 0;
+  border-radius: inherit;
   background: rgb(229 235 243 / 98%);
   color: #526986;
   cursor: pointer;

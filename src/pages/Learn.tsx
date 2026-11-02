@@ -650,10 +650,8 @@ export function PuzzlesPage({
   const [streak, setStreak] = useState(() =>
     readStorage("kuda-puzzle-streak", 0),
   );
-  const [started, setStarted] = useState(
-    () => savedSession?.started ?? readStorage("kuda-puzzle-streak", 0) > 0,
-  );
-  const [paused, setPaused] = useState(() => !!savedSession?.started);
+  const [started, setStarted] = useState(true);
+  const [paused, setPaused] = useState(false);
   const [best, setBest] = useState(() => readStorage("kuda-puzzle-best", 0));
   const [record, setRecord] = useState(() =>
     readStorage("kuda-puzzle-record", false),
@@ -794,16 +792,8 @@ export function PuzzlesPage({
         savedSession?.puzzleId === nextPuzzle.id &&
         savedSession.theme === theme &&
         savedSession.difficulty === difficulty;
-      const shouldStart = restored
-        ? savedSession.started
-        : firstPuzzleLoad.current
-          ? streak > 0
-          : startedRef.current;
-      const shouldPause = restored
-        ? true
-        : firstPuzzleLoad.current
-          ? !shouldStart
-          : pausedRef.current;
+      const shouldStart = true;
+      const shouldPause = firstPuzzleLoad.current ? false : pausedRef.current;
       const restoredElapsed = restored ? savedSession.elapsedMs : 0;
       firstPuzzleLoad.current = false;
       elapsedRef.current = restoredElapsed;

@@ -600,6 +600,7 @@
   .kuda-shell .page:is(.analysis-page, .bot-page) .board-section .chessboard {
     border-radius: 0;
   }
+  .kuda-shell .page.puzzle-page .puzzle-board-stage { border-radius: 0; }
   .kuda-shell .page:is(.analysis-page, .bot-page) > .workspace-toolbar { padding-inline: 12px; }
   .kuda-shell .page:is(.analysis-page, .bot-page) .analysis-grid > :is(.analysis-sidebar, .bot-player-header) {
     width: calc(100% - 24px);

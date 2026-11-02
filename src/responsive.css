@@ -612,3 +612,25 @@
   .kuda-shell .analysis-board-control-row { margin-inline: 12px; }
   .kuda-shell .page.analysis-page .board-section .analysis-board-control-row > .board-controls { width: 100%; margin-inline: 0; }
 }
+
+@media (max-width: 760px) {
+  .kuda-shell .page .board-and-eval > .eval-bar {
+    width: calc(100% - 24px);
+    margin-inline: 12px;
+    align-self: center;
+  }
+}
+
+.more-learning-cards { display: none; }
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .home-page > .home-activities { display: none; }
+  .more-learning-cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-bottom: 20px; }
+  .more-menu > button[data-learning] { display: none; }
+}
+
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .home-page .home-analysis-action { display: none; }
+  .home-page .home-welcome { padding-bottom: 12px; }
+  .home-page .home-welcome p { margin-bottom: 0; }
+  .home-page > .home-game-panels { margin-top: 8px; }
+}

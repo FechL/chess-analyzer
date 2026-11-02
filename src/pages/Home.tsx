@@ -57,7 +57,7 @@ export default function HomePage({
           <Title as="h1">{t("Satu langkah lebih baik.")}</Title>
           <p>{t("Ruang untuk bermain, memahami, dan berkembang.")}</p>
           <button
-            className="button primary"
+            className="button primary home-analysis-action"
             onClick={() => onNavigate("analysis")}
           >
             {t("Buka papan analisis")} <ArrowRight size={16} />

@@ -320,7 +320,7 @@ export default function App() {
         navigationLabel="Navigasi Kuda Chess Studio"
 
       >
-        {page === "more" && <MorePage onNavigate={navigate} />}
+        {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
         {page === "home" && <HomePage onNavigate={navigate} saved={saved} onLoad={load} completedCount={completed.length} />}
         {t(
           page === "analysis" && (

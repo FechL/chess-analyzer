@@ -21,9 +21,9 @@ import {
   Lightbulb,
   LoaderCircle,
   Maximize2,
-  MessageSquareText,
   Play,
   Plus,
+  RefreshCw,
   RotateCcw,
   TrendingUp,
   Undo2,
@@ -989,7 +989,7 @@ export default function Analysis({
                         </div>
                         {status === "ready" && game.moves.length > 0 && (
                           <button
-                            className="text-button review-action-button"
+                            className="text-button review-action-button desktop-review-action"
                             onClick={runReview}
                           >
                             {t(
@@ -1009,6 +1009,16 @@ export default function Analysis({
                         )}
                       </div>
                       <div className="accuracy-scores">
+                        {status === "ready" && game.moves.length > 0 && (
+                          <button
+                            className="mobile-review-reload"
+                            onClick={runReview}
+                            aria-label={t("Analisis ulang")}
+                            title={t("Analisis ulang")}
+                          >
+                            <RefreshCw size={15} aria-hidden="true" />
+                          </button>
+                        )}
                         <div>
                           <span className="color-dot white" />
                           <span>{t("Putih")}</span>
@@ -1326,22 +1336,9 @@ export default function Analysis({
               {t(
                 tab === "notes" && !customEditing && (
                   <div className="notes-panel">
-                    <MessageSquareText size={27} />
-                    <Title as="h3">{t("Ide yang layak diingat.")}</Title>
-                    <p>
-                      {t(
-                        "Catatan untuk posisi ini tersimpan otomatis di browser Anda.",
-                      )}
-                    </p>
-                    <label htmlFor="position-note">
-                      {t(
-                        ply
-                          ? `Setelah ${Math.ceil(ply / 2)}. ${currentMove?.san}`
-                          : "Posisi awal",
-                      )}
-                    </label>
                     <textarea
                       id="position-note"
+                      aria-label={t("Catatan")}
                       value={notes[fen] ?? ""}
                       onChange={(e) =>
                         setNotes((n) => ({ ...n, [fen]: e.target.value }))

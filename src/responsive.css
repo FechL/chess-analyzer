@@ -634,3 +634,89 @@
   .home-page .home-welcome p { margin-bottom: 0; }
   .home-page > .home-game-panels { margin-top: 8px; }
 }
+
+@media (max-width: 760px) {
+  .kuda-shell .page .analysis-sidebar { font-size: 11px; }
+  .kuda-shell .page .analysis-sidebar :is(p, label, button, select, td) { font-size: 11px; }
+  .kuda-shell .page .analysis-sidebar :is(.panel-tabs > button, .move-cell, .engine-line, .notes-panel textarea) { font-size: 11px; }
+  .kuda-shell .page .analysis-sidebar :is(.notation-heading, .move-number, .puzzle-history-row, .review-action-button) { font-size: 10px; }
+  .kuda-shell .page .analysis-sidebar :is(.section-label, .small-label, .move-think-time, th) { font-size: 9px; }
+  .kuda-shell .page .analysis-sidebar h2 { font-size: 14px; }
+  .kuda-shell .page .analysis-sidebar h3 { font-size: 12px; }
+  .kuda-shell .page .analysis-sidebar .accuracy-scores strong { font-size: 22px; }
+  .kuda-shell .page .analysis-sidebar .puzzle-stat strong { font-size: 18px; }
+  .kuda-shell .page .analysis-sidebar .puzzle-stat span { font-size: 9px; }
+  .kuda-shell .page .opening-study-sidebar .panel-tabs > button { font-size: 9px; }
+  .kuda-shell .page .opening-study-sidebar .opening-current-line h2 { font-size: 11px; }
+}
+
+@media (max-width: 760px) {
+  .kuda-shell .page .analysis-sidebar .engine-details { padding-top: 10px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .line-heading { padding: 0 12px 8px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .line-heading h3 { font-size: 11px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line { padding: 8px 12px; gap: 6px; font-size: 10px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line > div { min-width: 0; }
+  .kuda-shell .page .analysis-sidebar .engine-details .line-index { width: 14px; height: 14px; flex: 0 0 14px; font-size: 9px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line-meta { gap: 10px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line strong { font-size: 12px; line-height: 1.25; }
+  .kuda-shell .page .analysis-sidebar .engine-details .variation-depth { font-size: 9px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line p { margin-top: 3px; font-size: 10px; line-height: 1.5; word-spacing: 1px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .notation-line { gap: 4px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .notation-piece { width: 14px; height: 14px; }
+  .kuda-shell .page .analysis-sidebar .engine-details .engine-line > svg { width: 12px; height: 12px; flex-shrink: 0; }
+}
+
+@media (max-width: 760px) {
+  .kuda-shell .page .analysis-sidebar .notes-panel {
+    min-height: 0;
+    padding-bottom: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .kuda-shell .page.analysis-page .analysis-sidebar .review-overview-heading > .section-label { display: none; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .desktop-review-action { display: none; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 1px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding-top: 0;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-reload {
+    display: inline-flex;
+    width: 20px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: #438be6;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-reload:hover { color: #236bc8; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores .color-dot { display: none; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores > div > :is(span, strong),
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores strong small {
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores strong { margin: 0; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores .score-divider { height: 14px; }
+  .page.analysis-page:not(.puzzle-page):not(.opening-study-page) .analysis-panel .notation-heading,
+  .page.bot-page .bot-notation > .notation-heading { display: none; }
+}
+
+@media (min-width: 761px) {
+  .mobile-review-reload { display: none; }
+}

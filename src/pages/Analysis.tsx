@@ -14,7 +14,6 @@ import {
   ArrowRight,
   Bookmark,
   BookOpen,
-  Check,
   ChevronDown,
   CircleHelp,
   Flag,
@@ -23,7 +22,6 @@ import {
   Maximize2,
   Play,
   Plus,
-  RefreshCw,
   RotateCcw,
   TrendingUp,
   Undo2,
@@ -1009,16 +1007,6 @@ export default function Analysis({
                         )}
                       </div>
                       <div className="accuracy-scores">
-                        {status === "ready" && game.moves.length > 0 && (
-                          <button
-                            className="mobile-review-reload"
-                            onClick={runReview}
-                            aria-label={t("Analisis ulang")}
-                            title={t("Analisis ulang")}
-                          >
-                            <RefreshCw size={15} aria-hidden="true" />
-                          </button>
-                        )}
                         <div>
                           <span className="color-dot white" />
                           <span>{t("Putih")}</span>
@@ -1036,6 +1024,14 @@ export default function Analysis({
                             <small>{t("%")}</small>
                           </strong>
                         </div>
+                        {status === "ready" && game.moves.length > 0 && (
+                          <button
+                            className="text-button review-action-button mobile-review-action"
+                            onClick={runReview}
+                          >
+                            {t(reviewing ? "Hentikan ulasan" : "Analisis ulang")}
+                          </button>
+                        )}
                       </div>
                       {t(
                         reviewing && (
@@ -1348,12 +1344,8 @@ export default function Analysis({
                       )}
                       rows={9}
                     />
-                    <span className="saved-note">
-                      <Check size={13} />
-                      {t(" Tersimpan di perangkat")}
-                    </span>
                     <button
-                      className="button secondary"
+                      className="text-button notes-export-action"
                       onClick={() =>
                         downloadFile(
                           "kuda-catatan.txt",
@@ -1362,7 +1354,7 @@ export default function Analysis({
                       }
                     >
                       <ArrowDownToLine size={15} />
-                      {t(" Ekspor catatan")}
+                      {t("Ekspor catatan")}
                     </button>
                   </div>
                 ),

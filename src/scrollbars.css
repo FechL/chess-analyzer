@@ -42,3 +42,10 @@
     height: 0;
   }
 }
+
+/* Reserve the main desktop scroll track so page widths stay stable. */
+@media (min-width: 761px) {
+  .kuda-shell .dashboard-main-scroll {
+    scrollbar-gutter: stable;
+  }
+}

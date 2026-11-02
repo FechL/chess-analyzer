@@ -1302,6 +1302,11 @@ kbd {
 .saved-note {
   color: #647997;
 }
+.notes-panel .notes-export-action {
+  display: flex;
+  margin-top: 7px;
+  font-size: 12px;
+}
 .notes-panel textarea {
   color: #5b708d;
   border: 1px solid #e9e1cf;

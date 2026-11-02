@@ -1030,7 +1030,7 @@ export function DashboardShell({
       )}
       <div
         ref={contentRef}
-        className="obsidian-dashboard-shell-scroll min-h-0 flex-1 overflow-auto"
+        className="dashboard-main-scroll obsidian-dashboard-shell-scroll min-h-0 flex-1 overflow-auto"
       >
         {t(children)}
       </div>

@@ -676,28 +676,30 @@
 @media (max-width: 760px) {
   .kuda-shell .page.analysis-page .analysis-sidebar .review-overview-heading > .section-label { display: none; }
   .kuda-shell .page.analysis-page .analysis-sidebar .desktop-review-action { display: none; }
+  .kuda-shell .page.analysis-page .analysis-sidebar .review-overview-heading {
+    display: none;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-action {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    color: #438be6;
+    background: transparent;
+    box-shadow: none;
+    font-size: 11px;
+    line-height: 1.4;
+    text-decoration: none;
+    justify-self: end;
+    white-space: nowrap;
+  }
+  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-action:hover { color: #236bc8; }
   .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores {
     display: grid;
-    grid-template-columns: 20px minmax(0, 1fr) 1px minmax(0, 1fr);
+    grid-template-columns: max-content 1px max-content minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     padding-top: 0;
   }
-  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-reload {
-    display: inline-flex;
-    width: 20px;
-    height: 24px;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    color: #438be6;
-    background: transparent;
-    box-shadow: none;
-    cursor: pointer;
-  }
-  .kuda-shell .page.analysis-page .analysis-sidebar .mobile-review-reload:hover { color: #236bc8; }
   .kuda-shell .page.analysis-page .analysis-sidebar .accuracy-scores > div {
     display: flex;
     align-items: center;
@@ -718,5 +720,5 @@
 }
 
 @media (min-width: 761px) {
-  .mobile-review-reload { display: none; }
+  .mobile-review-action { display: none; }
 }

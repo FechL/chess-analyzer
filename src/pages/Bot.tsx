@@ -114,7 +114,6 @@ export default function BotPage({
   const [hint, setHint] = useState("");
   const [hintArrow, setHintArrow] = useState("");
   const [error, setError] = useState("");
-  const [premoveMessage, setPremoveMessage] = useState("");
   const [advancedTime, setAdvancedTime] = useState(false);
   const [customMinutes, setCustomMinutes] = useState("5");
   const [customIncrement, setCustomIncrement] = useState("");
@@ -258,7 +257,6 @@ export default function BotPage({
   }
   function cancelPremoves() {
     setSession((value) => ({ ...value, premoves: [] }));
-    setPremoveMessage("");
   }
   function commitTurn(next: Chess, color: Color, premove = false) {
     const elapsed = pendingElapsed();
@@ -340,7 +338,6 @@ export default function BotPage({
       const next = gameFromPgn(session.pgn);
       if (!executePremove(next, latest.current.premoves[0], human)) {
         cancelPremoves();
-        setPremoveMessage("Premove dibatalkan: langkah tidak lagi legal.");
         return;
       }
       commitTurn(next, human, true);
@@ -484,7 +481,6 @@ export default function BotPage({
     reviewGeneration.current++;
     setGameOverDismissed(false);
     setError("");
-    setPremoveMessage("");
     setPositionReviews([]);
     const color: Color = restart
       ? session.human
@@ -510,7 +506,6 @@ export default function BotPage({
     reviewGeneration.current++;
     setGameOverDismissed(false);
     setPositionReviews([]);
-    setPremoveMessage("");
     setError("");
     setSession((value) => ({
       ...newBotSession(),
@@ -537,7 +532,6 @@ export default function BotPage({
       next.move({ from, to, promotion });
       stopWork();
       commitTurn(next, human);
-      setPremoveMessage("");
       return true;
     } catch {
       return false;
@@ -558,7 +552,6 @@ export default function BotPage({
     if (!queue) return false;
     latest.current = { ...value, premoves: queue };
     setSession((current) => ({ ...current, premoves: queue }));
-    setPremoveMessage("");
     return true;
   }
   function undo() {
@@ -593,7 +586,6 @@ export default function BotPage({
       outcome: "",
       paused: next.turn() !== human,
     }));
-    setPremoveMessage("");
   }
   function navigate(nextPly: number) {
     const elapsed = pendingElapsed();
@@ -1025,11 +1017,6 @@ export default function BotPage({
                 ))}
               </div>
             </div>
-          )}
-          {premoveMessage && (
-            <p className="bot-premove-message" role="status">
-              {t(premoveMessage)}
-            </p>
           )}
           {hint && (
             <div className="hint-box" role="status">

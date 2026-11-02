@@ -1,3 +1,5 @@
+import MobileNavigation from "./components/MobileNavigation";
+import MorePage from "./pages/More";
 import Title from "./components/Title";
 import LibraryGames from "./components/LibraryGames";
 import { useMobileLayout } from "./hooks/useMobileLayout";
@@ -6,7 +8,7 @@ import type { LibraryKind } from "./lib/library-filter";
 import { titleCase } from "./lib/title-case";
 // i18n: rendered text
 import { useI18n } from "@/lib/i18n";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -29,7 +31,6 @@ import {
   Search,
   Settings2,
   ShieldCheck,
-  Sparkles,
   Star,
   Sun,
   Moon,
@@ -62,7 +63,7 @@ import {
   writeStorage,
 } from "./lib/chess";
 import type { GameData } from "./lib/chess";
-import { LESSONS, OPENINGS } from "./data/content";
+import { OPENINGS } from "./data/content";
 import { ANALYSIS_SHORTCUTS } from "./lib/analysis-shortcuts";
 
 const OpeningStudy = lazy(() => import("./pages/OpeningStudy"));
@@ -87,6 +88,7 @@ export type Settings = {
 export type SavedGame = { id: string; date: string; game: GameData; favorite?: boolean };
 const TITLES: Record<string, string> = {
   home: "Beranda",
+  more: "Lainnya",
   analysis: "Analisis permainan",
   bot: "Lawan bot",
   openings: "Opening explorer",
@@ -153,6 +155,11 @@ export default function App() {
   }));
   const [saved, setSaved] = useState<SavedGame[]>(() =>
     readStorage("kuda-library", []),
+  );
+  const currentPgn = useMemo(() => toPgn(game), [game]);
+  const gameIsSaved = useMemo(
+    () => saved.some((item) => toPgn(item.game) === currentPgn),
+    [saved, currentPgn],
   );
   const [modal, setModal] = useState<
     "import" | "new-game" | "settings" | "help" | undefined
@@ -284,7 +291,6 @@ export default function App() {
       ],
     },
   ];
-  const percent = Math.round((completed.length / LESSONS.length) * 100);
   return (
     <AppearanceContext.Provider value={settings}>
       <DashboardShell
@@ -312,44 +318,9 @@ export default function App() {
         onActiveItemChange={navigate}
         title={t(TITLES[page])}
         navigationLabel="Navigasi Kuda Chess Studio"
-        sidebarFooter={
-          <div className="sidebar-footer-content">
-            <div className="sidebar-learning">
-              <span className="sidebar-learning-icon">
-                <Sparkles size={21} />
-              </span>
-              <Title as="h3">
-                {t("Satu langkah")}
-                <br />
-                {t("lebih baik, setiap hari.")}
-              </Title>
-              <p>
-                {t("Luangkan waktu untuk")}
-                <br />
-                {t("rasa ingin tahumu.")}
-              </p>
-              <button onClick={() => navigate("academy")}>
-                {t("Lanjutkan belajar ")}
-                <ArrowRight size={14} />
-              </button>
-              <div className="sidebar-progress">
-                <span style={{ width: `${percent}%` }} />
-              </div>
-              <span className="sidebar-progress-label">
-                {t(completed.length)}
-                {t("/")}
-                {t(LESSONS.length)}
-                {t(" pelajaran selesai")}
-              </span>
-            </div>
-            <div className="sidebar-bottom">
-              <span className="status-dot" />
-              <span>{t("Ruang untuk berkembang.")}</span>
-              <span>{t("v1.0")}</span>
-            </div>
-          </div>
-        }
+
       >
+        {page === "more" && <MorePage onNavigate={navigate} />}
         {page === "home" && <HomePage onNavigate={navigate} saved={saved} onLoad={load} completedCount={completed.length} />}
         {t(
           page === "analysis" && (
@@ -360,6 +331,7 @@ export default function App() {
               settings={pageSettings}
               onSettingsChange={updatePageSettings}
               onSave={save}
+              isSaved={gameIsSaved}
               onImport={() => setModal("import")}
               onNewGame={() => setModal("new-game")}
               autoReviewOnLoad={autoReviewOnLoad}
@@ -432,8 +404,9 @@ export default function App() {
           ),
         )}
       </DashboardShell>
+      {mobileLayout && <MobileNavigation page={page} onNavigate={navigate} />}
       {t(
-        modal === "new-game" && (
+        modal === "new-game" && !mobileLayout && (
           <Modal
             title={t("Mulai permainan baru")}
             onClose={() => setModal(undefined)}
@@ -470,8 +443,15 @@ export default function App() {
         ),
       )}
       {t(
-        modal === "import" && (
+        (modal === "import" || (modal === "new-game" && mobileLayout)) && (
           <ImportModal
+            initialNewGame={modal === "new-game"}
+            onNewGame={mobileLayout && page === "analysis" ? (custom) => {
+              const next = emptyGame();
+              next.source = custom ? "Kustom" : "Bebas";
+              if (custom) next.event = "Analisis Bebas (Kustom)";
+              load(next, custom);
+            } : undefined}
             onClose={() => setModal(undefined)}
             saved={saved}
             onLoad={load}
@@ -852,15 +832,19 @@ function ImportModal({
   onClose,
   onLoad,
   saved,
+  onNewGame,
+  initialNewGame = false,
 }: {
   onClose: () => void;
   onLoad: (g: GameData) => void;
   saved: SavedGame[];
+  onNewGame?: (custom: boolean) => void;
+  initialNewGame?: boolean;
 }) {
   const { t } = useI18n();
 
-  const [source, setSource] = useState<"local" | "collection" | OnlineSource>(
-    "local",
+  const [source, setSource] = useState<"new" | "local" | "collection" | OnlineSource>(
+    initialNewGame && onNewGame ? "new" : "local",
   );
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
@@ -884,12 +868,17 @@ function ImportModal({
     setError("");
   };
   return (
-    <Modal title={t("Bawa permainanmu ke sini.")} onClose={onClose}>
+    <Modal title={onNewGame ? `${t("New Game")} / ${t("Impor permainan")}` : t("Bawa permainanmu ke sini.")} onClose={onClose}>
       <div
         className="import-source-options"
         role="group"
         aria-label={t("Sumber permainan")}
       >
+        {onNewGame && (
+          <button className={source === "new" ? "active" : ""} aria-pressed={source === "new"} onClick={() => setSource("new")}>
+            {t("New Game")}
+          </button>
+        )}
         {t(
           (
             [
@@ -912,7 +901,19 @@ function ImportModal({
         )}
       </div>
       {t(
-        source === "collection" ? (
+        source === "new" ? (
+          <>
+            <p className="modal-description">{t("Pilih papan awal untuk ruang analisis bebas.")}</p>
+            <div className="new-game-options">
+              <button className="button secondary" onClick={() => onNewGame?.(false)}>
+                <Plus size={16} /> {t("Dari posisi awal")}
+              </button>
+              <button className="button primary" onClick={() => onNewGame?.(true)}>
+                <Grid2X2 size={16} /> {t("Atur buah sendiri")}
+              </button>
+            </div>
+          </>
+        ) : source === "collection" ? (
           <div className="saved-import-list">
             {t(
               saved.length ? (
@@ -1038,6 +1039,11 @@ function Library({
   const { t } = useI18n();
 
   const [search, setSearch] = useState("");
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const searchField = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (searchExpanded) searchField.current?.focus();
+  }, [searchExpanded]);
   const [deleting, setDeleting] = useState<SavedGame>();
   const [favorites, setFavorites] = useState(false);
   const [kind, setKind] = useState<LibraryKind>("all");
@@ -1058,37 +1064,62 @@ function Library({
             {t("Simpan permainan yang berarti, dan kunjungi lagi kapan saja.")}
           </p>
         </div>
-        <button className="button primary" onClick={onImport}>
-          <Plus size={16} />
-          {t(" Impor permainan")}
+        <button
+          className="button primary library-import-action"
+          onClick={onImport}
+          aria-label={t("Impor permainan")}
+          title={t("Impor permainan")}
+        >
+          <ArrowDownToLine size={16} />
+          <span>{t(" Impor permainan")}</span>
         </button>
       </div>
-      <div className="catalog-toolbar library-toolbar">
+      <div className={`catalog-toolbar library-toolbar${searchExpanded ? " is-search-expanded" : ""}`}>
       <div className="library-filters">
-        <button className="button secondary library-favorite-filter" aria-pressed={favorites} onClick={() => setFavorites((value) => !value)}>
+        <button className="button secondary library-favorite-filter" aria-label={t("Favorit")} title={t("Favorit")} aria-pressed={favorites} onClick={() => setFavorites((value) => !value)}>
           <Star size={15} fill={favorites ? "currentColor" : "none"} />
-          {t("Favorit")}
+          <span>{t("Favorit")}</span>
         </button>
         <label>
           <select aria-label={t("Jenis permainan")} value={kind} onChange={(event) => setKind(event.target.value as LibraryKind)}>
             {([ ["all", "Semua jenis"], ["live", "Live"], ["bot", "Lawan bot"], ["free", "Analisis bebas"], ["chesscom", "Chess.com"], ["lichess", "Lichess"], ["pgn", "PGN"], ["fen", "FEN"], ["collection", "Koleksi"] ] as const).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
           </select>
         </label>
-        {hasFilters && <button className="text-button" onClick={() => {setSearch(""); setFavorites(false); setKind("all");}}>{t("Hapus filter")}</button>}
+        {hasFilters && <button className="text-button library-clear-filters" aria-label={t("Hapus filter")} title={t("Hapus filter")} onClick={() => {setSearch(""); setFavorites(false); setKind("all");}}><span>{t("Hapus filter")}</span><X size={15} /></button>}
       </div>
         <Title as="h3">
           {t(saved.length)}
           {t(" permainan tersimpan")}
         </Title>
         <div className="library-toolbar-actions">
+        <button
+          className="button secondary library-search-toggle"
+          aria-label={t("Cari koleksi")}
+          aria-expanded={searchExpanded}
+          aria-controls="library-search-field"
+          onClick={() => setSearchExpanded(true)}
+        >
+          <Search size={16} />
+        </button>
         <label className="search-input">
           <Search size={16} />
           <input
+            id="library-search-field"
+            ref={searchField}
+            onKeyDown={(event) => { if (event.key === "Escape") setSearchExpanded(false); }}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("Cari pemain atau permainan…")}
             aria-label={t("Cari koleksi")}
           />
+          <button
+            type="button"
+            className="library-search-close icon-button"
+            aria-label={t("Tutup")}
+            onClick={() => setSearchExpanded(false)}
+          >
+            <X size={16} />
+          </button>
         </label>
         </div>
       </div>

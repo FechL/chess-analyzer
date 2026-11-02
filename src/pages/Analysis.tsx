@@ -1,3 +1,4 @@
+import { useMobileLayout } from "../hooks/useMobileLayout";
 import Title from "../components/Title";
 import { saveGameAccuracy } from "../lib/game-accuracy";
 import EngineOptions from "../components/EngineOptions";
@@ -61,6 +62,7 @@ import {
 } from "../lib/chess";
 import type { Evaluation, GameData, ReviewMove } from "../lib/chess";
 import { formatAnalysisClock, moveDurations } from "../lib/move-time";
+import { capturedBy } from "../lib/bot-game";
 import { mainlineReturnPly } from "../lib/variation-navigation";
 import { findBookMove } from "../lib/opening-book";
 import {
@@ -128,6 +130,7 @@ export default function Analysis({
   settings,
   onSettingsChange,
   onSave,
+  isSaved = false,
   onImport,
   onPositionChange,
   onNewGame,
@@ -141,6 +144,7 @@ export default function Analysis({
   settings: Settings;
   onSettingsChange: (settings: Settings) => void;
   onSave: () => void;
+  isSaved?: boolean;
   onImport: () => void;
   onPositionChange: (fen: string) => void;
   onNewGame: () => void;
@@ -150,6 +154,7 @@ export default function Analysis({
   onCustomEditingChange: (editing: boolean) => void;
 }) {
   const { t } = useI18n();
+  const mobileLayout = useMobileLayout();
 
   const [activeVariationId, setActiveVariationId] = useState<string>();
   const activeVariation = mainGame.variations?.find(
@@ -749,65 +754,14 @@ export default function Analysis({
       setPly(nextPly);
     },
   };
-  return (
-    <div className="page analysis-page">
-      <div className="workspace-toolbar">
-        <div className="game-title-block">
-          <Title as="strong">
-            {t(
-              game.source === "Bebas" || game.source === "Kustom"
-                ? game.source === "Kustom" || game.event.includes("Kustom")
-                  ? "Analisis Bebas (Kustom)"
-                  : "Analisis Bebas"
-                : "Impor " + (game.source || "PGN"),
-            )}
-          </Title>
-          {t(
-            !customEditing && (
-              <div className="game-players">
-                {t(
-                  (["w", "b"] as const).map((color) => {
-                    const name = color === "w" ? game.white : game.black;
-                    const elo = color === "w" ? game.whiteElo : game.blackElo;
-                    return (
-                      <span className="game-player" key={color}>
-                        <span
-                          className={"player-color player-color-" + color}
-                          role="img"
-                          aria-label={t(color === "w" ? "Putih" : "Hitam")}
-                        />
-                        <span>
-                          {t(name)}
-                          {t(elo ? " (" + elo + ")" : "")}
-                        </span>
-                        {t(
-                          mainGame.moveTimes?.some(Boolean) && (
-                            <time
-                              aria-label={t(
-                                "Sisa waktu " +
-                                  (color === "w" ? "putih" : "hitam"),
-                              )}
-                            >
-                              {t(
-                                activeVariation ? "-:-:-" : playerClock(color),
-                              )}
-                            </time>
-                          ),
-                        )}
-                      </span>
-                    );
-                  }),
-                )}
-              </div>
-            ),
-          )}
-        </div>
-        <div className="workspace-actions">
+  const workspaceActions = (
+<div className="workspace-actions">
           {t(
             !customEditing && (
               <button
-                className="button secondary"
+                className="button secondary analysis-save-action"
                 onClick={onSave}
+                aria-label={t("Simpan")}
                 title={
                   settings.enableShortcuts
                     ? t("Simpan") + " (Shift+S)"
@@ -817,14 +771,15 @@ export default function Analysis({
                   settings.enableShortcuts ? "Shift+S" : undefined
                 }
               >
-                <Bookmark size={16} />
-                {t(" Simpan")}
+                <Bookmark size={16} fill={isSaved ? "currentColor" : "none"} />
+                <span className="workspace-action-label">{t(" Simpan")}</span>
               </button>
             ),
           )}
           <button
             className="button secondary"
             onClick={onNewGame}
+            aria-label={mobileLayout ? `${t("New Game")} / ${t("Impor permainan")}` : t("New Game")}
             title={
               settings.enableShortcuts
                 ? t("New Game") + " (Shift+N)"
@@ -833,11 +788,12 @@ export default function Analysis({
             aria-keyshortcuts={settings.enableShortcuts ? "Shift+N" : undefined}
           >
             <Plus size={15} />
-            {t(" New Game")}
+            <span className="workspace-action-label">{t(" New Game")}</span>
           </button>
-          <button
+          {!mobileLayout && <button
             className="button primary"
             onClick={onImport}
+            aria-label={t("Impor permainan")}
             title={
               settings.enableShortcuts
                 ? t("Impor permainan") + " (Shift+I)"
@@ -846,9 +802,70 @@ export default function Analysis({
             aria-keyshortcuts={settings.enableShortcuts ? "Shift+I" : undefined}
           >
             <ArrowDownToLine size={16} />
-            {t(" Impor permainan")}
-          </button>
+            <span className="workspace-action-label">
+              {t(" Impor permainan")}
+            </span>
+          </button>}
         </div>
+  );
+  return (
+    <div className="page analysis-page">
+      <div className="workspace-toolbar">
+        <div className="bot-player-header analysis-player-header">
+          {!customEditing &&
+            ([flipped ? "b" : "w", flipped ? "w" : "b"] as const).map(
+              (color, index) => {
+                const name = color === "w" ? game.white : game.black;
+                const elo = color === "w" ? game.whiteElo : game.blackElo;
+                const pieces = capturedBy(position, color);
+                const advantage = material(fen) * (color === "w" ? 1 : -1);
+                const clock = mainGame.moveTimes?.some(Boolean) ? (
+                  <time
+                    className="chess-clock"
+                    aria-label={t(
+                      "Sisa waktu " + (color === "w" ? "putih" : "hitam"),
+                    )}
+                  >
+                    {activeVariation ? "-:-:-" : playerClock(color)}
+                  </time>
+                ) : null;
+                return (
+                  <div
+                    className={`bot-player ${index === 0 ? "human-player" : "opponent-player"}`}
+                    key={color}
+                  >
+                    {index === 0 && clock}
+                    <div className="bot-player-info">
+                      <strong>
+                        <span
+                          className={"player-color player-color-" + color}
+                          role="img"
+                          aria-label={t(color === "w" ? "Putih" : "Hitam")}
+                        />
+                        <span className="bot-opponent-name" title={t(name)}>{t(name)}</span>
+                        {elo && (
+                          <small
+                            className={index === 1 ? "player-desktop-rating bot-opponent-elo" : "player-desktop-rating"}
+                          >
+                            ({elo})
+                          </small>
+                        )}
+                      </strong>
+                      {elo && <small className="player-mobile-rating">({elo})</small>}
+                      <div className="bot-captures" aria-label={t("Buah dimakan")}>
+                        {pieces.length > 0 && <span className="captured-piece-icons">{pieces.map((piece, i) => (
+                          <img key={i} src={pieceAsset(color === "w" ? "b" : "w", piece, settings.pieceTheme)} alt="" />
+                        ))}</span>}
+                        {advantage > 0 && <strong title={t("Keunggulan material")}>+{advantage}</strong>}
+                      </div>
+                    </div>
+                    {index === 1 && clock}
+                  </div>
+                );
+              },
+            )}
+        </div>
+        {!mobileLayout && workspaceActions}
       </div>
       <div className="analysis-grid">
         <section className="board-section">
@@ -892,7 +909,14 @@ export default function Analysis({
               />
             </div>
           </div>
+          <div className="analysis-board-control-row">
           <NavigationControls
+            leadingActions={mobileLayout && !customEditing ? (
+              <IconButton label={t("Simpan")} onClick={onSave}><Bookmark size={16} fill={isSaved ? "currentColor" : "none"} /></IconButton>
+            ) : undefined}
+            trailingActions={mobileLayout ? (
+              <IconButton label={`${t("New Game")} / ${t("Impor permainan")}`} onClick={onNewGame}><Plus size={16} /></IconButton>
+            ) : undefined}
             enableShortcuts={settings.enableShortcuts}
             ply={ply}
             total={game.moves.length}
@@ -917,6 +941,7 @@ export default function Analysis({
               ) : undefined
             }
           />
+          </div>
         </section>
         <div className="analysis-sidebar">
           <div className="analysis-sidebar-content">
@@ -1009,7 +1034,6 @@ export default function Analysis({
                           </div>
                         ),
                       )}
-
                     </div>
                     <div className="notation-heading">
                       <Title as="span">{t("Notasi permainan")}</Title>
@@ -1143,12 +1167,20 @@ export default function Analysis({
                   <div className="piece-editor">
                     <div className="piece-editor-turn">
                       <strong>{t("Giliran pertama")}</strong>
-                      <div className="segmented" role="group" aria-label={t("Giliran pertama")}>
+                      <div
+                        className="segmented"
+                        role="group"
+                        aria-label={t("Giliran pertama")}
+                      >
                         {(["w", "b"] as const).map((color) => (
                           <button
                             key={color}
                             type="button"
-                            className={game.startFen.split(" ")[1] === color ? "active" : ""}
+                            className={
+                              game.startFen.split(" ")[1] === color
+                                ? "active"
+                                : ""
+                            }
                             aria-pressed={game.startFen.split(" ")[1] === color}
                             onClick={() => {
                               const fields = game.startFen.split(" ");
@@ -1356,6 +1388,7 @@ export default function Analysis({
               />
             </section>
           </div>
+          {mobileLayout && <CopyGameActions fen={fen} getPgn={() => toPgn(game)} />}
         </div>
         <div className="board-under">
           {settings.enableShortcuts && (
@@ -1416,7 +1449,7 @@ export default function Analysis({
             </>
           )}
         </div>
-        <CopyGameActions fen={fen} getPgn={() => toPgn(game)} />
+        {!mobileLayout && <CopyGameActions fen={fen} getPgn={() => toPgn(game)} />}
       </div>
       {keyboardToast && (
         <div

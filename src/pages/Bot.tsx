@@ -1,3 +1,4 @@
+import { useMobileLayout } from "../hooks/useMobileLayout";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess } from "chess.js";
@@ -88,6 +89,7 @@ export default function BotPage({
   onReview: (game: GameData) => void;
 }) {
   const { t } = useI18n();
+  const mobileLayout = useMobileLayout();
   const [session, setSession] = useState<BotSession>(() =>
     restoreBotSession(readStorage(SESSION_KEY, null)),
   );
@@ -747,7 +749,7 @@ export default function BotPage({
     const advantage = material(visibleFen) * (color === "w" ? 1 : -1);
     return (
       <div className="bot-captures" aria-label={t("Buah dimakan")}>
-        {pieces.map((piece, i) => (
+        {pieces.length > 0 && <span className="captured-piece-icons">{pieces.map((piece, i) => (
           <img
             key={i}
             src={pieceAsset(
@@ -757,7 +759,7 @@ export default function BotPage({
             )}
             alt=""
           />
-        ))}
+        ))}</span>}
         {advantage > 0 && (
           <strong title={t("Keunggulan material")}>+{advantage}</strong>
         )}
@@ -790,18 +792,23 @@ export default function BotPage({
   return (
     <div className="page bot-page">
       <div className="analysis-grid bot-workspace">
-        <div className="bot-player-header">
+        <div className="bot-player-header analysis-player-header">
           <div className="bot-player human-player">
             {clock(human)}
             <div className="bot-player-info">
-              <strong>{t("Anda")} <small className="bot-assistance-label">({t(mode.label)})</small></strong>
+              <strong>
+                <span className={`player-color player-color-${human}`} role="img" aria-label={t(human === "w" ? "Putih" : "Hitam")} />
+                <span className="bot-player-name">{t("Anda")}</span>
+                <small className="player-desktop-rating">({t(mode.label)})</small>
+              </strong>
               {captures(human)}
             </div>
           </div>
           <div className="bot-player opponent-player">
             <div className="bot-player-info">
               <strong>
-                <span className="bot-opponent-name">{current.name}</span>{" "}<small className="bot-opponent-elo">(≈{current.elo} Elo)</small>
+                <span className={`player-color player-color-${opponent}`} role="img" aria-label={t(opponent === "w" ? "Putih" : "Hitam")} />
+                <span className="bot-opponent-name" title={current.name}>{current.name}</span>{" "}<small className="player-desktop-rating bot-opponent-elo">(≈{current.elo})</small>
               </strong>
               {captures(opponent)}
             </div>
@@ -1477,12 +1484,17 @@ export default function BotPage({
               </div>
             ) : null}
           </aside>
+          {mobileLayout && (
+            <CopyGameActions fen={visibleFen} getPgn={() => toPgn(exportGame())} className="bot-export-actions" />
+          )}
         </div>
-        <CopyGameActions
-          fen={visibleFen}
-          getPgn={() => toPgn(exportGame())}
-          className="bot-export-actions"
-        />
+        {!mobileLayout && (
+          <CopyGameActions
+            fen={visibleFen}
+            getPgn={() => toPgn(exportGame())}
+            className="bot-export-actions"
+          />
+        )}
       </div>
       {advancedTime && (
         <Modal

@@ -116,6 +116,8 @@ export function NavigationControls({
   onReturnToMain,
   enableShortcuts = false,
   actions,
+  leadingActions,
+  trailingActions,
 }: {
   ply: number;
   total: number;
@@ -128,11 +130,15 @@ export function NavigationControls({
   onReturnToMain?: () => void;
   enableShortcuts?: boolean;
   actions?: ReactNode;
+  leadingActions?: ReactNode;
+  trailingActions?: ReactNode;
 }) {
   const { t } = useI18n();
 
   return (
     <div className="board-controls">
+      <div className="board-control-start">
+      {leadingActions}
       <span
         className="move-position"
         aria-hidden={showPosition ? undefined : true}
@@ -144,7 +150,6 @@ export function NavigationControls({
               "- / -"
             ) : (
               <>
-                {t("Langkah ")}
                 {t(Math.ceil(ply / 2))}
                 {t("/")}
                 {t(Math.ceil(total / 2))}
@@ -152,6 +157,7 @@ export function NavigationControls({
             ),
           )}
       </span>
+      </div>
       <div className="navigation-buttons">
         {outsideNotation && onReturnToMain && (
           <span className="return-to-main-control">
@@ -208,6 +214,7 @@ export function NavigationControls({
             </IconButton>
           ),
         )}
+        {trailingActions}
       </div>
     </div>
   );

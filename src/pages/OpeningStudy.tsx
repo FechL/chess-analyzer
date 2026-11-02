@@ -139,9 +139,9 @@ export default function OpeningStudy({
     [opening],
   );
   const [mode, setMode] = useState<LessonMode>("learn");
-  const [tab, setTab] = useState<
-    "overview" | "lesson" | "review" | "lines" | "options"
-  >("overview");
+  const [tab, setTab] = useState<"overview" | "lesson" | "review" | "lines">(
+    "overview",
+  );
   const [overviewPly, setOverviewPly] = useState(0);
   const [overviewReplay, setOverviewReplay] = useState(0);
   const [tabTransition, setTabTransition] = useState<{
@@ -155,9 +155,7 @@ export default function OpeningStudy({
   const [mistakes, setMistakes] = useState(0);
   const [hints, setHints] = useState(0);
   const [hintShown, setHintShown] = useState(false);
-  const [showLearnArrows, setShowLearnArrows] = useState(() =>
-    readStorage("kuda-opening-learn-arrows", true),
-  );
+  const [showLearnArrows, setShowLearnArrows] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [mistakePreview, setMistakePreview] = useState<
     Pick<PuzzleReply, "fen" | "from" | "to"> & { mistakeSquare: string }
@@ -218,7 +216,9 @@ export default function OpeningStudy({
         .includes(query),
     );
   }, [lines, search]);
-  const learnedCount = lines.filter((item) => progress[item.id]?.learned).length;
+  const learnedCount = lines.filter(
+    (item) => progress[item.id]?.learned,
+  ).length;
   const practicedCount = lines.filter((item) => {
     const practice = progress[item.id]?.completed?.practice;
     return practice?.mistakes === 0 && practice.hints === 0;
@@ -248,9 +248,6 @@ export default function OpeningStudy({
     writeStorage(storageKey, progress);
   }, [storageKey, progress]);
   useEffect(() => {
-    writeStorage("kuda-opening-learn-arrows", showLearnArrows);
-  }, [showLearnArrows]);
-  useEffect(() => {
     writeStorage(`kuda-opening-line-${opening.id}`, line.id);
   }, [opening.id, line.id]);
   useEffect(() => {
@@ -265,12 +262,15 @@ export default function OpeningStudy({
       window.clearTimeout(mistakeTimer.current);
     };
   }, [tab, line.id, mode, viewPly, settings.engine]);
-  useEffect(() => () => {
-    mistakeRequest.current++;
-    window.clearTimeout(mistakeTimer.current);
-    replyEngine.current?.destroy();
-    replyEngine.current = null;
-  }, [settings.engine]);
+  useEffect(
+    () => () => {
+      mistakeRequest.current++;
+      window.clearTimeout(mistakeTimer.current);
+      replyEngine.current?.destroy();
+      replyEngine.current = null;
+    },
+    [settings.engine],
+  );
   useEffect(() => {
     if (tab !== "lesson" || browsing || challengeLocked || finished || userTurn)
       return;
@@ -351,13 +351,27 @@ export default function OpeningStudy({
     setFeedback("");
   }
   function hint() {
-    if (finished || browsing || challengeLocked || !userTurn || hintShown || mistakeBusy.current)
+    if (
+      finished ||
+      browsing ||
+      challengeLocked ||
+      !userTurn ||
+      hintShown ||
+      mistakeBusy.current
+    )
       return;
     setHintShown(true);
     setHints((value) => value + 1);
   }
   function playMove(from: string, to: string, promotion = "q") {
-    if (finished || browsing || challengeLocked || !userTurn || mistakeBusy.current) return false;
+    if (
+      finished ||
+      browsing ||
+      challengeLocked ||
+      !userTurn ||
+      mistakeBusy.current
+    )
+      return false;
     const chess = new Chess(fen);
     try {
       const candidate = chess.move({ from, to, promotion });
@@ -370,17 +384,26 @@ export default function OpeningStudy({
         const id = ++mistakeRequest.current;
         mistakeBusy.current = true;
         setHintShown(false);
-        setMistakePreview({ fen: chess.fen(), from: candidate.from, to: candidate.to, mistakeSquare: candidate.to });
+        setMistakePreview({
+          fen: chess.fen(),
+          from: candidate.from,
+          to: candidate.to,
+          mistakeSquare: candidate.to,
+        });
         void (async () => {
           try {
             const reply = await findPuzzleReply(chess.fen(), (position) => {
-              const instance = (replyEngine.current ??= new LocalEngine(settings.engine));
+              const instance = (replyEngine.current ??= new LocalEngine(
+                settings.engine,
+              ));
               return instance.analyze(position, { ms: 350, multiPV: 1 });
             });
             if (id !== mistakeRequest.current) return;
             if (reply) {
               setMistakePreview({ ...reply, mistakeSquare: candidate.to });
-              setFeedback(`${t("Balasan terbaik lawan: ")}${reply.san}${t(". Coba langkah lain dari posisi semula.")}`);
+              setFeedback(
+                `${t("Balasan terbaik lawan: ")}${reply.san}${t(". Coba langkah lain dari posisi semula.")}`,
+              );
             }
           } catch {
             if (id !== mistakeRequest.current) return;
@@ -709,12 +732,14 @@ export default function OpeningStudy({
   const boardFen = tabTransition
     ? tabTransition.fens[tabTransition.index]
     : reviewing
-    ? reviewPositions?.positions[reviewRun.step] || DEFAULT_POSITION
-    : showingOverview
-      ? overviewPosition.positions[overviewPly]
-      : showingVariation && previewPosition
-        ? previewPosition.positions[previewPosition.moves.length]
-        : tab === "lesson" && mistakePreview ? mistakePreview.fen : fen;
+      ? reviewPositions?.positions[reviewRun.step] || DEFAULT_POSITION
+      : showingOverview
+        ? overviewPosition.positions[overviewPly]
+        : showingVariation && previewPosition
+          ? previewPosition.positions[previewPosition.moves.length]
+          : tab === "lesson" && mistakePreview
+            ? mistakePreview.fen
+            : fen;
   const hasEvaluationTab = ["overview", "lines", "lesson", "review"].includes(
     tab,
   );
@@ -773,8 +798,9 @@ export default function OpeningStudy({
       overviewPly > 0 &&
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
-      const fens = Array.from({ length: overviewPly }, (_, index) =>
-        overviewPosition.positions[overviewPly - index - 1],
+      const fens = Array.from(
+        { length: overviewPly },
+        (_, index) => overviewPosition.positions[overviewPly - index - 1],
       );
       setTabTransition({ fens, index: 0 });
     } else {
@@ -806,35 +832,49 @@ export default function OpeningStudy({
                 pending={!!evaluation && !evaluationMatches}
               />
             )}
-            <div className={`board-main${showingOverview || showingLines ? " is-variation" : ""}`}>
+            <div
+              className={`board-main${showingOverview || showingLines ? " is-variation" : ""}`}
+            >
               <Board
                 fen={boardFen}
                 flipped={flipped}
                 theme={settings.boardTheme}
                 onMove={reviewing ? playReviewMove : playMove}
                 lastMove={
-                  tab === "lesson" && mistakePreview ? mistakePreview : reviewing
-                    ? reviewMoves[reviewRun.step - 1]
-                    : showingOverview
-                      ? overviewPosition.moves[overviewPly - 1]
-                      : showingVariation
-                        ? previewPosition.moves[previewPosition.moves.length - 1]
-                      : moves[visiblePly - 1]
+                  tab === "lesson" && mistakePreview
+                    ? mistakePreview
+                    : reviewing
+                      ? reviewMoves[reviewRun.step - 1]
+                      : showingOverview
+                        ? overviewPosition.moves[overviewPly - 1]
+                        : showingVariation
+                          ? previewPosition.moves[
+                              previewPosition.moves.length - 1
+                            ]
+                          : moves[visiblePly - 1]
                 }
-                moveBadge={tab === "lesson" && mistakePreview ? {
-                  square: mistakePreview.mistakeSquare,
-                  symbol: "×",
-                  label: t("Langkah latihan kurang tepat"),
-                  color: "#cc6464",
-                } : undefined}
+                moveBadge={
+                  tab === "lesson" && mistakePreview
+                    ? {
+                        square: mistakePreview.mistakeSquare,
+                        symbol: "×",
+                        label: t("Langkah latihan kurang tepat"),
+                        color: "#cc6464",
+                      }
+                    : undefined
+                }
                 disabled={
                   reviewing
                     ? !reviewCanMove
                     : showingOverview
                       ? true
-                    : showingLines
+                      : showingLines
                         ? true
-                      : browsing || finished || challengeLocked || !userTurn || !!mistakePreview
+                        : browsing ||
+                          finished ||
+                          challengeLocked ||
+                          !userTurn ||
+                          !!mistakePreview
                 }
                 arrow={
                   tab === "lesson" &&
@@ -860,7 +900,7 @@ export default function OpeningStudy({
                   ? overviewPly
                   : showingVariation
                     ? previewPosition.moves.length
-                  : visiblePly
+                    : visiblePly
             }
             total={
               reviewing
@@ -869,7 +909,7 @@ export default function OpeningStudy({
                   ? overviewTotal
                   : showingVariation
                     ? previewPosition.moves.length
-                  : line.moves.length
+                    : line.moves.length
             }
             navigationLimit={
               reviewing || showingOverview || showingLines || challengeLocked
@@ -878,7 +918,9 @@ export default function OpeningStudy({
             }
             navigationDisabled={reviewing || showingOverview || showingLines}
             enableShortcuts={settings.enableShortcuts && tab === "lesson"}
-            onChange={reviewing || showingOverview || showingLines ? () => {} : navigate}
+            onChange={
+              reviewing || showingOverview || showingLines ? () => {} : navigate
+            }
             onFlip={() => setFlipped((value) => !value)}
             actions={
               tab === "lesson" ? (
@@ -947,16 +989,6 @@ export default function OpeningStudy({
               >
                 {t("Review")}
               </button>
-              <button
-                role="tab"
-                id="opening-options-tab"
-                aria-controls="opening-options-panel"
-                aria-selected={tab === "options"}
-                className={tab === "options" ? "active" : ""}
-                onClick={() => setTab("options")}
-              >
-                {t("Opsi")}
-              </button>
               <DashboardPopover>
                 <DashboardPopoverTrigger asChild>
                   <button
@@ -1003,7 +1035,9 @@ export default function OpeningStudy({
               <div className="opening-mode-picker">
                 <div className="opening-current-line">
                   <span className="subtle-pill">{line.eco}</span>
-                  <Title as="h2" title={t(line.name)}>{t(line.name)}</Title>
+                  <Title as="h2" title={t(line.name)}>
+                    {t(line.name)}
+                  </Title>
                   <span>
                     Challenge {lineIndex + 1}/{lines.length}
                   </span>
@@ -1028,25 +1062,6 @@ export default function OpeningStudy({
             )}
             {tab === "overview" ? (
               <OpeningOverview opening={opening} />
-            ) : tab === "options" ? (
-              <div
-                className="opening-options-panel"
-                role="tabpanel"
-                id="opening-options-panel"
-                aria-labelledby="opening-options-tab"
-              >
-                <label className="opening-learn-arrow-setting board-sound-setting">
-                  <input
-                    type="checkbox"
-                    role="switch"
-                    checked={showLearnArrows}
-                    onChange={(event) =>
-                      setShowLearnArrows(event.target.checked)
-                    }
-                  />
-                  {t("Tampilkan panah langkah untuk Learn")}
-                </label>
-              </div>
             ) : tab === "review" ? (
               <div
                 className="opening-review-panel"
@@ -1226,8 +1241,12 @@ export default function OpeningStudy({
                   />
                 </label>
                 <div className="opening-variation-status" role="status">
-                  <span>Learn: {learnedCount}/{lines.length}</span>
-                  <span>Practice: {practicedCount}/{lines.length}</span>
+                  <span>
+                    Learn: {learnedCount}/{lines.length}
+                  </span>
+                  <span>
+                    Practice: {practicedCount}/{lines.length}
+                  </span>
                   <button
                     className="text-button opening-continue-learn"
                     onClick={() => {
@@ -1272,7 +1291,10 @@ export default function OpeningStudy({
                           title={t(item.name)}
                           onClick={() => setPreviewLineId(item.id)}
                         >
-                          <span className="opening-variation-icon" aria-hidden="true">
+                          <span
+                            className="opening-variation-icon"
+                            aria-hidden="true"
+                          >
                             {!unlocked ? (
                               <LockKeyhole size={16} />
                             ) : practiceComplete ? (
@@ -1311,7 +1333,13 @@ export default function OpeningStudy({
                             <button
                               className="text-button review-action-button"
                               disabled={!practiceUnlocked}
-                              title={!practiceUnlocked ? t("Selesaikan Learn line ini terlebih dahulu.") : undefined}
+                              title={
+                                !practiceUnlocked
+                                  ? t(
+                                      "Selesaikan Learn line ini terlebih dahulu.",
+                                    )
+                                  : undefined
+                              }
                               onClick={() => {
                                 openLine(item, "practice");
                                 setTab("lesson");

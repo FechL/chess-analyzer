@@ -2,6 +2,8 @@ import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  "Navigasi utama": "Main navigation",
+  "Lainnya": "More",
   Beranda: "Home",
   "Tampilan koleksi": "Library view",
   "Tampilan card": "Card view",

@@ -193,3 +193,422 @@
   .page .board-and-eval > .eval-bar.flipped > span { left: 5px; right: auto; }
   .page .board-and-eval > .eval-bar.flipped > span.positive { left: auto; right: 5px; }
 }
+
+
+/* Shared player headers: keep names and captured pieces within each half. */
+.page .bot-player-header { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.page .bot-player-header .bot-player { min-width: 0; max-width: 100%; }
+.page .bot-player-header .bot-player-info { flex: 1 1 0; min-width: 0; }
+.page .bot-player-header .bot-player-info > strong {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  align-self: center;
+  grid-row: 1;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.page .bot-player-header .opponent-player .bot-player-info > strong { justify-content: flex-end; }
+.page .bot-player-header :is(.bot-opponent-name, .bot-player-name) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page .bot-player-header .bot-player-info > strong > small {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.analysis-player-header .player-color {
+  display: inline-block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #a6b4c5;
+  border-radius: 50%;
+  align-self: center;
+}
+.page .analysis-player-header .opponent-player .player-color { order: 2; }
+.page .analysis-player-header .opponent-player .bot-opponent-name { order: 1; }
+.page .analysis-player-header .opponent-player .bot-opponent-elo { order: 0; }
+.page .bot-player-header .bot-captures:not(:empty) {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.page .bot-player-header .captured-piece-icons {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page .bot-player-header .bot-captures img { display: inline-block; vertical-align: middle; }
+.page .bot-player-header .bot-captures > strong { flex: 0 0 auto; white-space: nowrap; }
+.page .bot-player-header .bot-player-info:has(> .bot-captures:empty) > strong { grid-row: 1 / -1; }
+.player-mobile-rating { display: none; }
+.library-search-toggle, .library-search-close, .library-clear-filters > svg { display: none; }
+
+@media (max-width: 760px) {
+  /* On analysis, ratings share the capture row; bot ratings stay by the name. */
+  .page .analysis-player-header .bot-player-info { grid-template-columns: auto minmax(0, 1fr); column-gap: 4px; }
+  .page .analysis-player-header .bot-player-info > strong { grid-column: 1 / -1; }
+  .page .analysis-player-header .bot-player-info > strong > .player-desktop-rating { display: none; }
+  .page .analysis-player-header .bot-player-info > .player-mobile-rating {
+    display: block;
+    grid-row: 2;
+    grid-column: 1;
+    align-self: center;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8px;
+    line-height: 18px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .page .analysis-player-header .bot-player .bot-player-info:has(> .player-mobile-rating) > strong { grid-row: 1; margin-block: 0; }
+  .page .analysis-player-header .bot-player-info > .bot-captures { grid-row: 2; grid-column: 2; }
+  .page .analysis-player-header .opponent-player .bot-player-info { grid-template-columns: minmax(0, 1fr) auto; }
+  .page .analysis-player-header .opponent-player .player-mobile-rating { grid-column: 2; }
+  .page .analysis-player-header .opponent-player .bot-player-info > .bot-captures { grid-column: 1; }
+  .page.bot-page .bot-player-header .bot-player-info { grid-template-columns: minmax(0, 1fr); }
+  .page.bot-page .bot-player-header .bot-player-info > strong > .player-desktop-rating { display: inline; }
+  .page.bot-page .bot-player-header .bot-player-info > .bot-captures { grid-column: 1 / -1; }
+
+  /* Floating page actions line up with the navigation launcher. */
+  .analysis-page .workspace-actions {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 30;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .analysis-page .workspace-actions .button, .library-page .library-import-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgb(20 35 55 / 18%);
+  }
+  .analysis-page .workspace-actions .workspace-action-label, .library-page .library-import-action > span { display: none; }
+  .library-page .library-import-action {
+    position: fixed;
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 30;
+  }
+
+  /* Skip the hidden shortcut row below mobile boards. */
+  .puzzle-page .analysis-grid > .analysis-sidebar { grid-row: 2; }
+  .puzzle-page .puzzle-board-under, .opening-study-page .opening-study-shortcuts { display: none; }
+  .opening-study-page .opening-study-grid > .opening-study-sidebar { grid-row: 2; max-width: none; }
+  .opening-study-page .opening-study-sidebar .opening-study-panel { align-items: stretch; }
+  .opening-study-page .opening-study-panel > .panel-tabs { width: 100%; min-width: 0; align-self: stretch; }
+  .opening-study-page .opening-study-sidebar .panel-tabs > button:not(.icon-button) { flex: 1 1 0; min-width: 0; padding-inline: 3px; }
+  .opening-study-page .board-section .board-controls { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .opening-study-page .board-section .navigation-buttons { justify-self: center; }
+  .opening-study-page .board-section .board-control-actions { justify-self: end; }
+  .puzzle-page .analysis-sidebar .panel-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) 32px;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+    overflow: visible;
+  }
+  .puzzle-page .analysis-sidebar .panel-tabs > button:not(.icon-button) { min-width: 0; width: 100%; padding-inline: 6px; }
+  .puzzle-page .panel-tabs > .puzzle-guide-trigger { width: 32px; min-width: 0; height: 32px; margin: 0; padding: 6px; }
+
+  /* Search expands over the library filters without shifting the toolbar. */
+  .library-page .library-toolbar { position: relative; flex-wrap: nowrap; align-items: center; min-height: 38px; gap: 8px; }
+  .library-toolbar .library-favorite-filter { width: 36px; min-width: 36px; padding: 0; justify-content: center; }
+  .library-favorite-filter > span, .library-clear-filters > span { display: none; }
+  .library-clear-filters > svg { display: block; }
+  .library-toolbar .library-clear-filters { flex: 0 0 24px; padding: 0; }
+  .library-toolbar > h3 { min-width: 0; white-space: normal; padding-bottom: 0; font-size: 10px; }
+  .library-toolbar .library-toolbar-actions { width: 36px; flex: 0 0 36px; }
+  .library-toolbar .library-search-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; min-width: 36px; height: 36px; padding: 0; }
+  .library-toolbar .library-toolbar-actions .search-input { display: none; }
+  .library-toolbar.is-search-expanded .library-toolbar-actions { position: absolute; inset: 0; z-index: 2; width: 100%; max-width: none; margin: 0; }
+  .library-toolbar.is-search-expanded .library-search-toggle { display: none; }
+  .library-toolbar.is-search-expanded .library-toolbar-actions .search-input { display: flex; flex: 1 1 auto; width: 100%; max-width: none; height: 100%; background: var(--surface); }
+  .library-toolbar .library-search-close { display: inline-flex; flex: 0 0 28px; width: 28px; height: 28px; }
+}
+
+@media (max-width: 760px) {
+  /* A transformed page becomes the containing block for its fixed actions. */
+  .library-page { animation: none; }
+}
+
+/* Keep mobile boards and controls stationary; scroll the side panel instead. */
+@media (max-width: 760px) {
+  .kuda-shell .page:is(.analysis-page, .bot-page) {
+    --mobile-board-width: min(100%, max(180px, calc(100dvh - 320px)));
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    animation: none;
+  }
+  .page:is(.analysis-page, .bot-page) > .workspace-toolbar {
+    flex: 0 0 auto;
+    width: var(--mobile-board-width);
+    margin-inline: auto;
+  }
+  .page:is(.analysis-page, .bot-page) > .analysis-grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    gap: 6px;
+  }
+  .page:is(.analysis-page, .bot-page) .analysis-grid > :is(.board-section, .bot-player-header) {
+    flex: 0 0 auto;
+    width: var(--mobile-board-width);
+    max-width: 100%;
+    align-self: center;
+    margin-inline: auto;
+  }
+  .page:is(.analysis-page, .bot-page) .analysis-grid > .analysis-sidebar {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .page:is(.analysis-page, .bot-page) .analysis-grid > :is(.board-under, .board-export-actions, .bot-export-actions) {
+    flex: 0 0 auto;
+  }
+  .page:is(.analysis-page, .bot-page) .analysis-grid > .board-under:empty { display: none; }
+}
+
+@media (max-width: 760px) {
+  .page .analysis-sidebar > .board-export-actions { margin-top: 8px; }
+}
+
+@media (max-width: 760px) {
+  .analysis-page:not(.puzzle-page):not(.opening-study-page) .board-controls {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .analysis-page .analysis-board-control-row .workspace-actions {
+    position: static;
+    gap: 0;
+    flex: 0 0 auto;
+  }
+  .analysis-page .analysis-board-control-row .workspace-actions .button {
+    width: 24px;
+    min-width: 24px;
+    height: 36px;
+    padding: 4px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--muted);
+  }
+  .analysis-page:not(.puzzle-page):not(.opening-study-page) .board-controls .icon-button {
+    width: 24px;
+    min-width: 24px;
+  }
+}
+
+.analysis-board-control-row { display: contents; }
+@media (max-width: 760px) {
+  .analysis-board-control-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    min-width: 0;
+  }
+  .analysis-page .analysis-board-control-row > .board-controls {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+  }
+  .analysis-page .analysis-board-control-row > .workspace-actions {
+    margin: 0;
+    padding-left: 4px;
+  }
+}
+
+@media (max-width: 760px) {
+  .page .board-controls .navigation-buttons { justify-self: center; }
+  .page .analysis-sidebar, .page .analysis-sidebar * {
+    scrollbar-width: none;
+  }
+  .page .analysis-sidebar::-webkit-scrollbar,
+  .page .analysis-sidebar *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .analysis-page .analysis-board-control-row > .workspace-actions { display: contents; }
+  .analysis-board-control-row .analysis-save-action { order: -1; }
+}
+
+.board-control-start {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mobile-bottom-navigation {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding: 5px max(8px, env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  background: rgb(245 248 253 / 94%);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -3px 16px rgb(35 55 85 / 7%);
+  backdrop-filter: blur(20px);
+}
+.mobile-bottom-navigation a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  border-radius: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 9px;
+  line-height: 1.3;
+}
+.mobile-bottom-navigation a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-bottom-navigation a[aria-current="page"] { background: rgb(78 133 209 / 12%); color: #3478cb; }
+:root[data-color-mode="dark"] .mobile-bottom-navigation { background: rgb(28 42 59 / 96%); }
+:root[data-color-mode="dark"] .mobile-bottom-navigation a[aria-current="page"] { background: rgb(119 168 230 / 13%); color: #a4c9fa; }
+.more-page { max-width: 700px; margin-inline: auto; }
+.more-brand { display: flex; align-items: center; gap: 12px; width: fit-content; margin-bottom: 24px; text-decoration: none; color: var(--ink); }
+.more-brand > span:last-child { display: grid; gap: 4px; }
+.more-brand strong { font-size: 25px; }
+.more-brand small { color: var(--muted); font-size: 9px; letter-spacing: 2px; }
+.more-page h1 { margin-bottom: 18px; font-size: 22px; color: var(--ink); }
+.more-menu { display: grid; gap: 8px; }
+.more-menu button { display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; font-size: 13px; }
+.more-menu button > svg:first-child { color: var(--muted); flex-shrink: 0; }
+.more-menu button > svg:last-child { margin-left: auto; color: var(--muted); flex-shrink: 0; }
+.more-menu button:hover { background: rgb(105 150 214 / 10%); }
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell .shell-mobile-navigation { display: none; }
+  .kuda-shell .page { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .library-page .library-import-action { bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+}
+
+/* One compact, two-line header rhythm across every mobile board page. */
+@media (max-width: 760px) {
+  .page:is(.analysis-page, .bot-page) { --mobile-player-header-height: 36px; }
+  .page:is(.analysis-page, .bot-page) > .workspace-toolbar {
+    height: var(--mobile-player-header-height);
+    min-height: var(--mobile-player-header-height);
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 6px;
+    gap: 0;
+    align-items: center;
+  }
+  .page:is(.analysis-page, .bot-page) .bot-player-header {
+    height: var(--mobile-player-header-height);
+    min-height: var(--mobile-player-header-height);
+    align-items: center;
+    margin-block: 0;
+  }
+  .page.analysis-page .workspace-toolbar > .game-title-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 18px 18px;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: var(--mobile-player-header-height);
+    margin: 0;
+    gap: 0;
+  }
+  .page.analysis-page .workspace-toolbar .game-title-block > strong {
+    min-width: 0;
+    font-size: 11px;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .page.analysis-page .workspace-toolbar .game-title-block > :is(.game-players, .opening-repertoire) {
+    grid-row: 2;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    font-size: 9px;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .page.puzzle-page .workspace-toolbar .game-players { flex-wrap: nowrap; gap: 8px; }
+  .page.puzzle-page .workspace-toolbar .game-player { flex-wrap: nowrap; min-width: 0; gap: 4px; }
+  .page.puzzle-page .workspace-toolbar .game-player :is(strong, span) { font-size: 9px; line-height: 18px; white-space: nowrap; }
+  .page.puzzle-page .workspace-toolbar .game-player > span:not(.player-color) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .page.puzzle-page .workspace-toolbar .player-color { flex-shrink: 0; }
+}
+
+@media (max-width: 760px) {
+  .kuda-shell .page:is(.analysis-page, .bot-page) {
+    --mobile-board-width: 100%;
+    padding-inline: 0;
+  }
+  .kuda-shell .page:is(.analysis-page, .bot-page) .board-section .chessboard-wrap {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .kuda-shell .page:is(.analysis-page, .bot-page) .board-section .chessboard {
+    border-radius: 0;
+  }
+  .kuda-shell .page:is(.analysis-page, .bot-page) > .workspace-toolbar { padding-inline: 12px; }
+  .kuda-shell .page:is(.analysis-page, .bot-page) .analysis-grid > :is(.analysis-sidebar, .bot-player-header) {
+    width: calc(100% - 24px);
+    margin-inline: 12px;
+  }
+  .kuda-shell .page:is(.analysis-page, .bot-page) .board-section .board-controls {
+    width: calc(100% - 24px);
+    margin-inline: 12px;
+  }
+  .kuda-shell .analysis-board-control-row { margin-inline: 12px; }
+  .kuda-shell .page.analysis-page .board-section .analysis-board-control-row > .board-controls { width: 100%; margin-inline: 0; }
+}

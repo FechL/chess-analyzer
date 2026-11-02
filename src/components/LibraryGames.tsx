@@ -6,7 +6,6 @@ import type { GameData } from "../lib/chess";
 import { useI18n } from "../lib/i18n";
 import { libraryGameKind } from "../lib/library-filter";
 import { recentTimeControl } from "../lib/recent-game";
-import Title from "./Title";
 import { copyText } from "../lib/clipboard";
 
 const sourceLabels = {
@@ -21,13 +20,11 @@ const sourceLabels = {
 
 export default function LibraryGames({
   games,
-  view = "cards",
   onLoad,
   onDelete,
   onToggleFavorite,
 }: {
   games: SavedGame[];
-  view?: "cards" | "table";
   onLoad: (game: GameData) => void;
   onDelete: (game: SavedGame) => void;
   onToggleFavorite: (id: string) => void;
@@ -103,132 +100,78 @@ export default function LibraryGames({
     </>
   );
 
-  if (view === "table")
-    return (
-      <div className="library-table-wrap">
-        <table className="library-table">
-          <thead>
-            <tr>
-              <th>{t("Permainan")}</th>
-              <th>{t("Pemain")}</th>
-              <th>{t("Tanggal disimpan")}</th>
-              <th>{t("Sumber permainan")}</th>
-              <th>{t("Hasil")}</th>
-              <th>{t("Aksi")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {games.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <button
-                    className="text-button library-table-title"
-                    onClick={() => onLoad(item.game)}
-                  >
-                    {t(item.game.event)}
-                  </button>
-                  <small>
-                    {item.game.moves.length}
-                    {t(" ply")}
-                  </small>
-                </td>
-                <td>
-                  <span className="library-table-player">
-                    <span
-                      className="home-recent-side side-w"
-                      aria-label={t("Putih")}
-                    />
-                    {item.game.white}
-                    {item.game.whiteElo && ` (${item.game.whiteElo})`}
-                  </span>
-                  <span className="library-table-player">
-                    <span
-                      className="home-recent-side side-b"
-                      aria-label={t("Hitam")}
-                    />
-                    {item.game.black}
-                    {item.game.blackElo && ` (${item.game.blackElo})`}
-                  </span>
-                </td>
-                <td>{date(item)}</td>
-                <td>
-                  {source(item)}
-                  {item.game.timeControl && (
-                    <small>{recentTimeControl(item.game.timeControl)}</small>
-                  )}
-                </td>
-                <td>{item.game.result}</td>
-                <td>
-                  <div className="library-table-actions">
-                    {copyActions(item)}
-                    <button
-                      className="icon-button"
-                      onClick={() => onLoad(item.game)}
-                      aria-label={t("Buka permainan")}
-                      title={t("Buka permainan")}
-                    >
-                      <ArrowRight size={15} />
-                    </button>
-                    {manage(item)}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {copyFeedback}
-      </div>
-    );
-
   return (
-    <div className="library-grid">
-      {games.map((item) => (
-        <article className="saved-game-card" key={item.id}>
-          <div className="saved-card-top">
-            <span className="small-label saved-card-date">{date(item)}</span>
-            <span className="subtle-pill">{item.game.result}</span>
-            {manage(item)}
-          </div>
-          <div className="saved-card-title-row">
-            <Title as="h3">{t(item.game.event)}</Title>
-            <span className="saved-card-source">
-              {source(item)}
-              {item.game.timeControl &&
-                ` · ${recentTimeControl(item.game.timeControl)}`}
-            </span>
-          </div>
-          <p>
-            {item.game.white}
-            {Number(item.game.whiteElo) > 0 && (
-              <small className="saved-player-rating">
-                {" "}
-                ({item.game.whiteElo})
-              </small>
-            )}{" "}
-            <span>{t("vs")}</span> {item.game.black}
-            {Number(item.game.blackElo) > 0 && (
-              <small className="saved-player-rating">
-                {" "}
-                ({item.game.blackElo})
-              </small>
-            )}
-          </p>
-          <div className="saved-card-bottom">
-            <span>
-              {item.game.moves.length}
-              {t(" ply")}
-            </span>
-            {copyActions(item)}
-            <button
-              className="button secondary"
-              onClick={() => onLoad(item.game)}
-            >
-              {t("Buka ")}
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </article>
-      ))}
+    <div className="library-table-wrap">
+      <table className="library-table">
+        <thead>
+          <tr>
+            <th>{t("Permainan")}</th>
+            <th>{t("Pemain")}</th>
+            <th>{t("Tanggal disimpan")}</th>
+            <th>{t("Sumber permainan")}</th>
+            <th>{t("Hasil")}</th>
+            <th>{t("Aksi")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {games.map((item) => (
+            <tr key={item.id}>
+              <td>
+                <button
+                  className="text-button library-table-title"
+                  onClick={() => onLoad(item.game)}
+                >
+                  {t(item.game.event)}
+                </button>
+                <small>
+                  {item.game.moves.length}
+                  {t(" ply")}
+                </small>
+              </td>
+              <td>
+                <span className="library-table-player">
+                  <span
+                    className="home-recent-side side-w"
+                    aria-label={t("Putih")}
+                  />
+                  {item.game.white}
+                  {item.game.whiteElo && ` (${item.game.whiteElo})`}
+                </span>
+                <span className="library-table-player">
+                  <span
+                    className="home-recent-side side-b"
+                    aria-label={t("Hitam")}
+                  />
+                  {item.game.black}
+                  {item.game.blackElo && ` (${item.game.blackElo})`}
+                </span>
+              </td>
+              <td>{date(item)}</td>
+              <td>
+                {source(item)}
+                {item.game.timeControl && (
+                  <small>{recentTimeControl(item.game.timeControl)}</small>
+                )}
+              </td>
+              <td>{item.game.result}</td>
+              <td>
+                <div className="library-table-actions">
+                  {copyActions(item)}
+                  <button
+                    className="icon-button"
+                    onClick={() => onLoad(item.game)}
+                    aria-label={t("Buka permainan")}
+                    title={t("Buka permainan")}
+                  >
+                    <ArrowRight size={15} />
+                  </button>
+                  {manage(item)}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       {copyFeedback}
     </div>
   );

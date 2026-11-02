@@ -26,26 +26,9 @@ const handlers = {
 };
 
 describe("library game layouts", () => {
-  it("defaults to cards and fills the header with game type and time control", () => {
+  it("always shows games and management actions in a table", () => {
     const html = renderToStaticMarkup(
       <LibraryGames games={games} {...handlers} />,
-    );
-    expect(html).toContain('class="library-grid"');
-    expect(html).toContain('class="saved-card-source"');
-    expect(html).toContain("Play a Bot");
-    expect(html).toContain("3 min + 2s");
-    expect(html).toContain("(1500)");
-    expect(html).toContain("(600)");
-    expect(html).not.toContain("saved-game-icon");
-    expect(html).toContain('aria-label="Copy PGN"');
-    expect(html).toContain('aria-label="Copy FEN"');
-    expect(html.indexOf('aria-label="Delete Bot match"')).toBeLessThan(
-      html.indexOf('aria-label="Remove from favorites"'),
-    );
-  });
-  it("shows the same games and management actions in table view", () => {
-    const html = renderToStaticMarkup(
-      <LibraryGames games={games} view="table" {...handlers} />,
     );
     expect(html).toContain('<table class="library-table">');
     expect(html).toContain("Bot match");

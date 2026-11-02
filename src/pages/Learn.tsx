@@ -37,6 +37,7 @@ import {
   ProgressRing,
 } from "../components/Common";
 import { LESSONS, OPENINGS } from "../data/content";
+import { ACADEMY_MODULES, ACADEMY_REFERENCES } from "../data/academy";
 import type { Exercise } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
 import type { Evaluation } from "../lib/chess";
@@ -312,15 +313,30 @@ export function AcademyPage({
   const [completed, setCompleted] = useState<string[]>(() =>
     readStorage("kuda-lessons", []),
   );
+  const [search, setSearch] = useState("");
+  const [lessonStatus, setLessonStatus] = useState("all");
+  const [lessonCompleted, setLessonCompleted] = useState(false);
   const categories = [
     "Semua",
-    "Dasar",
-    "Taktik",
-    "Skakmat",
-    "Endgame",
-    "Aturan khusus",
+    ...ACADEMY_MODULES.map((module) => module.category),
   ];
-  const percent = Math.round((completed.length / LESSONS.length) * 100);
+  const completedCount = LESSONS.filter((lesson) =>
+    completed.includes(lesson.id),
+  ).length;
+  const visibleLessons = LESSONS.filter(
+    (lesson) =>
+      (category === "Semua" || lesson.category === category) &&
+      (lessonStatus === "all" ||
+        (lessonStatus === "completed") === completed.includes(lesson.id)) &&
+      `${t(lesson.title)} ${t(lesson.description)} ${t(lesson.category)}`
+        .toLowerCase()
+        .includes(search.trim().toLowerCase()),
+  );
+  const openLesson = (lesson: Exercise) => {
+    setLessonCompleted(false);
+    setSelected(lesson);
+  };
+  const percent = Math.round((completedCount / LESSONS.length) * 100);
   return (
     <div className="page learning-page">
       <div className="page-intro">
@@ -341,7 +357,7 @@ export function AcademyPage({
           <div>
             <strong>{t("Perjalanan belajarmu")}</strong>
             <span>
-              {t(completed.length)}
+              {t(completedCount)}
               {t(" dari ")}
               {t(LESSONS.length)}
               {t(" pelajaran selesai")}
@@ -359,13 +375,13 @@ export function AcademyPage({
           </Title>
           <p>
             {t(
-              "Kuasai pusat, aktifkan buah, dan jaga raja. Jadikan tiga prinsip ini bagian dari setiap permainan.",
+              "Mulai dari gerak buah, pahami aturan, lalu latih taktik, strategi, dan endgame. Setiap pelajaran memiliki penjelasan, petunjuk, serta latihan di papan.",
             )}
           </p>
           <button
             className="button primary"
             onClick={() =>
-              setSelected(
+              openLesson(
                 LESSONS.find((l) => !completed.includes(l.id)) ?? LESSONS[0],
               )
             }
@@ -394,7 +410,7 @@ export function AcademyPage({
           </span>
         </div>
       </div>
-      <div className="catalog-toolbar">
+      <div className="catalog-toolbar academy-toolbar">
         <div className="segmented wrap">
           {t(
             categories.map((c) => (
@@ -408,32 +424,36 @@ export function AcademyPage({
             )),
           )}
         </div>
-        <span className="muted">{t("Belajar dengan ritmemu sendiri")}</span>
+        <select
+          aria-label={t("Status pelajaran")}
+          value={lessonStatus}
+          onChange={(event) => setLessonStatus(event.target.value)}
+        >
+          <option value="all">{t("Semua status")}</option>
+          <option value="new">{t("Belum selesai")}</option>
+          <option value="completed">{t("Selesai")}</option>
+        </select>
+        <span className="muted academy-lesson-count">{visibleLessons.length} {t("pelajaran")}</span>
+        <label className="search-input">
+          <Search size={16} />
+          <input
+            aria-label={t("Cari pelajaran")}
+            placeholder={t("Cari topik atau pelajaran…")}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </label>
       </div>
       <div className="lesson-grid">
         {t(
-          LESSONS.filter(
-            (l) => category === "Semua" || l.category === category,
-          ).map((l, i) => (
+          visibleLessons.map((l) => (
             <button
               key={l.id}
               className="lesson-card"
-              onClick={() => setSelected(l)}
+              onClick={() => openLesson(l)}
             >
               <div className="lesson-top">
-                <span className={`lesson-icon tone-${i % 3}`}>
-                  {t(
-                    l.category === "Taktik" ? (
-                      <Target size={24} />
-                    ) : l.category === "Endgame" ? (
-                      <Flag size={24} />
-                    ) : l.category === "Skakmat" ? (
-                      <Trophy size={24} />
-                    ) : (
-                      <GraduationCap size={24} />
-                    ),
-                  )}
-                </span>
+                <span className="small-label">{t(l.category)}</span>
                 {t(
                   completed.includes(l.id) ? (
                     <span className="lesson-done">
@@ -447,11 +467,6 @@ export function AcademyPage({
                   ),
                 )}
               </div>
-              <span className="small-label">
-                {t(l.category)}
-                {t(" · ")}
-                {t(l.level)}
-              </span>
               <Title as="h3">{t(l.title)}</Title>
               <p>{t(l.description)}</p>
               <div className="lesson-bottom">
@@ -469,6 +484,29 @@ export function AcademyPage({
           )),
         )}
       </div>
+      {!visibleLessons.length && (
+        <p className="academy-empty">
+          {t("Tidak ada pelajaran yang cocok. Coba ubah filter pencarian.")}
+        </p>
+      )}
+      <details className="academy-references">
+        <summary>{t("Referensi kurikulum")}</summary>
+        <p>
+          {t(
+            "Materi dan posisi latihan disusun untuk Kuda. Platform berikut menjadi referensi cakupan dan urutan belajar, bukan penyedia salinan kursus.",
+          )}
+        </p>
+        <ul>
+          {ACADEMY_REFERENCES.map((reference) => (
+            <li key={reference.url}>
+              <a href={reference.url} target="_blank" rel="noreferrer">
+                {reference.name} ↗
+              </a>
+              <span>{t(reference.focus)}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
       {t(
         selected && (
           <Modal
@@ -487,7 +525,10 @@ export function AcademyPage({
                 hint={selected.hint}
                 explanation={selected.explanation}
                 startTraining
+                enableShortcuts={settings.enableShortcuts}
                 onComplete={() => {
+                  setLessonCompleted(true);
+                  playBoardSound("success");
                   const next = [...new Set([...completed, selected.id])];
                   setCompleted(next);
                   writeStorage("kuda-lessons", next);
@@ -504,6 +545,10 @@ export function AcademyPage({
                   {t(selected.minutes)}
                   {t(" menit")}
                 </span>
+                <Title as="h3">{t(selected.title)}</Title>
+                <p className="academy-lesson-intro">
+                  {t(selected.description)}
+                </p>
                 <Title as="h3">{t("Ide yang perlu dibawa.")}</Title>
                 <ol>
                   {t(
@@ -523,6 +568,37 @@ export function AcademyPage({
                     )}
                   </p>
                 </div>
+                {lessonCompleted && (
+                  <div className="academy-lesson-next">
+                    <span>
+                      <CheckCheck size={16} />
+                      {t("Pelajaran selesai")}
+                    </span>
+                    <button
+                      className="button primary"
+                      onClick={() => {
+                        const next =
+                          LESSONS[
+                            LESSONS.findIndex(
+                              (lesson) => lesson.id === selected.id,
+                            ) + 1
+                          ];
+                        if (next) openLesson(next);
+                        else setSelected(undefined);
+                      }}
+                    >
+                      {t(
+                        LESSONS.findIndex(
+                          (lesson) => lesson.id === selected.id,
+                        ) <
+                          LESSONS.length - 1
+                          ? "Pelajaran berikutnya"
+                          : "Kembali ke akademi",
+                      )}
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </Modal>

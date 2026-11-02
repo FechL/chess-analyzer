@@ -1,0 +1,1262 @@
+[
+  {
+    "id": "pawn-first-step",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "solution": [
+      "e4"
+    ],
+    "title": [
+      "Pion: langkah pertama",
+      "Pawn: The First Move"
+    ],
+    "description": [
+      "Pelajari pilihan satu atau dua petak dari baris awal.",
+      "Learn the one- or two-square choice from the starting rank."
+    ],
+    "hint": [
+      "Pion e2 boleh maju dua petak ke e4 jika e3 dan e4 kosong.",
+      "The e2 pawn may advance to e4 if e3 and e4 are empty."
+    ],
+    "explanation": [
+      "e4 legal karena pion masih di baris awal dan jalurnya kosong. Setelah bergerak, pion biasanya hanya maju satu petak.",
+      "e4 is legal because the pawn is on its starting rank and its path is clear. Later it normally advances one square."
+    ],
+    "theory": [
+      [
+        "Pion putih maju ke angka lebih besar; pion hitam ke angka lebih kecil.",
+        "White pawns advance toward higher rank numbers; Black toward lower ones."
+      ],
+      [
+        "Pion tidak dapat bergerak mundur.",
+        "Pawns cannot move backward."
+      ],
+      [
+        "Pion menangkap secara diagonal, bukan dengan maju lurus.",
+        "Pawns capture diagonally, not straight ahead."
+      ]
+    ]
+  },
+  {
+    "id": "pawn-capture",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/3p4/4P3/8/8/6K1 w - - 0 1",
+    "solution": [
+      "exd5"
+    ],
+    "title": [
+      "Pion: menangkap diagonal",
+      "Pawn: Diagonal Captures"
+    ],
+    "description": [
+      "Bedakan gerak maju dengan cara menangkap.",
+      "Distinguish advancing from capturing."
+    ],
+    "hint": [
+      "Pion e4 menangkap pion di d5.",
+      "The e4 pawn captures the pawn on d5."
+    ],
+    "explanation": [
+      "exd5 berarti pion dari lajur e menangkap di d5. Pion tidak bisa menangkap lawan tepat di depannya.",
+      "exd5 means the e-file pawn captures on d5. A pawn cannot capture an enemy directly ahead."
+    ],
+    "theory": [
+      [
+        "Notasi x menandai tangkapan.",
+        "An x marks a capture in notation."
+      ],
+      [
+        "Putih menangkap satu petak diagonal ke depan.",
+        "White captures one square diagonally forward."
+      ],
+      [
+        "Pion yang maju dapat mengubah lajur setelah menangkap.",
+        "A pawn changes files when it captures."
+      ]
+    ]
+  },
+  {
+    "id": "bishop-diagonals",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "7k/7p/8/8/8/8/P7/5BK1 w - - 0 1",
+    "solution": [
+      "Bc4"
+    ],
+    "title": [
+      "Gajah: diagonal panjang",
+      "Bishop: Long Diagonals"
+    ],
+    "description": [
+      "Temukan diagonal dari f1 ke c4.",
+      "Find the diagonal from f1 to c4."
+    ],
+    "hint": [
+      "Dari f1, ikuti e2–d3–c4.",
+      "From f1, follow e2–d3–c4."
+    ],
+    "explanation": [
+      "Bc4 mengaktifkan gajah sepanjang diagonal. Gajah selalu berada pada warna petak yang sama.",
+      "Bc4 activates the bishop along a diagonal. A bishop always stays on the same square color."
+    ],
+    "theory": [
+      [
+        "Gajah bergerak diagonal dan tidak dapat melompati buah.",
+        "Bishops move diagonally and cannot jump over pieces."
+      ],
+      [
+        "Gajah petak terang tidak pernah mencapai petak gelap.",
+        "A light-square bishop never reaches a dark square."
+      ],
+      [
+        "Diagonal terbuka menambah jangkauan gajah.",
+        "Open diagonals increase a bishop’s reach."
+      ]
+    ]
+  },
+  {
+    "id": "knight-jumps",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "solution": [
+      "Nf3"
+    ],
+    "title": [
+      "Kuda: melompat berbentuk L",
+      "Knight: The L-Shaped Jump"
+    ],
+    "description": [
+      "Kembangkan kuda tanpa memindahkan pion terlebih dahulu.",
+      "Develop a knight without moving a pawn first."
+    ],
+    "hint": [
+      "Kuda g1 dapat melompati pion ke f3.",
+      "The g1 knight can jump over pawns to f3."
+    ],
+    "explanation": [
+      "Nf3 membawa kuda ke pusat. Kuda adalah satu-satunya buah yang dapat melompati buah lain.",
+      "Nf3 brings a knight toward the center. Knights alone can jump over other pieces."
+    ],
+    "theory": [
+      [
+        "Gerak kuda: dua petak pada satu arah lalu satu petak ke samping.",
+        "A knight moves two squares in one direction and one sideways."
+      ],
+      [
+        "Kuda berganti warna petak setiap bergerak.",
+        "A knight changes square color with every move."
+      ],
+      [
+        "Kuda tidak menangkap buah yang dilompati; hanya buah di petak tujuan.",
+        "A knight captures only on its destination, not along the jump."
+      ]
+    ]
+  },
+  {
+    "id": "rook-routes",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "7k/7p/8/8/8/8/1P6/R5K1 w - - 0 1",
+    "solution": [
+      "Ra4"
+    ],
+    "title": [
+      "Benteng: lajur dan baris",
+      "Rook: Files and Ranks"
+    ],
+    "description": [
+      "Gerakkan benteng dari a1 ke a4.",
+      "Move the rook from a1 to a4."
+    ],
+    "hint": [
+      "Benteng bergerak lurus; pilih a1 lalu a4.",
+      "Rooks move in straight lines; select a1, then a4."
+    ],
+    "explanation": [
+      "Ra4 menunjukkan gerak vertikal. Benteng juga dapat bergerak horizontal, tetapi tidak dapat melompati buah.",
+      "Ra4 demonstrates vertical movement. A rook can also move horizontally, but cannot jump over pieces."
+    ],
+    "theory": [
+      [
+        "Lajur adalah kolom a–h; baris diberi angka 1–8.",
+        "Files are columns a–h; ranks are numbered 1–8."
+      ],
+      [
+        "Benteng boleh bergerak sejauh apa pun selama jalurnya kosong.",
+        "A rook can travel any distance along a clear rank or file."
+      ],
+      [
+        "Petak yang ditempati buah sendiri tidak boleh dituju.",
+        "You cannot land on a square occupied by your own piece."
+      ]
+    ]
+  },
+  {
+    "id": "queen-routes",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/8/8/8/P7/3Q2K1 w - - 0 1",
+    "solution": [
+      "Qd4"
+    ],
+    "title": [
+      "Menteri: dua jenis gerak",
+      "Queen: Two Types of Movement"
+    ],
+    "description": [
+      "Gabungkan jangkauan benteng dan gajah.",
+      "Combine the movement of a rook and bishop."
+    ],
+    "hint": [
+      "Pindahkan menteri d1 ke d4 melalui lajur d.",
+      "Move the queen from d1 to d4 along the d-file."
+    ],
+    "explanation": [
+      "Qd4 menunjukkan salah satu jalur menteri. Menteri dapat bergerak lurus atau diagonal, tetapi tidak melompati buah.",
+      "Qd4 demonstrates one queen route. Queens move along ranks, files, or diagonals, without jumping."
+    ],
+    "theory": [
+      [
+        "Menteri paling kuat secara material, tetapi bukan berarti harus keluar paling awal.",
+        "The queen has the highest material value, but need not develop first."
+      ],
+      [
+        "Jangkauan menteri tetap dibatasi buah yang menghalangi.",
+        "Intervening pieces still limit the queen’s range."
+      ],
+      [
+        "Periksa apakah petak tujuan diserang sebelum memindahkannya.",
+        "Check whether the destination is attacked before moving."
+      ]
+    ]
+  },
+  {
+    "id": "king-steps",
+    "category": "Gerak buah",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "4k3/p7/8/8/8/8/P7/4K3 w - - 0 1",
+    "solution": [
+      "Kf2"
+    ],
+    "title": [
+      "Raja: satu petak yang aman",
+      "King: One Safe Square"
+    ],
+    "description": [
+      "Gerakkan raja satu petak tanpa masuk serangan.",
+      "Move the king one square without entering an attack."
+    ],
+    "hint": [
+      "Raja e1 dapat bergerak diagonal ke f2.",
+      "The e1 king can move diagonally to f2."
+    ],
+    "explanation": [
+      "Kf2 legal karena f2 tidak diserang. Raja tidak boleh masuk skak, dan kedua raja tidak boleh berdampingan.",
+      "Kf2 is legal because f2 is not attacked. A king cannot enter check, and kings cannot stand adjacent."
+    ],
+    "theory": [
+      [
+        "Raja bergerak satu petak ke arah mana pun.",
+        "Kings move one square in any direction."
+      ],
+      [
+        "Raja boleh menangkap hanya jika petak tujuan aman.",
+        "A king may capture only when the destination is safe."
+      ],
+      [
+        "Saat endgame, raja dapat menjadi buah aktif yang kuat.",
+        "In the endgame, the king can become a strong active piece."
+      ]
+    ]
+  },
+  {
+    "id": "escape-check",
+    "category": "Dasar",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "k3r3/p7/8/8/8/8/P7/4K3 w - - 0 1",
+    "solution": [
+      "Kf1"
+    ],
+    "title": [
+      "Keluar dari skak",
+      "Getting Out of Check"
+    ],
+    "description": [
+      "Selamatkan raja dari serangan benteng.",
+      "Save the king from a rook attack."
+    ],
+    "hint": [
+      "Tinggalkan lajur e dengan Kf1.",
+      "Leave the e-file with Kf1."
+    ],
+    "explanation": [
+      "Kf1 keluar dari serangan benteng e8. Saat skak, langkah yang tidak menyelamatkan raja tidak legal.",
+      "Kf1 leaves the e8 rook’s line. While in check, a move that does not save the king is illegal."
+    ],
+    "theory": [
+      [
+        "Periksa penyerang sebelum memilih respons.",
+        "Identify the checking piece before choosing a response."
+      ],
+      [
+        "Tiga cara menjawab skak: pindahkan raja, tangkap penyerang, atau blokir jalur.",
+        "The three responses are moving the king, capturing the attacker, or blocking its line."
+      ],
+      [
+        "Skak kuda tidak dapat diblokir.",
+        "A knight check cannot be blocked."
+      ]
+    ]
+  },
+  {
+    "id": "block-check",
+    "category": "Dasar",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "k3r3/p7/8/8/8/8/P7/4KB2 w - - 0 1",
+    "solution": [
+      "Be2"
+    ],
+    "title": [
+      "Blokir jalur skak",
+      "Blocking a Check"
+    ],
+    "description": [
+      "Gunakan gajah sebagai pelindung raja.",
+      "Use a bishop to shield the king."
+    ],
+    "hint": [
+      "Letakkan gajah f1 di e2, di antara benteng dan raja.",
+      "Place the f1 bishop on e2, between the rook and king."
+    ],
+    "explanation": [
+      "Be2 memutus jalur benteng e8 ke raja e1. Blokir hanya bekerja terhadap serangan jarak jauh.",
+      "Be2 cuts the e8 rook’s line to the e1 king. Blocking works only against sliding attacks."
+    ],
+    "theory": [
+      [
+        "Gajah, benteng, dan menteri membutuhkan jalur yang terbuka.",
+        "Bishops, rooks, and queens need a clear line."
+      ],
+      [
+        "Buah pelindung mungkin menjadi terikat pada raja.",
+        "The blocking piece may become pinned to its king."
+      ],
+      [
+        "Bandingkan blokir dengan menangkap penyerang atau memindahkan raja.",
+        "Compare blocking with capturing the attacker or moving the king."
+      ]
+    ]
+  },
+  {
+    "id": "capture-checker",
+    "category": "Dasar",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "k7/p7/8/8/8/8/P3r3/4K3 w - - 0 1",
+    "solution": [
+      "Kxe2"
+    ],
+    "title": [
+      "Tangkap pemberi skak",
+      "Capturing the Checking Piece"
+    ],
+    "description": [
+      "Periksa apakah penyerang dilindungi.",
+      "Check whether the attacker is defended."
+    ],
+    "hint": [
+      "Benteng e2 tidak dilindungi; raja dapat menangkapnya.",
+      "The e2 rook is undefended; the king can capture it."
+    ],
+    "explanation": [
+      "Kxe2 menyelesaikan skak dan memenangkan benteng. Tangkapan raja hanya legal jika petak tujuan tidak diserang.",
+      "Kxe2 ends the check and wins a rook. A king capture is legal only if the destination is not attacked."
+    ],
+    "theory": [
+      [
+        "Jangan menganggap setiap buah yang dekat raja pasti terlindungi.",
+        "Do not assume every piece near the king is protected."
+      ],
+      [
+        "Periksa serangan pion, kuda, dan buah jarak jauh pada petak tujuan.",
+        "Check pawn, knight, and sliding attacks on the destination."
+      ],
+      [
+        "Raja tidak boleh menangkap buah yang dilindungi raja lawan.",
+        "A king cannot capture a piece protected by the opposing king."
+      ]
+    ]
+  },
+  {
+    "id": "material-values",
+    "category": "Dasar",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/p7/8/3q4/8/2N5/P7/6K1 w - - 0 1",
+    "solution": [
+      "Nxd5"
+    ],
+    "title": [
+      "Nilai buah dan tangkapan",
+      "Piece Values and Captures"
+    ],
+    "description": [
+      "Ambil menteri yang tidak dijaga.",
+      "Capture an undefended queen."
+    ],
+    "hint": [
+      "Kuda c3 dapat menangkap di d5.",
+      "The c3 knight can capture on d5."
+    ],
+    "explanation": [
+      "Nxd5 memenangkan menteri tanpa mengorbankan kuda. Nilai material membantu membandingkan pertukaran, tetapi keselamatan raja tetap utama.",
+      "Nxd5 wins a queen without losing the knight. Material values help compare exchanges, but king safety still comes first."
+    ],
+    "theory": [
+      [
+        "Panduan umum: pion 1, kuda/gajah 3, benteng 5, menteri 9.",
+        "A rough guide: pawn 1, knight/bishop 3, rook 5, queen 9."
+      ],
+      [
+        "Nilai ini bukan jaminan: aktivitas dan taktik dapat mengubah penilaian.",
+        "These values are approximate; activity and tactics can change an assessment."
+      ],
+      [
+        "Sebelum menukar, hitung semua tangkapan balasan.",
+        "Before exchanging, calculate the recaptures."
+      ]
+    ]
+  },
+  {
+    "id": "hanging-piece",
+    "category": "Taktik",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/4q3/8/8/P7/4R1K1 w - - 0 1",
+    "solution": [
+      "Rxe5"
+    ],
+    "title": [
+      "Cari buah yang tidak dijaga",
+      "Spot an Undefended Piece"
+    ],
+    "description": [
+      "Biasakan memeriksa tangkapan sebelum membuat rencana.",
+      "Check captures before making a plan."
+    ],
+    "hint": [
+      "Benteng e1 menjangkau menteri e5 melalui lajur kosong.",
+      "The e1 rook reaches the e5 queen along a clear file."
+    ],
+    "explanation": [
+      "Rxe5 memenangkan menteri. Memeriksa buah yang tidak dijaga adalah kebiasaan taktis yang berguna pada setiap langkah.",
+      "Rxe5 wins the queen. Scanning for undefended pieces is useful on every move."
+    ],
+    "theory": [
+      [
+        "Lihat buah lawan yang diserang tetapi tidak dilindungi.",
+        "Look for enemy pieces that are attacked but undefended."
+      ],
+      [
+        "Periksa apakah ada ancaman skakmat sebelum mengambil material.",
+        "Check for mate threats before taking material."
+      ],
+      [
+        "Setelah menemukan tangkapan, bayangkan respons lawan.",
+        "After finding a capture, visualize the opponent’s reply."
+      ]
+    ]
+  },
+  {
+    "id": "skewer",
+    "category": "Taktik",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "4q3/p2k4/8/3B4/8/8/P7/6K1 w - - 0 1",
+    "solution": [
+      "Bc6+",
+      "Kc8",
+      "Bxe8"
+    ],
+    "title": [
+      "Tusuk sate: raja di depan",
+      "Skewer: The King in Front"
+    ],
+    "description": [
+      "Paksa raja menyingkir agar menteri di belakangnya terbuka.",
+      "Force the king away to expose the queen behind it."
+    ],
+    "hint": [
+      "Bc6+ menyatukan raja d7 dan menteri e8 pada satu diagonal.",
+      "Bc6+ aligns the d7 king and e8 queen on one diagonal."
+    ],
+    "explanation": [
+      "Setelah Bc6+ Kc8, Bxe8 memenangkan menteri. Skewer menyerang buah berharga di depan agar sasaran belakang terbuka.",
+      "After Bc6+ Kc8, Bxe8 wins the queen. A skewer attacks a valuable front piece to expose the one behind."
+    ],
+    "theory": [
+      [
+        "Cari raja dan buah berat yang segaris.",
+        "Look for a king and a major piece on the same line."
+      ],
+      [
+        "Skak membuat lawan harus menanggapi ancaman pertama.",
+        "Check forces the opponent to answer the first threat."
+      ],
+      [
+        "Lawan dapat memiliki beberapa balasan; latihan ini menunjukkan satu jalur ilustratif.",
+        "The opponent may have several replies; this exercise shows one illustrative line."
+      ]
+    ]
+  },
+  {
+    "id": "discovered-attack",
+    "category": "Taktik",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "4q1k1/7p/8/8/8/8/4B3/4R1K1 w - - 0 1",
+    "solution": [
+      "Bc4+",
+      "Kh8",
+      "Rxe8+"
+    ],
+    "title": [
+      "Serangan terbuka",
+      "Discovered Attack"
+    ],
+    "description": [
+      "Gerakkan satu buah untuk membuka serangan buah lain.",
+      "Move one piece to uncover another piece’s attack."
+    ],
+    "hint": [
+      "Gajah e2 pindah ke c4 dengan skak dan membuka lajur benteng.",
+      "The e2 bishop moves to c4 with check and opens the rook’s file."
+    ],
+    "explanation": [
+      "Bc4+ memaksa respons terhadap skak sambil membuka serangan benteng ke menteri e8. Setelah Kh8, Rxe8+ menang material.",
+      "Bc4+ forces a response to check while uncovering the rook’s attack on e8. After Kh8, Rxe8+ wins material."
+    ],
+    "theory": [
+      [
+        "Perhatikan buah sendiri yang menutupi lajur benteng atau diagonal gajah.",
+        "Notice your pieces blocking a rook file or bishop diagonal."
+      ],
+      [
+        "Buah yang bergerak sebaiknya menciptakan ancaman baru.",
+        "The moving piece should ideally create a new threat."
+      ],
+      [
+        "Urutan langkah penting: skak dahulu, ambil material kemudian.",
+        "Move order matters: check first, collect material next."
+      ]
+    ]
+  },
+  {
+    "id": "double-check",
+    "category": "Taktik",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "4k3/p7/8/8/8/8/P3B3/4R1K1 w - - 0 1",
+    "solution": [
+      "Bb5+"
+    ],
+    "title": [
+      "Dua skak sekaligus",
+      "Double Check"
+    ],
+    "description": [
+      "Buka lajur benteng sambil memberi skak dengan gajah.",
+      "Open a rook file while checking with the bishop."
+    ],
+    "hint": [
+      "Bb5+ menyerang e8 melalui diagonal dan membuka lajur e.",
+      "Bb5+ attacks e8 diagonally and clears the e-file."
+    ],
+    "explanation": [
+      "Bb5+ menghasilkan dua penyerang pada raja: benteng e1 dan gajah b5. Lawan harus memindahkan rajanya.",
+      "Bb5+ checks with both the e1 rook and b5 bishop. The opponent must move the king."
+    ],
+    "theory": [
+      [
+        "Skak ganda muncul ketika satu langkah membuka dan memberi skak.",
+        "Double check arises when one move uncovers a check and gives another."
+      ],
+      [
+        "Menangkap atau memblokir satu penyerang tidak menyelesaikan serangan kedua.",
+        "Capturing or blocking one attacker does not stop the other check."
+      ],
+      [
+        "Notasi SAN tetap memakai tanda +, bukan dua tanda +.",
+        "SAN still uses +, rather than two plus signs."
+      ]
+    ]
+  },
+  {
+    "id": "remove-defender",
+    "category": "Taktik",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "6k1/6pq/5n2/6B1/7Q/8/8/6KR w - - 0 1",
+    "solution": [
+      "Bxf6",
+      "gxf6",
+      "Qxh7+"
+    ],
+    "title": [
+      "Singkirkan penjaga",
+      "Remove the Defender"
+    ],
+    "description": [
+      "Hilangkan kuda yang menjaga menteri lawan.",
+      "Eliminate the knight defending the enemy queen."
+    ],
+    "hint": [
+      "Kuda f6 menjaga h7. Tangkap dengan gajah sebelum mengambil menteri.",
+      "The f6 knight guards h7. Capture it with the bishop first."
+    ],
+    "explanation": [
+      "Bxf6 menghilangkan penjaga h7. Setelah gxf6, Qxh7+ aman dari Kxh7 karena benteng h1 melindungi lajur h.",
+      "Bxf6 removes h7’s defender. After gxf6, Qxh7+ cannot be met by Kxh7 because the h1 rook protects the h-file."
+    ],
+    "theory": [
+      [
+        "Cari satu buah yang menjalankan tugas pertahanan penting.",
+        "Look for a piece with a critical defensive task."
+      ],
+      [
+        "Hitung hasil setelah penjaga ditukar atau dipancing pergi.",
+        "Calculate what happens when the defender is traded or diverted."
+      ],
+      [
+        "Jangan berhenti menghitung pada tangkapan pertama.",
+        "Do not stop calculating at the first capture."
+      ]
+    ]
+  },
+  {
+    "id": "open-file",
+    "category": "Strategi",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/8/8/8/P7/R5K1 w - - 0 1",
+    "solution": [
+      "Re1"
+    ],
+    "title": [
+      "Benteng di lajur terbuka",
+      "Rook on an Open File"
+    ],
+    "description": [
+      "Tempatkan benteng pada lajur tanpa pion.",
+      "Place a rook on a file without pawns."
+    ],
+    "hint": [
+      "Lajur e kosong; pindahkan benteng a1 ke e1.",
+      "The e-file is empty; move the a1 rook to e1."
+    ],
+    "explanation": [
+      "Re1 menggunakan lajur terbuka untuk menjangkau wilayah lawan. Ini langkah rencana, bukan kombinasi menang paksa.",
+      "Re1 uses an open file to reach the opponent’s territory. This is a planning move, not a forced winning combination."
+    ],
+    "theory": [
+      [
+        "Lajur terbuka tidak memiliki pion dari kedua pihak.",
+        "An open file has no pawns from either side."
+      ],
+      [
+        "Lajur setengah terbuka hanya tidak memiliki pion sendiri.",
+        "A half-open file has no friendly pawn."
+      ],
+      [
+        "Cari petak masuk yang aman sebelum menggandakan benteng.",
+        "Find a safe entry square before doubling rooks."
+      ]
+    ]
+  },
+  {
+    "id": "knight-outpost",
+    "category": "Strategi",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "6k1/8/2p3p1/8/3P4/5N2/8/6K1 w - - 0 1",
+    "solution": [
+      "Ne5"
+    ],
+    "title": [
+      "Pos kuat untuk kuda",
+      "A Knight Outpost"
+    ],
+    "description": [
+      "Cari petak yang didukung pion dan sulit diusir pion lawan.",
+      "Find a pawn-supported square that enemy pawns cannot easily challenge."
+    ],
+    "hint": [
+      "Pion d4 melindungi e5; kuda f3 dapat menempatinya.",
+      "The d4 pawn protects e5; the f3 knight can occupy it."
+    ],
+    "explanation": [
+      "Ne5 menempatkan kuda di pos yang didukung pion d4. Dalam posisi ini tidak ada pion d atau f lawan untuk langsung mengusirnya.",
+      "Ne5 places the knight on a square supported by d4. Here no enemy d- or f-pawn can immediately drive it away."
+    ],
+    "theory": [
+      [
+        "Petak kuat membutuhkan dukungan, bukan sekadar berada di pusat.",
+        "A strong square needs support, not merely central location."
+      ],
+      [
+        "Periksa cara lawan menukar atau mengusir kuda.",
+        "Check how the opponent might trade or dislodge the knight."
+      ],
+      [
+        "Nilai pos kuat bergantung pada sasaran yang dapat dijangkau.",
+        "An outpost’s value depends on the targets it reaches."
+      ]
+    ]
+  },
+  {
+    "id": "pawn-break",
+    "category": "Strategi",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "6k1/8/4p3/3p4/3P4/8/2P5/5BK1 w - - 0 1",
+    "solution": [
+      "c4",
+      "dxc4",
+      "Bxc4"
+    ],
+    "title": [
+      "Terobosan pion",
+      "Pawn Break"
+    ],
+    "description": [
+      "Tantang rantai pion dan buka diagonal untuk gajah.",
+      "Challenge a pawn chain and open a bishop diagonal."
+    ],
+    "hint": [
+      "Dorong c2 ke c4 untuk menyerang pion d5.",
+      "Push c2 to c4 to challenge d5."
+    ],
+    "explanation": [
+      "c4 menantang basis d5. Balasan ilustratif dxc4 membuka diagonal f1–c4, sehingga Bxc4 sekaligus mengembangkan gajah.",
+      "c4 challenges the d5 base. The illustrative reply dxc4 opens f1–c4, allowing Bxc4 to develop the bishop."
+    ],
+    "theory": [
+      [
+        "Pion tidak bisa mundur: hitung perubahan struktur sebelum mendorongnya.",
+        "Pawns cannot retreat: calculate structural changes before pushing."
+      ],
+      [
+        "Serang basis rantai, bukan hanya ujung yang paling maju.",
+        "Attack the base of a pawn chain, not only its advanced tip."
+      ],
+      [
+        "Terobosan yang baik membuka jalur bagi buah sendiri.",
+        "A useful break opens lines for your pieces."
+      ]
+    ]
+  },
+  {
+    "id": "improve-bishop",
+    "category": "Strategi",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/8/8/1P2P3/3P4/2B3K1 w - - 0 1",
+    "solution": [
+      "Bb2"
+    ],
+    "title": [
+      "Perbaiki buah terburuk",
+      "Improve Your Worst Piece"
+    ],
+    "description": [
+      "Aktifkan gajah yang masih tertinggal di baris awal.",
+      "Activate the bishop still on its starting rank."
+    ],
+    "hint": [
+      "Pion b3 memberi ruang untuk gajah c1 menuju b2.",
+      "The b3 pawn leaves room for the c1 bishop on b2."
+    ],
+    "explanation": [
+      "Bb2 membawa gajah ke diagonal panjang. Saat tidak ada taktik mendesak, memperbaiki buah terburuk adalah cara memilih rencana.",
+      "Bb2 brings the bishop onto a long diagonal. When no tactic is urgent, improving the worst piece helps you choose a plan."
+    ],
+    "theory": [
+      [
+        "Tanyakan buah mana yang paling sedikit berkontribusi.",
+        "Ask which piece contributes least."
+      ],
+      [
+        "Cari jalur aman menuju petak yang lebih aktif.",
+        "Find a safe route to a more active square."
+      ],
+      [
+        "Jangan mengabaikan ancaman langsung demi rencana jangka panjang.",
+        "Do not ignore an immediate threat for a long-term plan."
+      ]
+    ]
+  },
+  {
+    "id": "king-luft",
+    "category": "Strategi",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "4r1k1/7p/8/8/8/8/5PPP/6K1 w - - 0 1",
+    "solution": [
+      "h3"
+    ],
+    "title": [
+      "Petak pelarian raja",
+      "A Flight Square for the King"
+    ],
+    "description": [
+      "Buat ruang bernapas sebelum baris belakang menjadi masalah.",
+      "Create breathing room before the back rank becomes a problem."
+    ],
+    "hint": [
+      "h3 mengosongkan h2 untuk raja.",
+      "h3 clears h2 for the king."
+    ],
+    "explanation": [
+      "h3 menyediakan petak h2. Ini contoh pencegahan ancaman baris belakang; tetap periksa serangan diagonal atau pengorbanan di h3.",
+      "h3 provides h2 as a flight square. It illustrates back-rank prevention; still check diagonal attacks or sacrifices on h3."
+    ],
+    "theory": [
+      [
+        "Raja dengan tiga pion di depannya dapat terkurung.",
+        "A king behind three pawns may become boxed in."
+      ],
+      [
+        "Petak pelarian hanya berguna jika tidak dikontrol lawan.",
+        "A flight square helps only if the opponent does not control it."
+      ],
+      [
+        "Langkah pion dekat raja juga menciptakan kelemahan.",
+        "Pawn moves near your king also create weaknesses."
+      ]
+    ]
+  },
+  {
+    "id": "queen-mate",
+    "category": "Skakmat",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "7k/8/5KQ1/8/8/8/8/8 w - - 0 1",
+    "solution": [
+      "Qg7#"
+    ],
+    "title": [
+      "Mat dengan menteri dan raja",
+      "Queen and King Checkmate"
+    ],
+    "description": [
+      "Gunakan raja untuk melindungi menteri di dekat raja lawan.",
+      "Use your king to protect the queen near the enemy king."
+    ],
+    "hint": [
+      "Qg7# terlindungi oleh raja f6.",
+      "Qg7# is protected by the f6 king."
+    ],
+    "explanation": [
+      "Menteri g7 menyerang h8 dan menutup g8 serta h7. Raja f6 melindungi g7 sehingga menteri tidak bisa ditangkap.",
+      "The g7 queen checks h8 and covers g8 and h7. The f6 king protects g7, so the queen cannot be captured."
+    ],
+    "theory": [
+      [
+        "Dorong raja lawan menuju tepi dengan koordinasi kedua buah.",
+        "Drive the enemy king toward the edge with both pieces."
+      ],
+      [
+        "Menteri tidak harus terus memberi skak untuk mempersempit ruang.",
+        "The queen need not check on every move to restrict space."
+      ],
+      [
+        "Selalu periksa stalemate ketika lawan tidak sedang skak.",
+        "Always check for stalemate when the opponent is not in check."
+      ]
+    ]
+  },
+  {
+    "id": "rook-mate",
+    "category": "Skakmat",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "7k/8/6K1/8/8/8/8/R7 w - - 0 1",
+    "solution": [
+      "Ra8#"
+    ],
+    "title": [
+      "Mat dengan benteng dan raja",
+      "Rook and King Checkmate"
+    ],
+    "description": [
+      "Potong baris terakhir sementara raja menutup petak keluar.",
+      "Cut off the last rank while your king covers the exits."
+    ],
+    "hint": [
+      "Benteng a1 naik ke a8. Raja g6 menutup h7 dan g7.",
+      "Lift the a1 rook to a8. The g6 king covers h7 and g7."
+    ],
+    "explanation": [
+      "Ra8# menutup baris kedelapan. Raja g6 mengambil petak pelarian pada baris ketujuh.",
+      "Ra8# controls the eighth rank. The g6 king takes away the seventh-rank escape squares."
+    ],
+    "theory": [
+      [
+        "Benteng memotong ruang dengan satu baris atau lajur.",
+        "A rook cuts off space along a rank or file."
+      ],
+      [
+        "Raja sendiri harus membantu mendekati raja lawan.",
+        "Your king must help approach the enemy king."
+      ],
+      [
+        "Jangan membiarkan benteng berada dalam jangkauan tangkapan raja.",
+        "Do not leave the rook within the enemy king’s capture range."
+      ]
+    ]
+  },
+  {
+    "id": "ladder-mate",
+    "category": "Skakmat",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "8/8/8/7k/8/8/1R6/R5K1 w - - 0 1",
+    "solution": [
+      "Ra5+",
+      "Kh6",
+      "Rb6+",
+      "Kg7",
+      "Ra7+",
+      "Kg8",
+      "Rb8#"
+    ],
+    "title": [
+      "Tangga dua benteng",
+      "The Two-Rook Ladder"
+    ],
+    "description": [
+      "Giring raja ke tepi dengan benteng yang bergantian memberi skak.",
+      "Drive the king to the edge with alternating rook checks."
+    ],
+    "hint": [
+      "Mulai Ra5+, lalu gunakan benteng lain untuk memotong baris keenam.",
+      "Start with Ra5+, then use the other rook to cut off the sixth rank."
+    ],
+    "explanation": [
+      "Ra5+ Kh6 Rb6+ Kg7 Ra7+ Kg8 Rb8# menunjukkan pola tangga: satu benteng menutup baris pelarian, yang lain memberi skak. Ini satu jalur contoh dari beberapa balasan raja.",
+      "Ra5+ Kh6 Rb6+ Kg7 Ra7+ Kg8 Rb8# demonstrates the ladder: one rook closes an escape rank while the other checks. This is one illustrative line among several king replies."
+    ],
+    "theory": [
+      [
+        "Satu benteng membatasi raja, yang lain memberi skak.",
+        "One rook restricts the king while the other checks."
+      ],
+      [
+        "Jaga jarak agar raja lawan tidak menangkap benteng.",
+        "Keep enough distance to prevent king captures."
+      ],
+      [
+        "Terus perkecil ruang sampai raja mencapai tepi papan.",
+        "Keep shrinking the space until the king reaches an edge."
+      ]
+    ]
+  },
+  {
+    "id": "active-king",
+    "category": "Endgame",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "8/4k3/2p5/8/2P5/3K4/8/8 w - - 0 1",
+    "solution": [
+      "Ke4"
+    ],
+    "title": [
+      "Aktifkan raja di endgame",
+      "Activate the King in the Endgame"
+    ],
+    "description": [
+      "Dekati pusat ketika ancaman mat berkurang.",
+      "Approach the center when mating threats have diminished."
+    ],
+    "hint": [
+      "Raja d3 dapat maju ke e4 dengan aman.",
+      "The d3 king can safely advance to e4."
+    ],
+    "explanation": [
+      "Ke4 meningkatkan jangkauan raja. Dalam endgame, raja membantu menyerang pion dan mendukung pion sendiri.",
+      "Ke4 improves the king’s reach. In endgames, kings help attack pawns and support their own."
+    ],
+    "theory": [
+      [
+        "Aktivitas raja sering lebih penting daripada bertahan di baris awal.",
+        "King activity often matters more than staying on the back rank."
+      ],
+      [
+        "Periksa jarak raja lawan dan kontrol pion sebelum melangkah.",
+        "Check the enemy king’s distance and pawn control before moving."
+      ],
+      [
+        "Raja tidak boleh mendekati raja lawan sampai berdampingan.",
+        "Kings must never become adjacent."
+      ]
+    ]
+  },
+  {
+    "id": "opposition",
+    "category": "Endgame",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "8/7p/4k3/8/3K4/4P3/8/8 w - - 0 1",
+    "solution": [
+      "Ke4"
+    ],
+    "title": [
+      "Ambil oposisi",
+      "Take the Opposition"
+    ],
+    "description": [
+      "Hadapkan raja dengan satu petak kosong di antaranya.",
+      "Face the kings with one empty square between them."
+    ],
+    "hint": [
+      "Ke4 menempatkan kedua raja di lajur e.",
+      "Ke4 places both kings on the e-file."
+    ],
+    "explanation": [
+      "Setelah Ke4, giliran hitam dengan kedua raja berhadapan. Oposisi membantu memperebutkan akses, tetapi hasil akhir tetap bergantung pada posisi pion.",
+      "After Ke4, Black moves with the kings facing each other. Opposition helps contest access, but the result still depends on the pawns."
+    ],
+    "theory": [
+      [
+        "Oposisi langsung biasanya berarti dua raja dipisahkan satu petak.",
+        "Direct opposition usually means kings separated by one square."
+      ],
+      [
+        "Giliran melangkah menentukan siapa yang harus memberi jalan.",
+        "The side to move determines who must give way."
+      ],
+      [
+        "Jangan menyimpulkan menang hanya karena memiliki oposisi.",
+        "Do not assume opposition alone guarantees a win."
+      ]
+    ]
+  },
+  {
+    "id": "passed-pawn",
+    "category": "Endgame",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "k7/p7/8/4P3/8/8/8/6K1 w - - 0 1",
+    "solution": [
+      "e6"
+    ],
+    "title": [
+      "Majukan pion bebas",
+      "Advance a Passed Pawn"
+    ],
+    "description": [
+      "Kenali pion yang tidak bisa dihadang pion lawan di lajurnya.",
+      "Recognize a pawn with no enemy pawn blocking its file or adjacent files."
+    ],
+    "hint": [
+      "Pion e5 dapat maju ke e6 tanpa lawan pion di lajur d, e, atau f.",
+      "The e5 pawn can advance to e6 with no enemy pawn on d, e, or f."
+    ],
+    "explanation": [
+      "e6 mendekatkan pion bebas ke promosi. Pion bebas tetap dapat dihentikan oleh raja atau buah lawan.",
+      "e6 brings the passed pawn closer to promotion. A passed pawn can still be stopped by a king or piece."
+    ],
+    "theory": [
+      [
+        "Pion bebas tidak memiliki pion lawan di depan pada lajur yang sama atau bersebelahan.",
+        "A passed pawn has no enemy pawn ahead on its own or neighboring files."
+      ],
+      [
+        "Dukung pion agar tidak berhenti sebagai sasaran.",
+        "Support the pawn so it does not merely become a target."
+      ],
+      [
+        "Hitung perlombaan promosi sebelum mendorong otomatis.",
+        "Calculate promotion races instead of pushing automatically."
+      ]
+    ]
+  },
+  {
+    "id": "pawn-square",
+    "category": "Endgame",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "6k1/8/8/p3K3/8/8/8/8 w - - 0 1",
+    "solution": [
+      "Kd5",
+      "a4",
+      "Kc4",
+      "a3",
+      "Kb3",
+      "a2",
+      "Kxa2"
+    ],
+    "title": [
+      "Aturan kotak pion",
+      "The Rule of the Square"
+    ],
+    "description": [
+      "Kejar pion sebelum ia berpromosi.",
+      "Catch a pawn before it promotes."
+    ],
+    "hint": [
+      "Masuk ke kotak pion lewat Kd5, lalu dekati lajur a.",
+      "Enter the pawn’s square with Kd5, then approach the a-file."
+    ],
+    "explanation": [
+      "Kd5 memasuki kotak pion a5. Pada jalur a4 Kc4 a3 Kb3 a2 Kxa2, raja tiba tepat waktu.",
+      "Kd5 enters the a5 pawn’s square. In a4 Kc4 a3 Kb3 a2 Kxa2, the king arrives in time."
+    ],
+    "theory": [
+      [
+        "Bayangkan kotak dari pion ke petak promosinya.",
+        "Imagine the square from the pawn to its promotion square."
+      ],
+      [
+        "Aturan kotak membantu menghitung tanpa memainkan setiap langkah.",
+        "The square rule helps count without playing every move."
+      ],
+      [
+        "Giliran melangkah, langkah dua petak awal, dan penghalang dapat mengubah perhitungan.",
+        "The side to move, initial two-square pushes, and obstacles can change the calculation."
+      ]
+    ]
+  },
+  {
+    "id": "rook-behind-pawn",
+    "category": "Endgame",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "6k1/7p/8/P7/8/8/8/1R4K1 w - - 0 1",
+    "solution": [
+      "Ra1"
+    ],
+    "title": [
+      "Benteng di belakang pion bebas",
+      "Rook Behind a Passed Pawn"
+    ],
+    "description": [
+      "Dukung dorongan pion dari belakang.",
+      "Support a passed pawn from behind."
+    ],
+    "hint": [
+      "Benteng b1 pindah ke a1 di belakang pion a5.",
+      "Move the b1 rook to a1 behind the a5 pawn."
+    ],
+    "explanation": [
+      "Ra1 mendukung pion dari belakang: saat pion maju, jangkauan benteng ikut bertambah. Ini pedoman praktis, bukan aturan tanpa pengecualian.",
+      "Ra1 supports the pawn from behind: as the pawn advances, the rook’s range increases. This is a practical guideline, not an exceptionless rule."
+    ],
+    "theory": [
+      [
+        "Benteng di belakang pion sendiri mendukung kemajuannya.",
+        "A rook behind your own pawn supports its advance."
+      ],
+      [
+        "Di belakang pion lawan, benteng dapat menyerangnya dari jauh.",
+        "Behind an enemy pawn, a rook can attack it from a distance."
+      ],
+      [
+        "Periksa skak dan keselamatan raja sebelum memindahkan benteng.",
+        "Check available checks and king safety before relocating a rook."
+      ]
+    ]
+  },
+  {
+    "id": "avoid-stalemate",
+    "category": "Endgame",
+    "level": "Menengah",
+    "minutes": 5,
+    "fen": "8/k1P5/2K5/8/8/8/8/8 w - - 0 1",
+    "solution": [
+      "c8=R"
+    ],
+    "title": [
+      "Promosi tanpa stalemate",
+      "Promotion Without Stalemate"
+    ],
+    "description": [
+      "Pilih benteng agar lawan tetap punya langkah.",
+      "Choose a rook so the opponent still has a legal move."
+    ],
+    "hint": [
+      "c8=Q membuat stalemate. Pilih benteng dengan c8=R.",
+      "c8=Q is stalemate. Choose c8=R instead."
+    ],
+    "explanation": [
+      "Menteri c8 akan menutup semua petak raja a7 tanpa memberi skak. Benteng c8 membiarkan a6 tersedia, sehingga permainan berlanjut.",
+      "A queen on c8 would cover every a7 king exit without checking. A rook on c8 leaves a6 available, so play continues."
+    ],
+    "theory": [
+      [
+        "Stalemate terjadi ketika pemain tidak skak tetapi tidak memiliki langkah legal.",
+        "Stalemate occurs when the side to move is not in check but has no legal move."
+      ],
+      [
+        "Stalemate adalah remis, bukan kemenangan.",
+        "Stalemate is a draw, not a win."
+      ],
+      [
+        "Promosi boleh menjadi menteri, benteng, gajah, atau kuda; bukan raja.",
+        "Promotion choices are queen, rook, bishop, or knight, never a king."
+      ]
+    ]
+  },
+  {
+    "id": "long-castle",
+    "category": "Aturan khusus",
+    "level": "Pemula",
+    "minutes": 3,
+    "fen": "6k1/7p/8/8/8/8/P7/R3K3 w Q - 0 1",
+    "solution": [
+      "O-O-O"
+    ],
+    "title": [
+      "Rokade panjang",
+      "Queenside Castling"
+    ],
+    "description": [
+      "Pelajari perpindahan raja dan benteng di sayap menteri.",
+      "Learn the king and rook moves on the queenside."
+    ],
+    "hint": [
+      "Klik raja e1 lalu c1 untuk O-O-O.",
+      "Select the e1 king, then c1, for O-O-O."
+    ],
+    "explanation": [
+      "O-O-O memindahkan raja e1 ke c1 dan benteng a1 ke d1. Petak b1 harus kosong, tetapi tidak harus bebas serangan karena raja tidak melewatinya.",
+      "O-O-O moves the e1 king to c1 and the a1 rook to d1. b1 must be empty, but need not be unattacked because the king does not cross it."
+    ],
+    "theory": [
+      [
+        "Raja dan benteng terkait belum pernah bergerak.",
+        "The king and participating rook must never have moved."
+      ],
+      [
+        "Semua petak antara raja dan benteng harus kosong.",
+        "All squares between king and rook must be empty."
+      ],
+      [
+        "Raja tidak boleh skak, melewati skak, atau berakhir dalam skak.",
+        "The king cannot start in, cross through, or finish in check."
+      ]
+    ]
+  }
+]

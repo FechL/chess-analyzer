@@ -1,4 +1,5 @@
 import { DEFAULT_POSITION } from "chess.js";
+import { ACADEMY_LESSONS, ACADEMY_MODULES } from "./academy";
 export type Opening = {
   id: string;
   name: string;
@@ -321,7 +322,7 @@ export type Exercise = {
   explanation: string;
   theory: string[];
 };
-export const LESSONS: Exercise[] = [
+const LEGACY_LESSONS: Exercise[] = [
   {
     id: "center",
     title: "Ambil kendali pusat",
@@ -401,11 +402,11 @@ export const LESSONS: Exercise[] = [
     level: "Pemula",
     minutes: 4,
     description: "Batasi gerakan buah yang menjaga rajanya.",
-    fen: "4k3/4n3/8/8/8/8/8/4R1K1 w - - 0 1",
-    solution: ["Re2"],
-    hint: "Benteng e1 tetap di lajur e. Majukan satu petak.",
+    fen: "4k3/p3n3/8/3P4/8/8/8/4R1K1 w - - 0 1",
+    solution: ["d6"],
+    hint: "Pion d5 dapat maju ke d6 dan menyerang kuda e7 yang terikat.",
     explanation:
-      "Kuda e7 terikat pada raja e8. Kuda tidak boleh bergerak meninggalkan lajur e karena akan membuka skak.",
+      "d6 menyerang kuda e7 yang terikat pada raja e8 oleh benteng e1. Kuda tidak boleh meninggalkan lajur e; hitam harus mencari pertahanan lain.",
     theory: [
       "Absolute pin mengikat buah pada raja.",
       "Buah yang terikat mutlak tidak boleh bergerak jika rajanya menjadi skak.",
@@ -485,23 +486,28 @@ export const LESSONS: Exercise[] = [
     ],
   },
 ];
+// Keep legacy IDs stable so existing completion progress is preserved.
+export const LESSONS: Exercise[] = ACADEMY_MODULES.flatMap((module) => [
+  ...ACADEMY_LESSONS.filter((lesson) => lesson.category === module.category),
+  ...LEGACY_LESSONS.filter((lesson) => lesson.category === module.category),
+].sort((a, b) => ["Pemula", "Menengah", "Lanjutan"].indexOf(a.level) - ["Pemula", "Menengah", "Lanjutan"].indexOf(b.level)));
 export const PUZZLES: Exercise[] = [
   {
-    ...LESSONS[5],
+    ...LEGACY_LESSONS[5],
     id: "p-backrank",
     title: "Jalan terakhir",
     category: "Skakmat 1 langkah",
     level: "Mudah",
   },
   {
-    ...LESSONS[3],
+    ...LEGACY_LESSONS[3],
     id: "p-fork",
     title: "Dua sasaran sekaligus",
     category: "Fork kuda",
     level: "Mudah",
   },
   {
-    ...LESSONS[8],
+    ...LEGACY_LESSONS[8],
     id: "p-opera",
     title: "Menteri yang rela pergi",
     category: "Skakmat 2 langkah",

@@ -1,3 +1,4 @@
+import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
@@ -62,6 +63,7 @@ export const ENGLISH: Record<string, string> = {
   "Pelajari opening, lalu latih variasinya dari ingatan.": "Learn openings, then practice their lines from memory.",
   "Pelajari dasar catur dan tingkatkan keterampilanmu.": "Learn chess fundamentals and build your skills.",
   ...OPENING_ENGLISH,
+  ...ACADEMY_ENGLISH,
   "Vs Bot": "Vs Bot",
   Mode: "Mode",
   "Penjelasan mode bantuan": "Assistance mode details",

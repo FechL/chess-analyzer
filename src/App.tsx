@@ -21,7 +21,6 @@ import {
   Import,
   LayoutDashboard,
   LibraryBig,
-  List,
   Monitor,
   Plus,
   RotateCcw,
@@ -1025,15 +1024,12 @@ function Library({
 }) {
   const { t } = useI18n();
 
-  const [view, setView] = useState<"cards" | "table">("cards");
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<SavedGame>();
   const [favorites, setFavorites] = useState(false);
   const [kind, setKind] = useState<LibraryKind>("all");
-  const [from, setFrom] = useState("");
-  const [until, setUntil] = useState("");
-  const hasFilters = !!(search || favorites || kind !== "all" || from || until);
-  const filtered = filterLibrary(saved, {search, favorites, kind, from, until});
+  const hasFilters = !!(search || favorites || kind !== "all");
+  const filtered = filterLibrary(saved, {search, favorites, kind, from: "", until: ""});
   return (
     <div className="page library-page">
       <div className="page-intro">
@@ -1061,30 +1057,17 @@ function Library({
           {t("Favorit")}
         </button>
         <label>
-          {t("Jenis permainan")}
-          <select value={kind} onChange={(event) => setKind(event.target.value as LibraryKind)}>
+          <select aria-label={t("Jenis permainan")} value={kind} onChange={(event) => setKind(event.target.value as LibraryKind)}>
             {([ ["all", "Semua jenis"], ["live", "Live"], ["bot", "Lawan bot"], ["free", "Analisis bebas"], ["chesscom", "Chess.com"], ["lichess", "Lichess"], ["pgn", "PGN"], ["fen", "FEN"], ["collection", "Koleksi"] ] as const).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
           </select>
         </label>
-        <label>
-          {t("Disimpan sejak")}
-          <input type="date" value={from} max={until || undefined} onChange={(event) => setFrom(event.target.value)} />
-        </label>
-        <label>
-          {t("Disimpan hingga")}
-          <input type="date" value={until} min={from || undefined} onChange={(event) => setUntil(event.target.value)} />
-        </label>
-        {hasFilters && <button className="text-button" onClick={() => {setSearch(""); setFavorites(false); setKind("all"); setFrom(""); setUntil("");}}>{t("Hapus filter")}</button>}
+        {hasFilters && <button className="text-button" onClick={() => {setSearch(""); setFavorites(false); setKind("all");}}>{t("Hapus filter")}</button>}
       </div>
         <Title as="h3">
           {t(saved.length)}
           {t(" permainan tersimpan")}
         </Title>
         <div className="library-toolbar-actions">
-        <div className="library-view-toggle" role="group" aria-label={t("Tampilan koleksi")}>
-          <button className="icon-button" aria-pressed={view === "cards"} title={t("Tampilan card")} aria-label={t("Tampilan card")} onClick={() => setView("cards")}><Grid2X2 size={16} /></button>
-          <button className="icon-button" aria-pressed={view === "table"} title={t("Tampilan tabel")} aria-label={t("Tampilan tabel")} onClick={() => setView("table")}><List size={17} /></button>
-        </div>
         <label className="search-input">
           <Search size={16} />
           <input
@@ -1098,7 +1081,7 @@ function Library({
       </div>
       {t(
         filtered.length ? (
-          <LibraryGames games={filtered} view={view} onLoad={onLoad} onDelete={setDeleting} onToggleFavorite={onToggleFavorite} />
+          <LibraryGames games={filtered} onLoad={onLoad} onDelete={setDeleting} onToggleFavorite={onToggleFavorite} />
         ) : (
           <div className="empty-state library-empty">
             <div className="empty-icon">

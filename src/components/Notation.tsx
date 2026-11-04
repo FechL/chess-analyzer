@@ -78,3 +78,35 @@ export function NotationLine({
     </span>
   );
 }
+
+/** Render explicitly identified SAN moves inside prose without treating square names as moves. */
+export function NotationText({
+  text,
+  moves,
+}: {
+  text: string;
+  moves: { san?: string; color: "w" | "b" }[];
+}) {
+  const known = new Map<string, "w" | "b">();
+  for (const move of moves)
+    if (move.san && !known.has(move.san)) known.set(move.san, move.color);
+  if (!known.size) return <>{text}</>;
+  const pattern = [...known.keys()]
+    .sort((a, b) => b.length - a.length)
+    .map((san) => san.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|");
+  const parts = text.split(
+    new RegExp(`(?<![\\p{L}\\p{N}_])(${pattern})(?![\\p{L}\\p{N}_])`, "gu"),
+  );
+  return (
+    <>
+      {parts.map((part, index) =>
+        index % 2 ? (
+          <NotationMove key={index} san={part} color={known.get(part)!} />
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}

@@ -1,3 +1,4 @@
+import { AppearanceContext } from "../lib/preferences";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { Settings } from "../App";
@@ -27,8 +28,12 @@ describe("Academy lesson workspace", () => {
     expect(html).not.toContain('role="dialog"');
     expect(html).not.toContain("<kbd");
     expect(html).toContain('id="academy-menu-tab"');
-    expect(html).not.toContain("Learn the moves and follow the arrows on the board.");
-    expect(html.indexOf("study-theory")).toBeLessThan(html.indexOf("academy-step-coach"));
+    expect(html).not.toContain(
+      "Learn the moves and follow the arrows on the board.",
+    );
+    expect(html.indexOf("study-theory")).toBeLessThan(
+      html.indexOf("academy-step-coach"),
+    );
     expect(html).toContain('class="board-arrow"');
     expect(html).not.toContain("Lesson Notation");
     expect(html).not.toContain('id="academy-overview-tab"');
@@ -38,6 +43,31 @@ describe("Academy lesson workspace", () => {
     expect(html).not.toContain("You&#x27;ve completed this lesson.");
     expect(html).not.toContain(">Practice<");
     expect(html).not.toContain("Show answer");
+  });
+
+  it("uses the selected piece notation and theme for the tutorial's next move", () => {
+    const lesson = LESSONS.find((item) => /^N/.test(item.solution[0]))!;
+    expect(lesson).toBeDefined();
+    const html = renderToStaticMarkup(
+      <AppearanceContext.Provider
+        value={{
+          notationStyle: "pieces",
+          pieceTheme: "celtic",
+          colorMode: "system",
+        }}
+      >
+        <AcademyStudy
+          lesson={lesson}
+          settings={settings}
+          onBack={() => {}}
+          onOpenLesson={() => {}}
+          onAnalyze={() => {}}
+        />
+      </AppearanceContext.Provider>,
+    );
+    expect(html).toMatch(
+      /class="notation-piece" src="\/pieces\/celtic\/[wb]N.svg"/,
+    );
   });
 
   it("keeps every lesson accessible from the catalog without embedding a lesson dialog", () => {

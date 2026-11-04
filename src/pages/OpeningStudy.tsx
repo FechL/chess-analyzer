@@ -32,7 +32,7 @@ import {
   NavigationControls,
   NavigationShortcutHint,
 } from "../components/Common";
-import { NotationMove } from "../components/Notation";
+import { NotationMove, NotationText } from "../components/Notation";
 import { useI18n } from "../lib/i18n";
 import { readStorage, writeStorage } from "../lib/chess";
 import {
@@ -164,7 +164,7 @@ export default function OpeningStudy({
   const [showLearnArrows, setShowLearnArrows] = useState(true);
   const [feedback, setFeedback] = useState("");
   const [mistakePreview, setMistakePreview] = useState<
-    Pick<PuzzleReply, "fen" | "from" | "to"> & { mistakeSquare: string }
+    Pick<PuzzleReply, "fen" | "from" | "to"> & { san?: string } & { mistakeSquare: string }
   >();
   const mistakeRequest = useRef(0);
   const mistakeBusy = useRef(false);
@@ -1476,7 +1476,7 @@ export default function OpeningStudy({
                           ) : null}
                           <p>
                             {feedback
-                              ? t(feedback)
+                              ? <NotationText text={t(feedback)} moves={[{ san: mistakePreview?.san, color: opening.side === "w" ? "b" : "w" }]} />
                               : showAnswer
                                 ? t(openingMoveIdea(studyMove))
                                 : t(

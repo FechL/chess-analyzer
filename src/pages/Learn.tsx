@@ -1,3 +1,4 @@
+import { NotationMove, NotationText } from "../components/Notation";
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import { openingLines } from "../lib/opening-training";
 import type { OpeningProgress } from "../lib/opening-training";
@@ -241,7 +242,7 @@ export function OpeningsPage({
                       o.moves.slice(0, 6).map((m, j) => (
                         <span key={j}>
                           {t(j % 2 === 0 ? `${Math.floor(j / 2) + 1}. ` : "")}
-                          {t(m)}
+                          <NotationMove san={m} color={j % 2 ? "b" : "w"} />
                         </span>
                       )),
                     )}
@@ -336,17 +337,6 @@ export function AcademyPage({
               </div>
               <Title as="h3">{t(l.title)}</Title>
               <p>{t(l.description)}</p>
-              <div className="lesson-bottom">
-                <span>
-                  <Clock3 size={13} />
-                  {t(l.minutes)}
-                  {t(" menit")}
-                </span>
-                <span>
-                  {t("Mulai pelajaran ")}
-                  <ArrowRight size={14} />
-                </span>
-              </div>
             </button>
           )),
         )}
@@ -390,7 +380,7 @@ export function AcademyStudy({
         <div className="game-title-block">
           <Title as="strong">{t(lesson.title)}</Title>
           <span className="opening-repertoire">
-            {t(lesson.category)} · {lesson.minutes} {t("menit")}
+            {t(lesson.category)}
           </span>
         </div>
         <div className="workspace-actions study-page-actions">
@@ -612,9 +602,6 @@ export function PuzzlesPage({
   const [puzzleSolved, setPuzzleSolved] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
-  const [moveFeedback, setMoveFeedback] = useState<PuzzleMoveFeedback>({
-    kind: "ready",
-  });
   const [positionFen, setPositionFen] = useState("");
   const [evaluation, setEvaluation] = useState<Evaluation>();
   const [busy, setBusy] = useState(false);
@@ -933,46 +920,11 @@ export function PuzzlesPage({
   const viewedPuzzle = historyEntry ? historyEntry.puzzle : puzzle;
   const color = (viewedPuzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
   const activeColor = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
-  const activeTheme = PUZZLE_THEMES.find(([id]) => id === theme)?.[1];
-  const activeDifficulty = PUZZLE_DIFFICULTIES.find(
-    ([id]) => id === difficulty,
-  )?.[1];
   return (
     <div ref={pageRef} className="page analysis-page puzzle-page viewport-board-layout">
       <div className="workspace-toolbar">
         <div className="game-title-block">
-          <Title as="strong">
-            {t(
-              historyEntry
-                ? "Puzzle Lichess #" + historyEntry.id
-                : puzzle
-                  ? "Puzzle Lichess #" + puzzle.id
-                  : "Puzzle Lichess",
-            )}
-          </Title>
-          <div className="game-players">
-            {t(
-              viewedPuzzle && (
-                <span className="game-player">
-                  <span
-                    className={"player-color player-color-" + color}
-                    aria-hidden="true"
-                  />
-                  <strong>{t(color === "w" ? "Putih" : "Hitam")}</strong>
-                  <span>
-                    {t("melangkah")}
-                    {t(" · ")}
-                    {t("Rating ")}
-                    {t(viewedPuzzle.rating)}
-                  </span>
-                </span>
-              ),
-            )}
-            <span className="game-player">
-              <strong>{t(activeTheme ?? "Campuran")}</strong>
-              <span>{t(activeDifficulty ?? "Normal")}</span>
-            </span>
-          </div>
+          <strong>{viewedPuzzle && t(color === "w" ? "Putih melangkah" : "Hitam melangkah")}</strong>
         </div>
       </div>
       <div className="analysis-grid">
@@ -1000,7 +952,6 @@ export function PuzzlesPage({
                   ) : null
                 }
                 onPositionChange={setPositionFen}
-                onFeedbackChange={setMoveFeedback}
                 onFindReply={getOpponentReply}
                 onComplete={() => playBoardSound("success")}
                 onAnalyze={(fen) =>
@@ -1043,7 +994,6 @@ export function PuzzlesPage({
                     ) : null
                   }
                   onPositionChange={historyEntry ? undefined : setPositionFen}
-                  onFeedbackChange={historyEntry ? undefined : setMoveFeedback}
                   onFindReply={getOpponentReply}
                   onMistake={breakStreak}
                   onSolve={(clean) => {
@@ -1368,68 +1318,6 @@ export function PuzzlesPage({
               )}
             </aside>
             <div className="puzzle-sidebar-footer">
-              <div
-                className={`coach-card puzzle-feedback ${moveFeedback.kind}`}
-                role="status"
-              >
-                <div className="coach-label">
-                  <span className="coach-avatar" aria-hidden="true">
-                    {moveFeedback.kind === "wrong" ? (
-                      <X size={17} />
-                    ) : moveFeedback.kind === "correct" ||
-                      moveFeedback.kind === "complete" ? (
-                      <Check size={17} />
-                    ) : (
-                      <Lightbulb size={17} />
-                    )}
-                  </span>
-                  <strong>
-                    {t(
-                      moveFeedback.kind === "wrong"
-                        ? "Langkah puzzle kurang tepat"
-                        : moveFeedback.kind === "correct"
-                          ? "Langkah puzzle tepat"
-                          : moveFeedback.kind === "complete"
-                            ? "Puzzle terselesaikan"
-                            : moveFeedback.kind === "hint"
-                              ? "Petunjuk"
-                              : "Catatan pelatih",
-                    )}
-                  </strong>
-                  {moveFeedback.move && (
-                    <span className="coach-move">{moveFeedback.move}</span>
-                  )}
-                </div>
-                <p>
-                  {moveFeedback.kind === "wrong" ? (
-                    moveFeedback.reply ? (
-                      <>
-                        {t("Balasan terbaik lawan: ")}
-                        <strong>{moveFeedback.reply}</strong>
-                        {t(". Coba langkah lain dari posisi semula.")}
-                      </>
-                    ) : (
-                      t(
-                        moveFeedback.replyStatus === "terminal"
-                          ? "Permainan berakhir setelah langkah ini. Coba langkah lain untuk menemukan solusi puzzle."
-                          : moveFeedback.replyStatus === "unavailable"
-                            ? "Balasan engine belum tersedia. Coba langkah lain dari posisi semula."
-                            : "Langkah ini belum menyelesaikan puzzle. Sedang mencari balasan terbaik lawan…",
-                      )
-                    )
-                  ) : (
-                    t(
-                      moveFeedback.kind === "correct"
-                        ? "Langkah tepat. Lanjutkan solusi Anda."
-                        : moveFeedback.kind === "complete"
-                          ? "Semua langkah solusi telah ditemukan."
-                          : moveFeedback.kind === "hint"
-                            ? "Cari langkah yang memaksa balasan lawan."
-                            : "Temukan langkah terbaik. Periksa skak, tangkapan, dan ancaman.",
-                    )
-                  )}
-                </p>
-              </div>
               <div className="puzzle-footer-actions">
                 <button
                   className="button secondary"
@@ -2041,10 +1929,10 @@ export function LineTrainer({
               <Title as="h3">
                 {Math.ceil((visibleStep + 1) / 2)}
                 {guidedMove.color === "w" ? ". " : "… "}
-                {guidedMove.san}
+                <NotationMove san={guidedMove.san} color={guidedMove.color} />
               </Title>
             )}
-            <p>{t(done ? explanation || title : feedback || title)}</p>
+            <p><NotationText text={t(done ? explanation || title : feedback || title)} moves={[{ san: last?.san, color }]} /></p>
             {!done && hint && <p className="academy-step-hint">{t(hint)}</p>}
           </div>
         </>

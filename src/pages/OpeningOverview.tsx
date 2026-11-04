@@ -1,13 +1,15 @@
+import { NotationMove } from "../components/Notation";
 import Title from "../components/Title";
 import { ExternalLink, Lightbulb } from "lucide-react";
 import type { Opening } from "../data/content";
-import { OPENING_OVERVIEWS } from "../data/opening-overviews";
+import { OPENING_OVERVIEWS, openingOverviewMoves } from "../data/opening-overviews";
 import { useI18n } from "../lib/i18n";
 
 export default function OpeningOverview({ opening }: { opening: Opening }) {
   const { t, language } = useI18n();
   const overview = OPENING_OVERVIEWS[opening.id];
   if (!overview) return null;
+  const moves = openingOverviewMoves(opening.id, opening.moves);
   const chesscom = `https://www.chess.com/openings/${overview.chesscom}`;
   const wikipedia = `https://en.wikipedia.org/wiki/${overview.wikipedia}`;
   const sources = [
@@ -46,7 +48,13 @@ export default function OpeningOverview({ opening }: { opening: Opening }) {
           className="opening-overview-moves"
           aria-label={t("Langkah pembuka")}
         >
-          {overview.moves}
+          {moves.map((san, index) => index % 2 === 0 && (
+            <span className="opening-overview-step" key={index}>
+              <span>{Math.floor(index / 2) + 1}.</span>
+              <NotationMove san={san} color="w" />
+              {moves[index + 1] && <NotationMove san={moves[index + 1]} color="b" />}
+            </span>
+          ))}
         </div>
       </header>
       <section>

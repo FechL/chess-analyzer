@@ -1,3 +1,4 @@
+import { NotationMove } from "./components/Notation";
 import SettingsBoardPreview from "./components/SettingsBoardPreview";
 import ProfilePage from "./pages/Profile";
 import { useAuth } from "./lib/auth-context";
@@ -375,13 +376,9 @@ export default function App() {
                         setSettings((s) => ({ ...s, notationStyle: value }))
                       }
                     >
-                      <span className="notation-example" aria-hidden="true">
-                        {value !== "letters" && (
-                          <img src={pieceAsset("w", "N", settings.pieceTheme)} alt="" />
-                        )}
-                        {value !== "pieces" && <span>Nf3</span>}
-                        {value === "pieces" && <span>f3</span>}
-                      </span>
+                      <AppearanceContext.Provider value={{ ...settings, notationStyle: value }}>
+                        <span className="notation-example" aria-hidden="true"><NotationMove san="Nf3" color="w" /></span>
+                      </AppearanceContext.Provider>
                       <span>{t(label)}</span>
                       {settings.notationStyle === value && <Check className="setting-choice-check" size={14} />}
                     </button>

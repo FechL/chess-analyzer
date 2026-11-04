@@ -23,7 +23,7 @@ import { useI18n } from "../lib/i18n";
 import Board, { EvalBar } from "../components/Board";
 import EngineOptions from "../components/EngineOptions";
 import CopyGameActions from "../components/CopyGameActions";
-import { NotationLine } from "../components/Notation";
+import { NotationLine, NotationText } from "../components/Notation";
 import {
   IconButton,
   Modal,
@@ -999,7 +999,7 @@ export default function BotPage({
           {hint && (
             <div className="hint-box" role="status">
               <Lightbulb size={16} />
-              {t(hint)}
+              <NotationText text={t(hint)} moves={[{ san: hintArrow ? pvToSan(visibleFen, [hintArrow], 1)[0] : undefined, color: human }]} />
             </div>
           )}
         </div>

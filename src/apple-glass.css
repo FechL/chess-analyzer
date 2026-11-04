@@ -4339,3 +4339,11 @@ textarea::placeholder {
   .settings-preview { width: min(100%, 240px); }
   .settings-preview-frame { width: 180px; margin-inline: auto; }
 }
+
+.academy-step-coach h3 .notation-piece { width: 26px; height: 26px; }
+.opening-overview-step { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+.opening-overview-moves { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.opening-overview-moves .notation-san { vertical-align: middle; line-height: 1.5; }
+.opening-overview-moves .notation-piece { flex-shrink: 0; display: block; }
+.opening-moves > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }

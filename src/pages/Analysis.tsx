@@ -30,7 +30,7 @@ import {
   Trash2,
   WandSparkles,
 } from "lucide-react";
-import { NotationLine } from "../components/Notation";
+import { NotationLine, NotationMove, NotationText } from "../components/Notation";
 import Board, { EvalBar } from "../components/Board";
 import {
   IconButton,
@@ -1072,12 +1072,16 @@ export default function Analysis({
                         {t(
                           (currentBook || currentReview) && (
                             <span className="coach-move">
-                              {t(currentMove?.san)}
+                              {currentMove && <NotationMove san={currentMove.san} color={currentMove.color} />}
                             </span>
                           ),
                         )}
                       </div>
-                      <p>{t(coachText)}</p>
+                      <p><NotationText text={t(coachText)} moves={[
+                        { san: currentMove?.san, color: currentMove?.color || "w" },
+                        { san: currentReview?.bestSan, color: currentReview?.color || "w" },
+                        { san: result?.lines[0] ? pvToSan(fen, result.lines[0].pv, 1)[0] : undefined, color: position.turn() },
+                      ]} /></p>
                     </div>}
                   </>
                 ),
@@ -1236,12 +1240,7 @@ export default function Analysis({
                                     }}
                                   >
                                     <img
-                                      src={
-                                        "/pieces/" +
-                                        color +
-                                        type.toUpperCase() +
-                                        ".svg"
-                                      }
+                                      src={pieceAsset(color, type, settings.pieceTheme)}
                                       alt={t("")}
                                     />
                                   </button>

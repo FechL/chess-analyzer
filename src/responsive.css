@@ -841,6 +841,34 @@
   .settings-notation-moves .notation-piece { width: 16px; height: 16px; }
 }
 
+/* Mobile setup shows only the game configuration until Start. */
+.page.bot-mobile-setup .bot-player-header,
+.page.bot-mobile-setup .bot-board-area,
+.page.bot-mobile-setup .bot-board-under,
+.page.bot-mobile-setup .bot-side-panel > .panel-tabs {
+  display: none;
+}
+.page.bot-mobile-setup > .bot-workspace {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.page.bot-mobile-setup .bot-workspace > .bot-sidebar {
+  flex: 1;
+  min-height: 0;
+}
+.page.bot-mobile-setup .bot-sidebar > .bot-side-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.page.bot-mobile-setup .bot-game-panel {
+  padding-inline: 0;
+}
+
 /* One shared height for the content directly above every full-size board. */
 .page:is(.analysis-page, .bot-page) { --board-header-height: 44px; --board-header-line: 22px; --board-header-gap: 8px; }
 .page .board-page-header { box-sizing: border-box; height: var(--board-header-height); min-height: var(--board-header-height); max-height: var(--board-header-height); align-items: center; padding-block: 0; margin-block: 0 var(--board-header-gap); }

@@ -98,6 +98,7 @@ export default function BotPage({
     ...readStorage<Partial<BotOptions>>(OPTIONS_KEY, {}),
   }));
   const [tab, setTab] = useState("game");
+  const mobileSetup = mobileLayout && !session.started;
   const liveAssistance = permissions.engine && options.liveEngine;
   useEffect(() => {
     if (!permissions.engine) {
@@ -468,6 +469,7 @@ export default function BotPage({
   ]);
 
   function start(restart = false) {
+    setTab("game");
     warnedClocks.current.clear();
     stopWork();
     reviewGeneration.current++;
@@ -770,7 +772,7 @@ export default function BotPage({
               ? t("Permainan dijeda")
               : t(gameStatus(chess));
   return (
-    <div ref={pageRef} className="page bot-page viewport-board-layout">
+    <div ref={pageRef} className={`page bot-page viewport-board-layout${mobileSetup ? " bot-mobile-setup" : ""}`}>
       <div className="analysis-grid bot-workspace">
         <div className="bot-player-header analysis-player-header board-page-header">
           <div className="bot-player human-player">
@@ -1008,7 +1010,7 @@ export default function BotPage({
                 {t("Opsi")}
               </button>
             </div>
-            {tab === "game" ? (
+            {mobileSetup || tab === "game" ? (
               <div className={`bot-game-panel${session.started ? " is-playing" : ""}`}>
                 {!session.started && (
                   <>
@@ -1393,7 +1395,7 @@ export default function BotPage({
               </div>
             ) : null}
           </aside>
-          {mobileLayout && (
+          {mobileLayout && session.started && (
             <CopyGameActions fen={visibleFen} getPgn={() => toPgn(exportGame())} className="bot-export-actions" />
           )}
         </div>

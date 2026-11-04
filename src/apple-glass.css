@@ -4100,11 +4100,22 @@ textarea::placeholder {
 .library-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
 .library-table :is(th, td) { padding: 15px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .library-table th { color: var(--muted); font-size: 10px; font-weight: 500; white-space: nowrap; }
-.library-table td { color: var(--ink); }
+.library-table td { color: var(--ink); white-space: nowrap; }
 .library-table tbody tr:last-child td { border-bottom: 0; }
 .library-table tbody tr:hover { background: #78a6dd0c; }
 .library-table td > small { display: block; color: var(--muted); font-size: 10px; margin-top: 6px; }
-.library-table .library-table-title { display: inline; font-size: 12px; text-align: left; min-width: 140px; }
+.library-table .library-table-title {
+  display: block;
+  font-size: 12px;
+  text-align: left;
+  min-width: 140px;
+  white-space: nowrap;
+}
+.library-table .library-table-source { min-width: 144px; }
+.library-table-source > span {
+  display: block;
+  white-space: nowrap;
+}
 .library-table-player { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .library-table-player + .library-table-player { margin-top: 6px; }
 .library-table-actions { display: flex; gap: 4px; }

@@ -49,3 +49,15 @@
     scrollbar-gutter: stable;
   }
 }
+
+/* Hide vertical tracks on mobile, including dialogs and portal content. */
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell .dashboard-main-scroll { scrollbar-gutter: auto; }
+  @supports selector(::-webkit-scrollbar) {
+    *::-webkit-scrollbar { width: 0; }
+    *::-webkit-scrollbar:vertical { display: none; }
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    * { scrollbar-width: none; }
+  }
+}

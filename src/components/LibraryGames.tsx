@@ -119,6 +119,7 @@ export default function LibraryGames({
               <td>
                 <button
                   className="text-button library-table-title"
+                  title={t(item.game.event)}
                   onClick={() => onLoad(item.game)}
                 >
                   {t(item.game.event)}
@@ -147,8 +148,8 @@ export default function LibraryGames({
                 </span>
               </td>
               <td>{date(item)}</td>
-              <td>
-                {source(item)}
+              <td className="library-table-source">
+                <span title={source(item)}>{source(item)}</span>
                 {item.game.timeControl && (
                   <small>{recentTimeControl(item.game.timeControl)}</small>
                 )}

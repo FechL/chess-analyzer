@@ -18,7 +18,6 @@ export default function MorePage({ onNavigate, completedCount = 0 }: { onNavigat
         <span className="brand-icon"><img src="/pieces/wN.svg" alt="" /></span>
         <span><strong>kuda</strong><small>CHESS STUDIO</small></span>
       </a>
-      <Title as="h1">{t("Lainnya")}</Title>
       <div className="home-activities more-learning-cards">
         {items.filter((item) => item.id === "academy").map(({ id, label, icon: Icon }) => (
           <button key={id} className="home-activity" onClick={() => onNavigate(id)}>

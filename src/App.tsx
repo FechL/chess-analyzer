@@ -79,6 +79,7 @@ export type Settings = {
   autoAnalyzeImported: boolean;
   enableShortcuts: boolean;
   showPieceAnnotation: boolean;
+  showCoachNotes?: boolean;
   notationStyle: "letters" | "pieces" | "both";
   language: "id" | "en";
   colorMode: "light" | "dark" | "system";
@@ -107,6 +108,7 @@ const DEFAULT_SETTINGS: Settings = {
   autoAnalyzeImported: true,
   enableShortcuts: true,
   showPieceAnnotation: true,
+  showCoachNotes: true,
   notationStyle: "letters",
   language: "en",
   colorMode: "system",

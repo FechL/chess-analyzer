@@ -304,6 +304,7 @@ export const ENGLISH: Record<string, string> = {
   Kesalahan: "Mistake",
   Blunder: "Blunder",
   "Catatan pelatih": "Coach notes",
+  "Tampilkan catatan pelatih": "Show Coach Notes",
   "Menilai langkah…": "Rating move…",
   "Penilaian tidak tersedia": "Move rating unavailable",
   "Belum dianalisis": "Not analyzed",

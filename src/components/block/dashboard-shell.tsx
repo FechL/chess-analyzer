@@ -66,8 +66,6 @@ const LAYER_SPRING = {
   mass: 0.7,
 } as const;
 const RESIZE_STEP = 10;
-/** The sidebar docks beside the content from this container width, in rem. Keep in sync with `@2xl/dashboard-shell`. */
-const DOCKED_SIDEBAR_REM = 42;
 
 export const dashboardButtonVariants = cva(
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-medium leading-none outline-none select-none transition-[background-color,color,box-shadow] duration-150 ease-[cubic-bezier(0.25,1,0.5,1)] focus-visible:ring-2 focus-visible:ring-(--obsidian-dashboard-shell-ring) disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -866,15 +864,14 @@ export function DashboardShell({
     }
   }, [isDrawerOpen]);
 
-  // A container that widens past the docking width hides the drawer with CSS; close it too so the content is not left inert.
+  // Match the actual docked sidebar, including app-specific responsive rules.
   useEffect(() => {
     const root = rootRef.current;
     if (!isDrawerOpen || !root || typeof ResizeObserver === "undefined") return;
-    const dockedWidth =
-      DOCKED_SIDEBAR_REM *
-      (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry.contentRect.width >= dockedWidth) setIsDrawerOpen(false);
+    const sidebar = root.querySelector<HTMLElement>(":scope > aside");
+    const observer = new ResizeObserver(() => {
+      if (sidebar && getComputedStyle(sidebar).display !== "none")
+        setIsDrawerOpen(false);
     });
     observer.observe(root);
     return () => observer.disconnect();
@@ -1141,7 +1138,7 @@ export function DashboardShell({
               isDrawerOpen && (
                 <motion.div
                   key="drawer"
-                  className="absolute inset-0 z-30 @2xl/dashboard-shell:hidden"
+                  className="shell-navigation-overlay absolute inset-0 z-30 @2xl/dashboard-shell:hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

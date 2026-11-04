@@ -730,9 +730,17 @@
   .kuda-shell > aside { display: flex; }
 }
 @media (min-width: 761px) and (max-width: 1280px) {
+  .page.viewport-board-layout > .workspace-toolbar { row-gap: 12px; }
+  .page.viewport-board-layout > .workspace-toolbar > .workspace-actions { grid-row: 1; grid-column: 1; }
+  .page.viewport-board-layout > .workspace-toolbar > .analysis-player-header { grid-row: 2; grid-column: 1; }
   .analysis-grid > .analysis-sidebar:not(.bot-sidebar):not(.opening-study-sidebar) { grid-column: 1; }
   .analysis-sidebar .analysis-panel { display: block; }
-  .analysis-grid > .board-section { max-width: 620px; margin-inline: auto; }
+  .page:is(.analysis-page, .bot-page) > .workspace-toolbar,
+  .page .analysis-grid > :is(.board-section, .analysis-sidebar, .board-under, .board-export-actions, .bot-player-header) {
+    width: min(100%, 620px);
+    max-width: 620px;
+    margin-inline: auto;
+  }
   .bot-workspace > .bot-player-header,
   .analysis-page .workspace-toolbar > .analysis-player-header {
     width: 100%;
@@ -760,4 +768,20 @@
       minmax(var(--desktop-analysis-panel-min), 1fr);
     column-gap: var(--desktop-analysis-gap);
   }
+}
+
+/* Hide the left navigation before the board's right panel needs to stack. */
+@media (min-width: 761px) and (max-width: 1520px) {
+  .kuda-shell > aside { display: none; }
+  .kuda-shell .shell-mobile-navigation { display: inline-flex; }
+  .kuda-shell > .shell-navigation-overlay { display: block; }
+}
+/* A single board column leaves enough room to dock navigation again. */
+@media (min-width: 1000px) and (max-width: 1280px) {
+  .kuda-shell > aside { display: flex; }
+  .kuda-shell .shell-mobile-navigation { display: none; }
+  .kuda-shell > .shell-navigation-overlay { display: none; }
+}
+@media (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell .shell-mobile-navigation { display: none; }
 }

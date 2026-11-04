@@ -1069,7 +1069,7 @@ export default function Analysis({
                       </span>
                     </div>
                     <MoveList {...notationProps} />
-                    <div className="coach-card">
+                    {settings.showCoachNotes !== false && <div className="coach-card">
                       <div className="coach-label">
                         <span className="coach-avatar">
                           {t(
@@ -1100,7 +1100,7 @@ export default function Analysis({
                         )}
                       </div>
                       <p>{t(coachText)}</p>
-                    </div>
+                    </div>}
                   </>
                 ),
               )}
@@ -1327,6 +1327,11 @@ export default function Analysis({
                       checked: settings.showEvalBar,
                       onChange: (showEvalBar) =>
                         onSettingsChange({ ...settings, showEvalBar }),
+                    }}
+                    coachNotes={{
+                      checked: settings.showCoachNotes !== false,
+                      onChange: (showCoachNotes) =>
+                        onSettingsChange({ ...settings, showCoachNotes }),
                     }}
                     shortcuts={settings.enableShortcuts}
                     onChange={(value) => {

@@ -18,11 +18,13 @@ export default function EngineOptions({
   onChange,
   shortcuts = false,
   evaluationBar,
+  coachNotes,
 }: {
   value: EngineOptionsValue;
   onChange: (next: EngineOptionsValue) => void;
   shortcuts?: boolean;
   evaluationBar?: { checked: boolean; onChange: (checked: boolean) => void };
+  coachNotes?: { checked: boolean; onChange: (checked: boolean) => void };
 }) {
   const { t } = useI18n();
   const id = useId();
@@ -156,6 +158,19 @@ export default function EngineOptions({
               onChange={(e) => evaluationBar.onChange(e.target.checked)}
             />
             {t("Tampilkan bar evaluasi")}
+          </label>
+        </div>
+      )}
+      {coachNotes && (
+        <div className="settings-section">
+          <label className="board-sound-setting">
+            <input
+              type="checkbox"
+              role="switch"
+              checked={coachNotes.checked}
+              onChange={(event) => coachNotes.onChange(event.target.checked)}
+            />
+            {t("Tampilkan catatan pelatih")}
           </label>
         </div>
       )}

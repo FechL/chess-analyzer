@@ -776,7 +776,7 @@ export default function Analysis({
           <button
             className="button secondary"
             onClick={onNewGame}
-            aria-label={mobileLayout ? `${t("New Game")} / ${t("Impor permainan")}` : t("New Game")}
+            aria-label={`${t("New Game")} / ${t("Impor permainan")}`}
             title={
               settings.enableShortcuts
                 ? t("New Game") + " (Shift+N)"
@@ -787,23 +787,7 @@ export default function Analysis({
             <Plus size={15} />
             <span className="workspace-action-label">{t(" New Game")}</span>
           </button>
-          {!mobileLayout && <button
-            className="button primary"
-            onClick={onImport}
-            aria-label={t("Impor permainan")}
-            title={
-              settings.enableShortcuts
-                ? t("Impor permainan") + " (Shift+I)"
-                : undefined
-            }
-            aria-keyshortcuts={settings.enableShortcuts ? "Shift+I" : undefined}
-          >
-            <ArrowDownToLine size={16} />
-            <span className="workspace-action-label">
-              {t(" Impor permainan")}
-            </span>
-          </button>}
-          <button className="button secondary" onClick={onBackHome} aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")}>
+          <button className="icon-button back-icon" onClick={onBackHome} aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")}>
             <ArrowLeft size={16} />
           </button>
         </div>

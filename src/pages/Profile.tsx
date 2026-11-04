@@ -45,7 +45,7 @@ export default function ProfilePage({ onBack }: { onBack: () => void }) {
   }
   return (
     <div className="page profile-page">
-      <header className="settings-page-header"><button className="icon-button" onClick={onBack} aria-label={t("Kembali")}><ArrowLeft size={20} /></button><Title as="h1">{t("Profil")}</Title></header>
+      <header className="settings-page-header"><button className="icon-button back-icon" onClick={onBack} aria-label={t("Kembali")}><ArrowLeft size={20} /></button><Title as="h1">{t("Profil")}</Title></header>
       <button className={`text-button profile-sync-status is-${sync}`} onClick={() => void run("sync", flushUserState)} disabled={!!busy || sync !== "offline"}>
         {sync === "saving" ? <LoaderCircle size={16} className="spin" /> : sync === "offline" ? <CloudOff size={16} /> : <Cloud size={16} />}
         {t(sync === "saving" ? "Menyimpan perubahan…" : sync === "offline" ? "Belum tersinkron. Coba lagi." : "Semua perubahan tersimpan di akun Anda.")}

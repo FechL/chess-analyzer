@@ -1,14 +1,15 @@
+import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import { openingLines } from "../lib/opening-training";
 import type { OpeningProgress } from "../lib/opening-training";
 import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 // i18n: rendered text
-import { pieceAsset } from "../lib/preferences";
 import { useI18n } from "@/lib/i18n";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
+  ArrowLeft,
   ArrowRight,
   BookOpen,
   Check,
@@ -27,6 +28,7 @@ import {
   Search,
   SkipForward,
   Sparkles,
+  Star,
   Target,
   Trophy,
   X,
@@ -37,10 +39,9 @@ import {
   Modal,
   NavigationControls,
   NavigationShortcutHint,
-  ProgressRing,
 } from "../components/Common";
 import { LESSONS, OPENINGS } from "../data/content";
-import { ACADEMY_MODULES, ACADEMY_REFERENCES } from "../data/academy";
+import { ACADEMY_MODULES } from "../data/academy";
 import type { Exercise } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
 import type { Evaluation } from "../lib/chess";
@@ -113,6 +114,30 @@ function formatPuzzleClock(milliseconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
+function CatalogToolbar({ children, search, onSearch, placeholder, label, className = "" }: {
+  children: ReactNode;
+  search: string;
+  onSearch: (value: string) => void;
+  placeholder: string;
+  label: string;
+  className?: string;
+}) {
+  const { t } = useI18n();
+  const [expanded, setExpanded] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const id = useId();
+  useEffect(() => { if (expanded) input.current?.focus(); }, [expanded]);
+  function closeSearch() { setExpanded(false); trigger.current?.focus(); }
+  return <div className={`catalog-toolbar catalog-search-toolbar ${className}${expanded ? " is-search-expanded" : ""}`}>
+    {children}
+    <div className="catalog-search-actions">
+      <button type="button" ref={trigger} className="button secondary catalog-search-toggle" aria-label={label} aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(true)}><Search size={16} /></button>
+      <div className="search-input"><Search size={16} /><input id={id} ref={input} value={search} onChange={event => onSearch(event.target.value)} placeholder={placeholder} aria-label={label} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); closeSearch(); } }} /><button type="button" className="icon-button catalog-search-close" aria-label={t("Tutup")} onClick={closeSearch}><X size={16} /></button></div>
+    </div>
+  </div>;
+}
+
 export function OpeningsPage({
   settings,
   onOpenOpening,
@@ -124,13 +149,19 @@ export function OpeningsPage({
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [favorites, setFavorites] = useState<string[]>(() => readStorage("kuda-opening-favorites", []));
+  function toggleFavorite(id: string) {
+    const next = favorites.includes(id) ? favorites.filter(item => item !== id) : [...favorites, id];
+    setFavorites(next);
+    writeStorage("kuda-opening-favorites", next);
+  }
   const openings = OPENINGS.filter(
     (o) =>
       (filter === "all" || o.side === filter) &&
       `${o.name} ${o.eco} ${o.category}`
         .toLowerCase()
         .includes(search.toLowerCase()),
-  );
+  ).sort((a, b) => Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)));
   return (
     <div className="page learning-page">
       <div className="page-intro">
@@ -148,38 +179,8 @@ export function OpeningsPage({
             )}
           </p>
         </div>
-        <div className="learning-counter">
-          <GitOpening />
-          <strong>{t(OPENINGS.length)}</strong>
-          <span>
-            {t("opening pilihan")}
-            <br />
-            {t("untuk repertoarmu")}
-          </span>
-        </div>
       </div>
-      <div className="feature-banner">
-        <div className="feature-chess-icon">{t("♘")}</div>
-        <div>
-          <span className="small-label">{t("REKOMENDASI UNTUK MEMULAI")}</span>
-          <Title as="h2">
-            {t("Italian Game. Klasik untuk sebuah alasan.")}
-          </Title>
-          <p>
-            {t(
-              "Kontrol pusat, kembangkan buah, dan amankan raja. Semua dalam satu opening.",
-            )}
-          </p>
-        </div>
-        <button
-          className="button primary"
-          onClick={() => onOpenOpening(OPENINGS[0].id)}
-        >
-          {t("Pelajari sekarang ")}
-          <ArrowRight size={16} />
-        </button>
-      </div>
-      <div className="catalog-toolbar">
+      <CatalogToolbar search={search} onSearch={setSearch} placeholder={t("Cari opening atau kode ECO…")} label={t("Cari opening")}>
         <div className="segmented">
           {t(
             [
@@ -192,21 +193,12 @@ export function OpeningsPage({
                 key={id}
                 onClick={() => setFilter(id)}
               >
-                {t(label)}
+                <Title>{t(label)}</Title>
               </button>
             )),
           )}
         </div>
-        <label className="search-input">
-          <Search size={16} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("Cari opening atau kode ECO…")}
-            aria-label={t("Cari opening")}
-          />
-        </label>
-      </div>
+      </CatalogToolbar>
       <div className="opening-grid">
         {t(
           openings.map((o) => {
@@ -226,6 +218,7 @@ export function OpeningsPage({
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
+                  if (e.target !== e.currentTarget) return;
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     onOpenOpening(o.id);
@@ -246,8 +239,13 @@ export function OpeningsPage({
                 </div>
                 <div className="opening-card-content">
                   <div className="opening-card-meta">
-                    <span className="opening-card-labels"><span className="eco-label">{t(o.eco)}</span><span>{t(o.side === "w" ? "● Putih" : "● Hitam")}</span></span>
-                    <span>{t(o.level)}</span>
+                    <span className="opening-card-labels"><span className="eco-label">{t(o.eco)}</span><span>{t(o.side === "w" ? "Putih" : "Hitam")}</span></span>
+                    <span className="opening-card-meta-actions">
+                      <span>{t(o.level)}</span>
+                      <button type="button" className={`icon-button opening-favorite${favorites.includes(o.id) ? " is-favorite" : ""}`} aria-label={t(favorites.includes(o.id) ? "Hapus dari favorit" : "Tambah ke favorit")} aria-pressed={favorites.includes(o.id)} onClick={event => { event.stopPropagation(); toggleFavorite(o.id); }}>
+                        <Star size={16} fill={favorites.includes(o.id) ? "currentColor" : "none"} />
+                      </button>
+                    </span>
                   </div>
                   <Title as="h3">
                     {t(o.name)}
@@ -297,43 +295,22 @@ export function OpeningsPage({
     </div>
   );
 }
-function GitOpening() {
-  const { t } = useI18n();
-
-  return (
-    <div className="learning-counter-icon">
-      <BookOpen size={27} />
-    </div>
-  );
-}
-
 export function AcademyPage({
   settings,
-  onAnalyze,
+  onOpenLesson,
 }: {
   settings: Settings;
-  onAnalyze: (fen: string, name: string) => void;
+  onOpenLesson: (id: string) => void;
 }) {
   const { t } = useI18n();
 
-  const [category, setCategory] = useState("Semua");
-  const [selected, setSelected] = useState<Exercise>();
-  const [completed, setCompleted] = useState<string[]>(() =>
+  const [completed] = useState<string[]>(() =>
     readStorage("kuda-lessons", []),
   );
   const [search, setSearch] = useState("");
   const [lessonStatus, setLessonStatus] = useState("all");
-  const [lessonCompleted, setLessonCompleted] = useState(false);
-  const categories = [
-    "Semua",
-    ...ACADEMY_MODULES.map((module) => module.category),
-  ];
-  const completedCount = LESSONS.filter((lesson) =>
-    completed.includes(lesson.id),
-  ).length;
   const visibleLessons = LESSONS.filter(
     (lesson) =>
-      (category === "Semua" || lesson.category === category) &&
       (lessonStatus === "all" ||
         (lessonStatus === "completed") === completed.includes(lesson.id)) &&
       `${t(lesson.title)} ${t(lesson.description)} ${t(lesson.category)}`
@@ -341,15 +318,13 @@ export function AcademyPage({
         .includes(search.trim().toLowerCase()),
   );
   const openLesson = (lesson: Exercise) => {
-    setLessonCompleted(false);
-    setSelected(lesson);
+    onOpenLesson(lesson.id);
   };
-  const percent = Math.round((completedCount / LESSONS.length) * 100);
   return (
     <div className="page learning-page">
       <div className="page-intro">
         <div>
-          <div className="eyebrow">{t("AKADEMI KUDA")}</div>
+          <div className="eyebrow">CHESS ACADEMY</div>
           <Title as="h1">
             {t("Pahami satu ide.")}
             <br />
@@ -360,98 +335,12 @@ export function AcademyPage({
             {t("Pelajaran singkat. Papan interaktif. Pemahaman yang bertahan.")}
           </p>
         </div>
-        <div className="academy-progress">
-          <ProgressRing percent={percent} size={62} />
-          <div>
-            <strong>{t("Perjalanan belajarmu")}</strong>
-            <span>
-              {t(completedCount)}
-              {t(" dari ")}
-              {t(LESSONS.length)}
-              {t(" pelajaran selesai")}
-            </span>
-          </div>
-        </div>
       </div>
-      <div className="academy-feature">
-        <div className="academy-feature-copy">
-          <span className="small-label">{t("MULAI DARI FONDASI")}</span>
-          <Title as="h2">
-            {t("Permainan hebat dimulai")}
-            <br />
-            {t("dari kebiasaan kecil.")}
-          </Title>
-          <p>
-            {t(
-              "Mulai dari gerak buah, pahami aturan, lalu latih taktik, strategi, dan endgame. Setiap pelajaran memiliki penjelasan, petunjuk, serta latihan di papan.",
-            )}
-          </p>
-          <button
-            className="button primary"
-            onClick={() =>
-              openLesson(
-                LESSONS.find((l) => !completed.includes(l.id)) ?? LESSONS[0],
-              )
-            }
-          >
-            {t("Lanjutkan belajar ")}
-            <ArrowRight size={16} />
-          </button>
+      <CatalogToolbar className="academy-toolbar" search={search} onSearch={setSearch} placeholder={t("Cari topik atau pelajaran…")} label={t("Cari pelajaran")}>
+        <div className="segmented academy-status-filter" role="group" aria-label={t("Status pelajaran")}>
+          {[["all", "Semua status"], ["new", "Belum selesai"], ["completed", "Selesai"]].map(([id, label]) => <button key={id} type="button" className={lessonStatus === id ? "active" : ""} aria-pressed={lessonStatus === id} onClick={() => setLessonStatus(id)}>{t(label)}</button>)}
         </div>
-        <div className="academy-illustration" aria-hidden="true">
-          <div className="illustration-board" />
-          {t(
-            ["wN", "wK", "wB"].map((p, i) => (
-              <img
-                className={`hero-piece piece-${i}`}
-                key={p}
-                src={pieceAsset(p[0], p[1], settings.pieceTheme)}
-                alt={t("")}
-              />
-            )),
-          )}
-          <span className="illustration-spark spark-1">{t("✦")}</span>
-          <span className="illustration-spark spark-2">{t("✦")}</span>
-          <span className="illustration-note">
-            <CheckCheck size={15} />
-            {t(" Sedikit latihan, setiap hari.")}
-          </span>
-        </div>
-      </div>
-      <div className="catalog-toolbar academy-toolbar">
-        <div className="segmented wrap">
-          {t(
-            categories.map((c) => (
-              <button
-                className={category === c ? "active" : ""}
-                key={c}
-                onClick={() => setCategory(c)}
-              >
-                {t(c)}
-              </button>
-            )),
-          )}
-        </div>
-        <select
-          aria-label={t("Status pelajaran")}
-          value={lessonStatus}
-          onChange={(event) => setLessonStatus(event.target.value)}
-        >
-          <option value="all">{t("Semua status")}</option>
-          <option value="new">{t("Belum selesai")}</option>
-          <option value="completed">{t("Selesai")}</option>
-        </select>
-        <span className="muted academy-lesson-count">{visibleLessons.length} {t("pelajaran")}</span>
-        <label className="search-input">
-          <Search size={16} />
-          <input
-            aria-label={t("Cari pelajaran")}
-            placeholder={t("Cari topik atau pelajaran…")}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </label>
-      </div>
+      </CatalogToolbar>
       <div className="lesson-grid">
         {t(
           visibleLessons.map((l) => (
@@ -497,121 +386,203 @@ export function AcademyPage({
           {t("Tidak ada pelajaran yang cocok. Coba ubah filter pencarian.")}
         </p>
       )}
-      <details className="academy-references">
-        <summary>{t("Referensi kurikulum")}</summary>
-        <p>
-          {t(
-            "Materi dan posisi latihan disusun untuk Kuda. Platform berikut menjadi referensi cakupan dan urutan belajar, bukan penyedia salinan kursus.",
-          )}
-        </p>
-        <ul>
-          {ACADEMY_REFERENCES.map((reference) => (
-            <li key={reference.url}>
-              <a href={reference.url} target="_blank" rel="noreferrer">
-                {reference.name} ↗
-              </a>
-              <span>{t(reference.focus)}</span>
-            </li>
-          ))}
-        </ul>
-      </details>
-      {t(
-        selected && (
-          <Modal
-            title={t(selected.title)}
-            onClose={() => setSelected(undefined)}
-            wide
+    </div>
+  );
+}
+
+export function AcademyStudy({
+  lesson,
+  settings,
+  onBack,
+  onOpenLesson,
+  onAnalyze,
+}: {
+  lesson: Exercise;
+  settings: Settings;
+  onBack: () => void;
+  onOpenLesson: (id: string) => void;
+  onAnalyze: (fen: string, name: string) => void;
+}) {
+  const { t } = useI18n();
+  const pageRef = useDesktopBoardSize();
+  const [tab, setTab] = useState("lesson");
+  const [completedLessons, setCompletedLessons] = useState<string[]>(() =>
+    readStorage("kuda-lessons", []),
+  );
+  const nextLesson =
+    LESSONS[LESSONS.findIndex((item) => item.id === lesson.id) + 1];
+  return (
+    <div
+      ref={pageRef}
+      className="page analysis-page academy-study-page viewport-board-layout"
+    >
+      <div className="workspace-toolbar">
+        <div className="game-title-block">
+          <Title as="strong">{t(lesson.title)}</Title>
+          <span className="opening-repertoire">
+            {t(lesson.category)} · {lesson.minutes} {t("menit")}
+          </span>
+        </div>
+        <div className="workspace-actions study-page-actions">
+          <button
+            className="icon-button back-icon"
+            onClick={onBack}
+            aria-label={t("Kembali ke akademi")}
+            title={t("Kembali ke akademi")}
           >
-            <div className="study-layout">
-              <LineTrainer
-                key={selected.id}
-                fen={selected.fen}
-                moves={selected.solution}
-                color={selected.fen.split(" ")[1] as "w" | "b"}
-                theme={settings.boardTheme}
-                title={t(selected.description)}
-                hint={selected.hint}
-                explanation={selected.explanation}
-                startTraining
-                enableShortcuts={settings.enableShortcuts}
-                onComplete={() => {
-                  setLessonCompleted(true);
-                  playBoardSound("success");
-                  const next = [...new Set([...completed, selected.id])];
-                  setCompleted(next);
-                  writeStorage("kuda-lessons", next);
-                }}
-                onAnalyze={(fen) => {
-                  onAnalyze(fen, selected.title);
-                  setSelected(undefined);
-                }}
-              />
-              <div className="study-theory">
-                <span className="subtle-pill">
-                  {t(selected.category)}
-                  {t(" · ")}
-                  {t(selected.minutes)}
-                  {t(" menit")}
-                </span>
-                <Title as="h3">{t(selected.title)}</Title>
-                <p className="academy-lesson-intro">
-                  {t(selected.description)}
-                </p>
-                <Title as="h3">{t("Ide yang perlu dibawa.")}</Title>
-                <ol>
-                  {t(
-                    selected.theory.map((idea, i) => (
-                      <li key={i}>
-                        <span>{t(String(i + 1).padStart(2, "0"))}</span>
-                        {t(idea)}
-                      </li>
-                    )),
-                  )}
-                </ol>
-                <div className="study-tip">
-                  <Lightbulb size={18} />
-                  <p>
-                    {t(
-                      "Baca posisi, periksa ancaman, lalu coba langkahmu langsung di papan.",
-                    )}
-                  </p>
+            <ArrowLeft size={16} />
+          </button>
+        </div>
+      </div>
+      <LineTrainer
+        key={lesson.id}
+        fen={lesson.fen}
+        moves={lesson.solution}
+        color={lesson.fen.split(" ")[1] as "w" | "b"}
+        theme={settings.boardTheme}
+        title={t(lesson.description)}
+        hint={lesson.hint}
+        explanation={lesson.explanation}
+        startTraining
+        enableShortcuts={settings.enableShortcuts}
+        onComplete={() => {
+          const completed = readStorage<string[]>("kuda-lessons", []);
+          const next = [...new Set([...completed, lesson.id])];
+          writeStorage("kuda-lessons", next);
+          setCompletedLessons(next);
+          playBoardSound("success");
+        }}
+        onAnalyze={(fen) => onAnalyze(fen, lesson.title)}
+        workspace={({ board, content, actions, complete }) => (
+          <div className="analysis-grid academy-study-grid">
+            <section className="board-section">{board}</section>
+            <div className="analysis-sidebar academy-study-sidebar">
+              <aside className="analysis-panel academy-study-panel">
+                <div
+                  className="panel-tabs"
+                  role="tablist"
+                  aria-label={t("Materi pelajaran")}
+                >
+                  <button
+                    id="academy-lesson-tab"
+                    role="tab"
+                    aria-controls="academy-lesson-panel"
+                    aria-selected={tab === "lesson"}
+                    className={tab === "lesson" ? "active" : ""}
+                    onClick={() => setTab("lesson")}
+                  >
+                    {t("Pelajaran")}
+                  </button>
+                  <button
+                    id="academy-menu-tab"
+                    role="tab"
+                    aria-controls="academy-menu-panel"
+                    aria-selected={tab === "menu"}
+                    className={tab === "menu" ? "active" : ""}
+                    onClick={() => setTab("menu")}
+                  >
+                    {t("Menu")}
+                  </button>
                 </div>
-                {lessonCompleted && (
-                  <div className="academy-lesson-next">
-                    <span>
-                      <CheckCheck size={16} />
-                      {t("Pelajaran selesai")}
-                    </span>
-                    <button
-                      className="button primary"
-                      onClick={() => {
-                        const next =
-                          LESSONS[
-                            LESSONS.findIndex(
-                              (lesson) => lesson.id === selected.id,
-                            ) + 1
-                          ];
-                        if (next) openLesson(next);
-                        else setSelected(undefined);
-                      }}
-                    >
-                      {t(
-                        LESSONS.findIndex(
-                          (lesson) => lesson.id === selected.id,
-                        ) <
-                          LESSONS.length - 1
-                          ? "Pelajaran berikutnya"
-                          : "Kembali ke akademi",
-                      )}
-                      <ArrowRight size={15} />
-                    </button>
-                  </div>
-                )}
-              </div>
+                <div
+                  className="academy-study-content"
+                  role="tabpanel"
+                  id={`academy-${tab}-panel`}
+                  aria-labelledby={`academy-${tab}-tab`}
+                >
+                  {tab === "lesson" ? (
+                    <>
+                      <div className="study-theory">
+                        <Title as="h3">{t(lesson.title)}</Title>
+                        <p className="academy-lesson-intro">
+                          {t(lesson.description)}
+                        </p>
+                        <Title as="h3">{t("Ide yang perlu dibawa.")}</Title>
+                        <ol>
+                          {lesson.theory.map((idea, index) => (
+                            <li key={index}>
+                              <span>{String(index + 1).padStart(2, "0")}</span>
+                              {t(idea)}
+                            </li>
+                          ))}
+                        </ol>
+                        <div className="study-tip">
+                          <Lightbulb size={18} />
+                          <p>
+                            {t(
+                              "Baca posisi, periksa ancaman, lalu coba langkahmu langsung di papan.",
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      {content}
+                    </>
+                  ) : (
+                    <div className="academy-lesson-menu">
+                      {ACADEMY_MODULES.map((module) => (
+                        <section key={module.category}>
+                          <Title as="h3">{t(module.title)}</Title>
+                          {LESSONS.filter(
+                            (item) => item.category === module.category,
+                          ).map((item) => (
+                            <button
+                              key={item.id}
+                              className={`academy-menu-lesson${item.id === lesson.id ? " active" : ""}`}
+                              aria-current={
+                                item.id === lesson.id ? "page" : undefined
+                              }
+                              onClick={() => onOpenLesson(item.id)}
+                            >
+                              <span className="academy-menu-number">
+                                {String(LESSONS.indexOf(item) + 1).padStart(
+                                  2,
+                                  "0",
+                                )}
+                              </span>
+                              <span>{t(item.title)}</span>
+                              {completedLessons.includes(item.id) ? (
+                                <Check size={15} />
+                              ) : (
+                                <ArrowRight size={15} />
+                              )}
+                            </button>
+                          ))}
+                        </section>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="academy-study-footer">
+                  <div className="academy-study-actions">{actions}</div>
+                  <button
+                    className="button primary"
+                    disabled={!complete}
+                    onClick={() =>
+                      nextLesson ? onOpenLesson(nextLesson.id) : onBack()
+                    }
+                  >
+                    {t(
+                      nextLesson
+                        ? "Pelajaran berikutnya"
+                        : "Kembali ke akademi",
+                    )}
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </aside>
             </div>
-          </Modal>
-        ),
-      )}
+            {settings.enableShortcuts && (
+              <div className="board-under academy-study-shortcuts">
+                <NavigationShortcutHint />
+                <span>
+                  <kbd>F</kbd> {t("Balik papan")}
+                </span>
+                <ShortcutHelp items={["navigate", "start", "end", "flip"]} />
+              </div>
+            )}
+          </div>
+        )}
+      />
     </div>
   );
 }
@@ -988,6 +959,7 @@ export function PuzzlesPage({
       instance.stop();
     };
   }, [positionFen, status, settings.showEvalBar, settings.engine, engine]);
+  const pageRef = useDesktopBoardSize(`${puzzle?.id}:${attempt}:${historyEntry?.number}:${historyAttempt}`);
   const viewedPuzzle = historyEntry ? historyEntry.puzzle : puzzle;
   const color = (viewedPuzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
   const activeColor = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
@@ -996,7 +968,7 @@ export function PuzzlesPage({
     ([id]) => id === difficulty,
   )?.[1];
   return (
-    <div className="page analysis-page puzzle-page">
+    <div ref={pageRef} className="page analysis-page puzzle-page viewport-board-layout">
       <div className="workspace-toolbar">
         <div className="game-title-block">
           <Title as="strong">
@@ -1623,7 +1595,14 @@ export function LineTrainer({
   onSolve,
   onComplete,
   onAnalyze,
+  workspace,
 }: {
+  workspace?: (parts: {
+    board: ReactNode;
+    content: ReactNode;
+    actions: ReactNode;
+    complete: boolean;
+  }) => ReactNode;
   fen: string;
   moves: string[];
   color: "w" | "b";
@@ -1649,6 +1628,11 @@ export function LineTrainer({
   const { t } = useI18n();
 
   const [step, setStep] = useState(0);
+  const [browsePly, setBrowsePly] = useState<number>();
+  const browsing = !!workspace && browsePly !== undefined && browsePly !== step;
+  const visibleStep = browsing ? browsePly! : step;
+  const navigateLesson = (ply: number) =>
+    setBrowsePly(ply === step ? undefined : Math.max(0, Math.min(step, ply)));
   const [training, setTraining] = useState(startTraining);
   const [feedback, setFeedback] = useState("");
   const [showHint, setShowHint] = useState(false);
@@ -1669,13 +1653,14 @@ export function LineTrainer({
   const counted = useRef(false);
   const mistaken = useRef(false);
   const chess = useMemo(() => {
-    if (alternateFen) return new Chess(alternateFen);
+    if (alternateFen && !browsing) return new Chess(alternateFen);
     const c = new Chess(fen);
-    moves.slice(0, step).forEach((m) => c.move(m));
+    moves.slice(0, visibleStep).forEach((m) => c.move(m));
     return c;
-  }, [fen, moves, step, alternateFen]);
+  }, [fen, moves, visibleStep, alternateFen, browsing]);
   const done = step === moves.length;
   const isOpponent =
+    !browsing &&
     training &&
     !done &&
     chess.turn() !== color &&
@@ -1695,7 +1680,8 @@ export function LineTrainer({
     onFeedbackChange?.(showHint && !done ? { kind: "hint" } : moveFeedback);
   }, [moveFeedback, showHint, done, puzzleMode, onFeedbackChange]);
   useEffect(() => {
-    if (!puzzleMode || !enableShortcuts || !started || paused) return;
+    if ((!puzzleMode && !workspace) || !enableShortcuts || !started || paused)
+      return;
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
       if (
@@ -1708,6 +1694,19 @@ export function LineTrainer({
       if (event.altKey || event.ctrlKey || event.metaKey) return;
       if (event.key === "Escape") {
         setPremoves([]);
+        return;
+      }
+      if (workspace && ["ArrowLeft", "ArrowRight"].includes(event.key)) {
+        event.preventDefault();
+        navigateLesson(
+          event.key === "ArrowLeft"
+            ? event.shiftKey
+              ? 0
+              : visibleStep - 1
+            : event.shiftKey
+              ? step
+              : visibleStep + 1,
+        );
         return;
       }
       const canNavigate = !training || done;
@@ -1739,6 +1738,10 @@ export function LineTrainer({
     puzzleMode,
     started,
     training,
+    browsing,
+    visibleStep,
+    step,
+    !!workspace,
   ]);
   useEffect(() => {
     onPositionChange?.(displayedFen);
@@ -1758,6 +1761,7 @@ export function LineTrainer({
     }
   }, [done, training, revealed, onComplete, onSolve]);
   const reset = (train: boolean) => {
+    setBrowsePly(undefined);
     previewRequest.current++;
     previewBusy.current = false;
     window.clearTimeout(rollbackTimer.current);
@@ -1915,10 +1919,25 @@ export function LineTrainer({
     setPremoves(next);
     return true;
   };
+  let guidedMove: ReturnType<Chess["move"]> | undefined;
+  if (workspace && moves[visibleStep]) {
+    try {
+      guidedMove = new Chess(chess.fen()).move(moves[visibleStep]);
+    } catch {
+      /* End of a lesson or an alternate mate. */
+    }
+  }
   const board = (
     <Board
       fen={displayedFen}
-      flipped={puzzleMode ? flipped !== (color === "b") : color === "b"}
+      flipped={
+        puzzleMode || workspace ? flipped !== (color === "b") : color === "b"
+      }
+      arrow={
+        workspace && guidedMove && !done && !browsing && !isOpponent
+          ? `${guidedMove.from}${guidedMove.to}`
+          : undefined
+      }
       theme={theme}
       lastMove={preview ?? last}
       moveBadge={
@@ -1949,6 +1968,7 @@ export function LineTrainer({
           : undefined
       }
       disabled={
+        browsing ||
         !training ||
         (!puzzleMode && isOpponent) ||
         done ||
@@ -2010,6 +2030,63 @@ export function LineTrainer({
       )}
     </div>
   );
+  if (workspace)
+    return workspace({
+      board: (
+        <>
+          <div className="board-and-eval">
+            {evalBar}
+            <div className="board-main">{board}</div>
+          </div>
+          <NavigationControls
+            ply={visibleStep}
+            total={moves.length}
+            navigationLimit={step}
+            outsideNotation={browsing}
+            onReturnToMain={() => setBrowsePly(undefined)}
+            onChange={navigateLesson}
+            onFlip={() => setFlipped((value) => !value)}
+            enableShortcuts={false}
+          />
+        </>
+      ),
+      content: (
+        <>
+          <div
+            className={`academy-step-coach${feedback && !done ? " has-feedback" : ""}`}
+            aria-live="polite"
+          >
+            <span className="small-label">
+              {t(
+                browsing
+                  ? "Posisi pilihan"
+                  : done
+                    ? "Pelajaran selesai"
+                    : isOpponent
+                      ? "Lawan melangkah"
+                      : "Langkah berikutnya",
+              )}
+            </span>
+            {guidedMove && !done && (
+              <Title as="h3">
+                {Math.ceil((visibleStep + 1) / 2)}
+                {guidedMove.color === "w" ? ". " : "… "}
+                {guidedMove.san}
+              </Title>
+            )}
+            <p>{t(done ? explanation || title : feedback || title)}</p>
+            {!done && hint && <p className="academy-step-hint">{t(hint)}</p>}
+          </div>
+        </>
+      ),
+      actions: (
+        <button className="button secondary" onClick={() => reset(true)}>
+          <RotateCcw size={14} />
+          {t("Ulangi pelajaran")}
+        </button>
+      ),
+      complete: done && !browsing,
+    });
   return (
     <div className="line-trainer">
       {t(

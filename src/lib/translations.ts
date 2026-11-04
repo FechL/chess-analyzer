@@ -2,6 +2,18 @@ import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  "Pelajaran sudah selesai dipelajari.": "You've completed this lesson.",
+  "Pelajari langkah dan ikuti panah di papan.": "Learn the moves and follow the arrows on the board.",
+  "Pelajaran selesai": "Lesson Complete",
+  "Notasi pelajaran": "Lesson Notation",
+  "Ulangi pelajaran": "Repeat Lesson",
+  "Kembali ke opening": "Back to Openings",
+  "Kembali ke akademi": "Back to Academy",
+  "Materi pelajaran": "Lesson Material",
+  "Pelajaran": "Lesson",
+  "Ikhtisar": "Overview",
+  "Pelajaran berikutnya": "Next Lesson",
+
   "Profil": "Profile",
   "Memuat akun…": "Loading your account…",
   "Masuk": "Sign In",

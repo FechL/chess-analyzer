@@ -4,6 +4,7 @@ import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import {
+  ArrowLeft,
   ArrowRight,
   BookOpen,
   Check,
@@ -108,7 +109,9 @@ export default function OpeningStudy({
   opening,
   settings,
   onSettingsChange,
+  onBack,
 }: {
+  onBack: () => void;
   opening: Opening;
   settings: Settings;
   onSettingsChange: (settings: Settings) => void;
@@ -822,6 +825,7 @@ export default function OpeningStudy({
             {lines.length} {t("variasi")}
           </span>
         </div>
+        <div className="workspace-actions study-page-actions"><button className="icon-button back-icon" onClick={onBack} aria-label={t("Kembali ke opening")} title={t("Kembali ke opening")}><ArrowLeft size={16} /></button></div>
       </div>
       <div className="analysis-grid opening-study-grid">
         <section className="board-section">

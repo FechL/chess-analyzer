@@ -4262,3 +4262,52 @@ textarea::placeholder {
 .opening-card-progress-track { display: flex; height: 5px; border-radius: 3px; overflow: hidden; background: var(--line); }
 .opening-card-practiced { background: var(--ink); }
 .opening-card-learned { background: var(--muted); opacity: .5; }
+
+.opening-card-meta-actions { display: inline-flex; align-items: center; gap: 8px; }
+.opening-card .opening-favorite { width: 26px; min-width: 26px; height: 26px; padding: 4px; color: var(--muted); }
+.opening-card .opening-favorite.is-favorite { color: #c99c41; }
+
+/* Academy lessons use the same board/sidebar workspace as analysis. */
+.academy-study-sidebar { grid-column: 2; grid-row: 1; min-width: 0; }
+.academy-study-sidebar .academy-study-panel { position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
+.academy-study-panel .panel-tabs { flex-shrink: 0; }
+.academy-study-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 18px; }
+.academy-study-page .board-controls { margin-left: 0; }
+.academy-study-footer { flex-shrink: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 14px; border-top: 1px solid var(--line); }
+.academy-study-actions { display: contents; }
+.academy-study-footer .button { justify-content: center; font-size: 11px; min-width: 0; }
+.academy-study-shortcuts { gap: 12px; justify-content: flex-start; text-align: left; }
+.academy-study-shortcuts > span { display: inline-flex; align-items: center; gap: 6px; }
+@media (min-width: 761px) and (max-width: 1280px) {
+  .academy-study-sidebar { grid-column: 1; grid-row: 3; }
+  .academy-study-sidebar .academy-study-panel { position: static; min-height: 460px; max-height: 680px; }
+}
+
+.academy-learn-status { display: flex; align-items: center; gap: 9px; padding: 14px 18px; margin: -18px -18px 18px; border-bottom: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 11px; line-height: 1.7; }
+.academy-learn-status svg { flex-shrink: 0; }
+.academy-learn-status.complete { background: #71b99420; color: #46956d; }
+.academy-step-coach { padding: 15px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 18px; background: var(--paper); }
+.academy-step-coach h3 { font-size: 22px; margin-block: 8px; }
+.academy-step-coach p { color: var(--muted); font-size: 12px; line-height: 1.85; margin-top: 8px; }
+.academy-step-coach .academy-step-hint { padding-top: 10px; border-top: 1px solid var(--line); }
+.academy-lesson-menu section + section { margin-top: 22px; }
+.academy-lesson-menu h3 { color: var(--muted); font-size: 11px; margin-bottom: 10px; }
+.academy-menu-lesson { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: left; color: var(--ink); font-size: 12px; line-height: 1.6; padding: 12px 10px; border-radius: 8px; }
+.academy-menu-lesson:hover { background: var(--surface); }
+.academy-menu-lesson.active { background: #78a6dd26; }
+.academy-menu-number { color: var(--muted); font-size: 10px; }
+
+.academy-study-page .academy-study-shortcuts { margin-left: 0; padding-left: 0; }
+.academy-study-content .study-theory { margin-bottom: 20px; }
+.academy-study-content .academy-learn-status { margin: 0 0 18px; border-radius: 8px; }
+
+.academy-toolbar .academy-status-filter { flex: 0 0 auto; max-width: 100%; min-width: 0; overflow-x: auto; }
+
+.catalog-search-toolbar { position: relative; }
+.catalog-search-actions { display: flex; flex: 0 1 300px; min-width: 0; margin-left: auto; }
+.academy-toolbar .catalog-search-actions { flex-basis: 240px; }
+.catalog-search-toolbar .catalog-search-actions .search-input { width: 100%; min-width: 0; flex: 1; margin: 0; }
+.catalog-search-toggle, .catalog-search-close { display: none; }
+
+.page .back-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; min-width: 32px; height: 32px; padding: 6px; border: 0; background: transparent; box-shadow: none; color: var(--muted); }
+.page .back-icon:hover:not(:disabled) { background: transparent; box-shadow: none; color: var(--ink); }

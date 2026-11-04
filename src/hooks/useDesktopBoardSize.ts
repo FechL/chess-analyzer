@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 
 /** Fit the board around the actual header, controls, and footer height. */
-export function useDesktopBoardSize() {
+export function useDesktopBoardSize(layoutKey = "") {
   const pageRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -44,7 +44,7 @@ export function useDesktopBoardSize() {
       desktop.removeEventListener("change", schedule);
       page.style.removeProperty("--desktop-board-column");
     };
-  }, []);
+  }, [layoutKey]);
 
   return pageRef;
 }

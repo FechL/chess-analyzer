@@ -57,7 +57,7 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="page about-page">
       <header className="about-page-header">
-        <button className="icon-button" onClick={onBack} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
+        <button className="icon-button back-icon" onClick={onBack} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
         <Title as="h1">{t("Tentang")}</Title>
       </header>
       <AboutContent />

@@ -49,7 +49,7 @@ import { setBoardSound, useBoardSound } from "./lib/board-sound";
 import { setBoardAnimation, useBoardAnimation } from "./lib/board-animation";
 import BotPage from "./pages/Bot";
 import HomePage from "./pages/Home";
-import { AcademyPage, OpeningsPage, PuzzlesPage } from "./pages/Learn";
+import { AcademyPage, AcademyStudy, OpeningsPage, PuzzlesPage } from "./pages/Learn";
 import { Modal, ProgressRing } from "./components/Common";
 import OnlineImport from "./components/OnlineImport";
 import type { OnlineSource } from "./components/OnlineImport";
@@ -64,7 +64,7 @@ import {
   writeStorage,
 } from "./lib/chess";
 import type { GameData } from "./lib/chess";
-import { OPENINGS } from "./data/content";
+import { LESSONS, OPENINGS } from "./data/content";
 
 const OpeningStudy = lazy(() => import("./pages/OpeningStudy"));
 
@@ -152,6 +152,7 @@ export default function App() {
     setRoute(target);
   }, [mobileLayout, routePage, analysisActive]);
   const [showLeaveAnalysis, setShowLeaveAnalysis] = useState(false);
+  const activeLesson = page === "academy" ? LESSONS.find(lesson => lesson.id === route.split("/")[1]) : undefined;
   const activeOpening =
     page === "openings"
       ? OPENINGS.find((opening) => opening.id === route.split("/")[1])
@@ -239,9 +240,9 @@ export default function App() {
     return () => window.removeEventListener("hashchange", handler);
   }, []);
   useEffect(() => {
-    document.title = `${titleCase(activeOpening?.name || t(TITLES[page]))} · Kuda`;
+    document.title = `${titleCase(activeOpening?.name || (activeLesson && t(activeLesson.title)) || t(TITLES[page]))} · Kuda`;
     setCompleted(readStorage("kuda-lessons", []));
-  }, [page, activeOpening?.name, modal, t]);
+  }, [page, activeOpening?.name, activeLesson?.title, modal, t]);
   useEffect(() => {
     const update = () => setCompleted(readStorage("kuda-lessons", []));
     window.addEventListener("kuda-progress", update);
@@ -559,7 +560,7 @@ export default function App() {
         {page === "settings" && (
           <div className="page settings-page">
             <header className="settings-page-header">
-              <button className="icon-button" onClick={() => navigate("more")} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
+              <button className="icon-button back-icon" onClick={() => navigate("more")} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
               <Title as="h1">{t("Pengaturan")}</Title>
             </header>
             {renderSettings()}
@@ -567,7 +568,7 @@ export default function App() {
         )}
         {page === "about" && <AboutPage onBack={() => navigate("more")} />}
         {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
-        {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} onImport={() => setModal("import")} />}
+        {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} />}
         {t(
           analysisBoard && (
             <Analysis
@@ -614,6 +615,7 @@ export default function App() {
                 <OpeningStudy
                   key={activeOpening.id}
                   opening={activeOpening}
+                  onBack={() => navigate("openings")}
                   settings={pageSettings}
                   onSettingsChange={updatePageSettings}
                 />
@@ -627,7 +629,7 @@ export default function App() {
         )}
         {t(
           page === "academy" && (
-            <AcademyPage settings={pageSettings} onAnalyze={analyzePosition} />
+            activeLesson ? <AcademyStudy key={activeLesson.id} lesson={activeLesson} settings={pageSettings} onBack={() => navigate("academy")} onOpenLesson={id => navigate(`academy/${id}`)} onAnalyze={analyzePosition} /> : <AcademyPage settings={pageSettings} onOpenLesson={id => navigate(`academy/${id}`)} />
           ),
         )}
         {t(
@@ -665,48 +667,11 @@ export default function App() {
       )}
       {mobileLayout && <MobileNavigation page={page} onNavigate={navigate} />}
       {t(
-        modal === "new-game" && !mobileLayout && (
-          <Modal
-            title={t("Mulai permainan baru")}
-            onClose={() => setModal(undefined)}
-          >
-            <p className="modal-description">
-              {t("Pilih papan awal untuk ruang analisis bebas.")}
-            </p>
-            <div className="new-game-options">
-              <button
-                className="button secondary"
-                onClick={() => {
-                  const g = emptyGame();
-                  g.source = "Bebas";
-                  load(g);
-                }}
-              >
-                <Plus size={16} />
-                {t(" Dari posisi awal")}
-              </button>
-              <button
-                className="button primary"
-                onClick={() => {
-                  const g = emptyGame();
-                  g.event = "Analisis Bebas (Kustom)";
-                  g.source = "Kustom";
-                  load(g, true);
-                }}
-              >
-                <Grid2X2 size={16} />
-                {t(" Atur buah sendiri")}
-              </button>
-            </div>
-          </Modal>
-        ),
-      )}
-      {t(
-        (modal === "import" || (modal === "new-game" && mobileLayout)) && (
+        (modal === "import" || modal === "new-game") && (
           <ImportModal
             initialNewGame={modal === "new-game"}
             limitedSources={page === "analysis" && !analysisBoard}
-            onNewGame={mobileLayout && page === "analysis" && (analysisBoard || modal === "new-game") ? (custom) => {
+            onNewGame={page === "analysis" ? (custom) => {
               const next = emptyGame();
               next.source = custom ? "Kustom" : "Bebas";
               if (custom) next.event = "Analisis Bebas (Kustom)";

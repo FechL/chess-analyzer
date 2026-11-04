@@ -800,3 +800,33 @@
   .kuda-shell .dashboard-main-scroll { scrollbar-width: none; }
   .kuda-shell .dashboard-main-scroll::-webkit-scrollbar { width: 0; }
 }
+
+@media (max-width: 760px) {
+  .page.analysis-page .workspace-toolbar:has(.study-page-actions) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .page.analysis-page .workspace-toolbar .study-page-actions { position: static; grid-column: 2; margin: 0; }
+  .page.analysis-page .study-page-actions .button { width: 32px; min-width: 32px; height: 32px; border-radius: 8px; box-shadow: none; }
+  .academy-study-sidebar .academy-study-panel { position: static; display: flex; min-height: 300px; height: 100%; max-height: none; }
+  .academy-study-content { padding: 12px; }
+  .academy-study-content :is(p, li, .exercise-feedback, .trainer-instruction) { font-size: 11px; }
+  .academy-study-content .study-theory h3 { font-size: 13px; }
+  .academy-study-shortcuts { display: none; }
+}
+
+@media (max-width: 760px) {
+  .academy-learn-status { margin: -12px -12px 12px; padding: 12px; font-size: 10px; }
+  .academy-menu-lesson { font-size: 11px; padding-block: 10px; }
+}
+
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .learning-page .catalog-search-toolbar { flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; min-height: 38px; }
+  .catalog-search-toolbar > .segmented { flex: 0 1 auto; min-width: 0; max-width: calc(100% - 44px); width: max-content; flex-wrap: nowrap; overflow-x: auto; }
+  .catalog-search-toolbar > .segmented > button { flex-shrink: 0; white-space: nowrap; font-size: 10px; padding-inline: 10px; }
+  .catalog-search-toolbar .catalog-search-actions { flex: 0 0 36px; width: 36px; margin-left: auto; }
+  .catalog-search-toolbar .catalog-search-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; min-width: 36px; height: 36px; padding: 0; }
+  .catalog-search-toolbar .catalog-search-actions .search-input { display: none; }
+  .catalog-search-toolbar.is-search-expanded > .segmented { visibility: hidden; }
+  .catalog-search-toolbar.is-search-expanded .catalog-search-actions { position: absolute; inset: 0; z-index: 3; width: 100%; margin: 0; }
+  .catalog-search-toolbar.is-search-expanded .catalog-search-toggle { display: none; }
+  .catalog-search-toolbar.is-search-expanded .catalog-search-actions .search-input { display: flex; height: 100%; max-width: none; background: var(--surface); }
+  .catalog-search-toolbar .catalog-search-close { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; width: 28px; height: 28px; padding: 0; }
+}

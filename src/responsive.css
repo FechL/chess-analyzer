@@ -746,3 +746,18 @@
   .home-analysis-actions { margin-top: 12px; gap: 8px; }
   .home-analysis-actions .button { font-size: 11px; padding-inline: 10px; }
 }
+
+/* Maximize the desktop analysis board within both viewport dimensions. */
+@media (min-width: 1281px) {
+  .page.viewport-board-layout {
+    --desktop-board-column: calc(100dvh - 180px);
+    --desktop-analysis-gap: 24px;
+    --desktop-analysis-panel-min: 360px;
+  }
+  .page.viewport-board-layout > :is(.workspace-toolbar, .analysis-grid) {
+    grid-template-columns:
+      minmax(0, min(var(--desktop-board-column), calc(100% - var(--desktop-analysis-panel-min) - var(--desktop-analysis-gap))))
+      minmax(var(--desktop-analysis-panel-min), 1fr);
+    column-gap: var(--desktop-analysis-gap);
+  }
+}

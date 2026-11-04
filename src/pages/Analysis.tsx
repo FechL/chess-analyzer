@@ -1,4 +1,5 @@
 import { useMobileLayout } from "../hooks/useMobileLayout";
+import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import Title from "../components/Title";
 import { saveGameAccuracy } from "../lib/game-accuracy";
 import EngineOptions from "../components/EngineOptions";
@@ -156,6 +157,7 @@ export default function Analysis({
 }) {
   const { t } = useI18n();
   const mobileLayout = useMobileLayout();
+  const pageRef = useDesktopBoardSize();
 
   const [activeVariationId, setActiveVariationId] = useState<string>();
   const activeVariation = mainGame.variations?.find(
@@ -813,7 +815,7 @@ export default function Analysis({
         </div>
   );
   return (
-    <div className="page analysis-page">
+    <div ref={pageRef} className="page analysis-page viewport-board-layout">
       <div className="workspace-toolbar">
         <div className="bot-player-header analysis-player-header">
           {!customEditing &&

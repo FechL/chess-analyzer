@@ -74,8 +74,8 @@ describe("Home library preview", () => {
     expect(html.match(/class="home-game-row"/g)).toHaveLength(10);
     expect(html).toContain('aria-label="Page 10"');
     expect(html).not.toContain('aria-label="Page 11"');
-    expect(html).toContain("Load more games");
-    expect(html).not.toMatch(/disabled=""[^>]*>Load more games/);
+    expect(html).toContain("Load More");
+    expect(html).not.toMatch(/disabled=""[^>]*>Load More/);
   });
   it("renders five saved games and numbered pages for the remaining games", () => {
     const saved = Array.from({ length: 12 }, (_, index) => ({

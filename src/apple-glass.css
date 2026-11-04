@@ -4314,3 +4314,28 @@ textarea::placeholder {
 
 .page.settings-page { max-width: 900px; margin-inline: auto; }
 .page.about-page { max-width: 1100px; margin-inline: auto; }
+
+.auth-loading-text { color: var(--muted); font-size: 13px; text-align: center; }
+
+.settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: start; gap: 28px; }
+.settings-preview { position: sticky; top: 20px; width: 100%; padding-top: 12px; user-select: none; }
+.settings-preview-board.chessboard { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); aspect-ratio: 1; }
+.settings-preview-board .square { cursor: default; touch-action: auto; }
+.settings-preview-board .coordinate { font-size: 12px; }
+@media (max-width: 760px) {
+  .settings-layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .settings-preview { position: static; grid-row: 1; width: 180px; justify-self: center; padding-top: 0; }
+}
+
+.settings-notation-preview { margin-top: 22px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.settings-notation-preview .notation-heading { padding: 10px 12px; border-top: 0; background: var(--surface); border-color: var(--line); color: var(--ink); }
+.settings-notation-moves { padding: 6px; }
+.settings-notation-moves .move-row { grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr); }
+.settings-notation-moves .move-cell { padding: 7px 5px; font-size: 12px; color: var(--ink); }
+.settings-notation-moves .move-number { font-size: 11px; color: var(--muted); }
+.settings-notation-moves .move-cell:hover { background: transparent; }
+.settings-notation-moves .move-cell.current { background: #78a6dd26; }
+@media (max-width: 760px) {
+  .settings-preview { width: min(100%, 240px); }
+  .settings-preview-frame { width: 180px; margin-inline: auto; }
+}

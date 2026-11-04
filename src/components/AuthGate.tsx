@@ -76,12 +76,13 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
-  if (phase === "loading" || phase === "error") return (
+  if (phase === "loading") return (
+    <div className="auth-screen"><p className="auth-loading-text" role="status">{t("Memuat akun…")}</p></div>
+  );
+  if (phase === "error") return (
     <div className="auth-screen">
       <div className="auth-card auth-status" role="status">
-        {phase === "loading" ? <><LoaderCircle size={22} className="spin" /><p>{t("Memuat akun…")}</p></> : <>
-          <p>{error}</p><button className="button primary" onClick={() => setAttempt(value => value + 1)}>{t("Coba lagi")}</button>
-        </>}
+        <p>{error}</p><button className="button primary" onClick={() => setAttempt(value => value + 1)}>{t("Coba lagi")}</button>
       </div>
     </div>
   );

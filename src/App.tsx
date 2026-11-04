@@ -1,3 +1,4 @@
+import SettingsBoardPreview from "./components/SettingsBoardPreview";
 import ProfilePage from "./pages/Profile";
 import { useAuth } from "./lib/auth-context";
 import { AboutPage } from "./components/AboutModal";
@@ -305,6 +306,7 @@ export default function App() {
     load(g);
   };
   const renderSettings = () => (
+    <div className="settings-layout">
             <div className="app-settings">
             <div className="settings-section">
               <Title as="label">{t("Tampilan papan")}</Title>
@@ -487,6 +489,8 @@ export default function App() {
               </button>
             </div>
             </div>
+      <SettingsBoardPreview boardTheme={settings.boardTheme} pieceTheme={settings.pieceTheme} />
+    </div>
   );
   const nav = [
     {

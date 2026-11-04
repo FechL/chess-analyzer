@@ -2,6 +2,7 @@ import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  "Pratinjau papan 3×3": "3×3 Board Preview",
   "Pelajaran sudah selesai dipelajari.": "You've completed this lesson.",
   "Pelajari langkah dan ikuti panah di papan.": "Learn the moves and follow the arrows on the board.",
   "Pelajaran selesai": "Lesson Complete",

@@ -20,13 +20,11 @@ export default function MorePage({ onNavigate, completedCount = 0 }: { onNavigat
       </a>
       <Title as="h1">{t("Lainnya")}</Title>
       <div className="home-activities more-learning-cards">
-        {items.slice(0, 2).map(({ id, label, icon: Icon }) => (
+        {items.filter((item) => item.id === "academy").map(({ id, label, icon: Icon }) => (
           <button key={id} className="home-activity" onClick={() => onNavigate(id)}>
             <span className="home-activity-icon" aria-hidden="true"><Icon /></span>
             <Title as="h2">{t(label)}</Title>
-            <p>{t(id === "openings"
-              ? "Pelajari opening, lalu latih variasinya dari ingatan."
-              : "Pelajari dasar catur dan tingkatkan keterampilanmu.")}</p>
+            <p>{t("Pelajari dasar catur dan tingkatkan keterampilanmu.")}</p>
             {id === "academy" && <small className="home-academy-progress">{completedCount} {t("pelajaran selesai")}</small>}
             <ArrowRight size={17} className="home-activity-arrow" />
           </button>

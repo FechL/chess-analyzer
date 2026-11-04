@@ -883,7 +883,7 @@ kbd {
   align-self: center;
   margin-left: 0;
 }
-@media (max-width: 1050px) {
+@media (max-width: 1280px) {
   .analysis-export-actions {
     grid-column: 1;
     grid-row: 4;
@@ -2085,7 +2085,7 @@ textarea::placeholder {
     font-size: 12px;
   }
 }
-@media (max-width: 1050px) {
+@media (max-width: 1280px) {
   .analysis-grid,
   .analysis-page .workspace-toolbar {
     grid-template-columns: minmax(0, 1fr);
@@ -2379,7 +2379,7 @@ textarea::placeholder {
 .analysis-bottom {
   display: block;
 }
-@media (max-width: 1050px) {
+@media (max-width: 1280px) {
   .analysis-sidebar {
     grid-row: 3;
   }
@@ -3559,7 +3559,7 @@ textarea::placeholder {
   border-radius: 8px;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1280px) {
   .bot-sidebar {
     grid-column: 1;
     grid-row: 4;
@@ -3638,7 +3638,7 @@ textarea::placeholder {
   min-height: 0;
   max-height: none;
 }
-@media (max-width: 1050px) {
+@media (max-width: 1280px) {
   .analysis-sidebar .analysis-panel.is-review > .move-list {
     flex: 0 1 auto;
     min-height: 160px;
@@ -3722,7 +3722,7 @@ textarea::placeholder {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 18px 0 44px;
+  padding: 18px 0 12px;
 }
 .home-eyebrow {
   color: var(--muted);
@@ -3844,12 +3844,31 @@ textarea::placeholder {
   margin-bottom: 28px;
 }
 .home-games-panel {
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--glass-border, var(--line));
   background: linear-gradient(140deg, #ffffffa8, #f3f7fc73);
   border-radius: 18px;
   box-shadow: var(--glass-shadow);
+}
+.home-recent-games > .home-game-list {
+  width: 100%;
+  max-height: min(55dvh, 480px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+.home-library-games > .home-game-list {
+  height: 445px;
+  overflow-y: auto;
+}
+.home-library-games .home-game-row { height: 89px; }
+.home-library-games > .home-library-pagination {
+  min-height: 64px;
+  align-items: center;
 }
 .home-games-heading {
   display: flex;
@@ -3926,6 +3945,21 @@ textarea::placeholder {
   border-color: var(--line);
 }
 :root[data-color-mode="dark"] .home-library-pagination [aria-current="page"] { color: #a8cdff; }
+@media (min-width: 1151px) {
+  .home-game-panels { align-items: stretch; }
+  .home-recent-games {
+    display: flex;
+    flex-direction: column;
+    contain: size;
+    min-height: 300px;
+  }
+  .home-recent-games > :not(.home-game-list) { flex-shrink: 0; }
+  .home-recent-games > .home-game-list {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+  }
+}
 @media (max-width: 1150px) {
   .home-game-panels { grid-template-columns: 1fr; }
 }
@@ -3955,7 +3989,7 @@ textarea::placeholder {
   border-top: 1px solid var(--line);
   border-bottom: 0;
 }
-.home-page > .home-game-panels { margin-top: 28px; }
+.home-page > .home-game-panels { margin-top: 8px; }
 .home-personal > :only-child { grid-column: 1 / -1; }
 
 .home-calendar-popover { width: 260px; padding: 16px; }

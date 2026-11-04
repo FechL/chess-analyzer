@@ -93,13 +93,6 @@ export default function OnlineImport({
     source === "chesscom" ? games.length > limit : next !== undefined;
   return (
     <div className="online-import">
-      <p className="modal-description">
-        {t(
-          source === "url"
-            ? "Tempel tautan langsung ke satu berkas PGN dari platform lain. Situs sumber perlu mengizinkan akses browser."
-            : `Ambil permainan publik yang sudah selesai dari ${source === "chesscom" ? "Chess.com" : "Lichess"}. Cukup username, tanpa login.`,
-        )}
-      </p>
       <form
         className="online-import-form"
         onSubmit={(e) => {
@@ -107,12 +100,11 @@ export default function OnlineImport({
           search();
         }}
       >
-        <label className="field-label" htmlFor="online-game-input">
-          {t(source === "url" ? "Tautan PGN" : "Username")}
-        </label>
+        {source !== "url" && <label className="field-label" htmlFor="online-game-input">{t("Username")}</label>}
         <div className="online-search-row">
           <input
             id="online-game-input"
+            aria-label={t(source === "url" ? "Tautan PGN" : "Username")}
             className="online-import-input"
             autoFocus
             autoComplete="off"
@@ -150,9 +142,9 @@ export default function OnlineImport({
       {t(
         archives.length > 0 && (
           <label className="online-month">
-            <span>{t("Arsip bulan")}</span>
             <select
               value={month}
+              aria-label={t("Arsip bulan")}
               disabled={busy}
               onChange={(e) => {
                 const url = e.target.value;
@@ -222,11 +214,6 @@ export default function OnlineImport({
       {t(
         games.length > 0 && (
           <>
-            <p className="online-import-status">
-              {t("Permainan ")}
-              {t(query)}
-              {t(" · pilih untuk membuka analisis")}
-            </p>
             <div
               className="online-game-list"
               aria-label={t("Daftar permainan")}
@@ -294,11 +281,6 @@ export default function OnlineImport({
           </button>
         ),
       )}
-      <p className="online-import-note">
-        {t(
-          "Hanya catur standar. Analisis tetap dilakukan oleh Stockfish di perangkat Anda.",
-        )}
-      </p>
     </div>
   );
 }

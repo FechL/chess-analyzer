@@ -1,11 +1,11 @@
-import { ChartNoAxesCombined, Ellipsis, House, Swords, Target } from "lucide-react";
+import { BookOpen, ChartNoAxesCombined, Ellipsis, Swords, Target } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 
 const items = [
-  { id: "home", label: "Beranda", icon: House },
-  { id: "analysis", label: "Analisis", icon: ChartNoAxesCombined },
+  { id: "analysis", label: "Analisis papan", icon: ChartNoAxesCombined },
   { id: "bot", label: "Lawan bot", icon: Swords },
   { id: "puzzles", label: "Puzzle", icon: Target },
+  { id: "openings", label: "Kumpulan opening", icon: BookOpen },
   { id: "more", label: "Lainnya", icon: Ellipsis },
 ];
 

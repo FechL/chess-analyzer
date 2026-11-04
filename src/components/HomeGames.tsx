@@ -195,7 +195,7 @@ export default function HomeGames({
   return (
     <div className="home-game-panels">
       <section
-        className="home-games-panel"
+        className="home-games-panel home-recent-games"
         aria-label={t("Permainan pemain tersimpan")}
       >
         <div className="home-games-heading">
@@ -208,8 +208,8 @@ export default function HomeGames({
               disabled={!selected || busy}
               onClick={() => void fetchGames(true)}
             >
-              <RotateCcw size={15} className={busy ? "spin" : ""} />
               {t("Muat ulang")}
+              <RotateCcw size={12} className={busy ? "spin" : ""} />
             </button>
           </div>
         </div>
@@ -512,13 +512,13 @@ export default function HomeGames({
               onClick={() => void fetchGames(false)}
             >
               {busy && <LoaderCircle size={14} className="spin" />}
-              {t("Muat lebih banyak permainan")}
+              {t("Muat lebih banyak")}
             </button>
           </nav>
         )}
       </section>
 
-      <section className="home-games-panel" aria-label={t("Koleksi permainan")}>
+      <section className="home-games-panel home-library-games" aria-label={t("Koleksi permainan")}>
         <div className="home-games-heading">
           <Title as="h2">{t("Koleksi permainan")}</Title>
           <div>
@@ -553,7 +553,7 @@ export default function HomeGames({
             </p>
           )}
         </div>
-        {pages > 1 && (
+        {pages > 1 ? (
           <nav
             className="home-library-pagination"
             aria-label={t("Halaman koleksi")}
@@ -572,7 +572,7 @@ export default function HomeGames({
               ),
             )}
           </nav>
-        )}
+        ) : <div className="home-library-pagination" aria-hidden="true" />}
       </section>
     </div>
   );

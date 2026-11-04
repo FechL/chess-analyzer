@@ -723,3 +723,39 @@
 @media (min-width: 761px) {
   .mobile-review-action { display: none; }
 }
+
+/* Analysis starts with the dashboard; an opened game has its own back action. */
+.home-analysis-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.analysis-home-back {
+  position: fixed;
+  z-index: 35;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 3px 12px rgb(20 35 55 / 14%);
+}
+.analysis-home-back { right: 16px; bottom: 16px; }
+@media (min-width: 761px) {
+  .kuda-shell > aside { display: flex; }
+}
+@media (min-width: 761px) and (max-width: 1280px) {
+  .analysis-grid > .analysis-sidebar:not(.bot-sidebar):not(.opening-study-sidebar) { grid-column: 1; }
+  .analysis-sidebar .analysis-panel { display: block; }
+  .analysis-grid > .board-section { max-width: 620px; margin-inline: auto; }
+  .bot-workspace > .bot-player-header,
+  .analysis-page .workspace-toolbar > .analysis-player-header {
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
+  }
+}
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell > aside { display: none !important; }
+  .mobile-bottom-navigation { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .home-analysis-actions { margin-top: 12px; gap: 8px; }
+  .home-analysis-actions .button { font-size: 11px; padding-inline: 10px; }
+  .analysis-home-back { bottom: calc(76px + env(safe-area-inset-bottom)); right: max(12px, env(safe-area-inset-right)); }
+}

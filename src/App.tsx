@@ -12,10 +12,10 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
+  ArrowLeft,
   BookOpen,
   Check,
   ChartNoAxesCombined,
-  House,
   CircleHelp,
   Cpu,
   Download,
@@ -127,11 +127,25 @@ export default function App() {
 
   const boardSound = useBoardSound();
   const boardAnimation = useBoardAnimation();
+  const mobileLayout = useMobileLayout();
   const [route, setRoute] = useState(
-    () => location.hash.slice(1) || "home",
+    () => location.hash.slice(1) || (readStorage("kuda-analysis-open", false) ? "analysis/game" : "analysis"),
   );
   const routePage = route.split("/")[0];
-  const page = TITLES[routePage] ? routePage : "home";
+  const page = routePage === "home" || (!mobileLayout && routePage === "more")
+    ? "analysis"
+    : TITLES[routePage] ? routePage : "analysis";
+  const [analysisActive, setAnalysisActive] = useState(() =>
+    route === "analysis/game" || readStorage("kuda-analysis-open", false),
+  );
+  const analysisBoard = page === "analysis" && analysisActive;
+  useEffect(() => {
+    if (mobileLayout || routePage !== "more") return;
+    const target = analysisActive ? "analysis/game" : "analysis";
+    window.history.replaceState(window.history.state, "", `#${target}`);
+    setRoute(target);
+  }, [mobileLayout, routePage, analysisActive]);
+  const [showLeaveAnalysis, setShowLeaveAnalysis] = useState(false);
   const activeOpening =
     page === "openings"
       ? OPENINGS.find((opening) => opening.id === route.split("/")[1])
@@ -146,7 +160,6 @@ export default function App() {
     ...DEFAULT_SETTINGS,
     ...readStorage("kuda-settings", {}),
   }));
-  const mobileLayout = useMobileLayout();
   const pageSettings = mobileLayout ? { ...settings, enableShortcuts: false } : settings;
   const updatePageSettings = (next: Settings) => setSettings((current) => ({
     ...next,
@@ -200,7 +213,7 @@ export default function App() {
   useEffect(() => {
     const handler = () => {
       const next = location.hash.slice(1);
-      setRoute(next || "home");
+      setRoute(next || "analysis");
     };
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
@@ -220,8 +233,11 @@ export default function App() {
       setModal(id);
       return;
     }
-    setRoute(id);
-    location.hash = id;
+    const target = id === "home" || id === "analysis"
+      ? (analysisActive ? "analysis/game" : "analysis")
+      : id;
+    setRoute(target);
+    location.hash = target;
   };
   const notify = (message: string) => {
     setToast(message);
@@ -229,6 +245,8 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(""), 3500);
   };
   const load = (g: GameData, editCustom = false) => {
+    setAnalysisActive(true);
+    writeStorage("kuda-analysis-open", true);
     setGame(g);
     setCustomEditing(editCustom);
     setAutoReviewOnLoad(
@@ -239,8 +257,15 @@ export default function App() {
     );
     setAnalysisFen(positionAt(g, g.moves.length).fen());
     setRevision((r) => r + 1);
-    navigate("analysis");
+    navigate("analysis/game");
     setModal(undefined);
+  };
+  const returnToAnalysisHome = () => {
+    setAnalysisActive(false);
+    writeStorage("kuda-analysis-open", false);
+    setShowLeaveAnalysis(false);
+    setRoute("analysis");
+    location.hash = "analysis";
   };
   const save = () => {
     const existing = saved.find((s) => toPgn(s.game) === toPgn(game));
@@ -264,7 +289,6 @@ export default function App() {
       id: "workspace",
       title: "RUANG BERMAIN",
       items: [
-        { id: "home", label: "Beranda", icon: House },
         { id: "analysis", label: "Analisis permainan", icon: ChartNoAxesCombined },
         { id: "bot", label: "Lawan bot", icon: Swords },
       ],
@@ -301,7 +325,7 @@ export default function App() {
         maxSidebarWidth={300}
         brand={{
           name: "kuda",
-          href: "#home",
+          href: "#analysis",
           description: "CHESS STUDIO",
           logo: (
             <span className="brand-icon">
@@ -321,9 +345,9 @@ export default function App() {
 
       >
         {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
-        {page === "home" && <HomePage onNavigate={navigate} saved={saved} onLoad={load} completedCount={completed.length} />}
+        {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} onImport={() => setModal("import")} />}
         {t(
-          page === "analysis" && (
+          analysisBoard && (
             <Analysis
               key={revision}
               game={game}
@@ -404,6 +428,21 @@ export default function App() {
           ),
         )}
       </DashboardShell>
+      {analysisBoard && (
+        <button className="analysis-home-back icon-button" aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")} onClick={() => {
+          if (!gameIsSaved) setShowLeaveAnalysis(true);
+          else returnToAnalysisHome();
+        }}><ArrowLeft size={20} /></button>
+      )}
+      {showLeaveAnalysis && (
+        <Modal title={t("Permainan belum disimpan")} onClose={() => setShowLeaveAnalysis(false)}>
+          <p className="modal-description">{t("Simpan permainan ke koleksi sebelum kembali?")}</p>
+          <div className="modal-actions">
+            <button className="text-button" onClick={returnToAnalysisHome}>{t("Kembali tanpa menyimpan")}</button>
+            <button className="button primary" onClick={() => { save(); returnToAnalysisHome(); }}>{t("Simpan dan kembali")}</button>
+          </div>
+        </Modal>
+      )}
       {mobileLayout && <MobileNavigation page={page} onNavigate={navigate} />}
       {t(
         modal === "new-game" && !mobileLayout && (
@@ -446,7 +485,8 @@ export default function App() {
         (modal === "import" || (modal === "new-game" && mobileLayout)) && (
           <ImportModal
             initialNewGame={modal === "new-game"}
-            onNewGame={mobileLayout && page === "analysis" ? (custom) => {
+            limitedSources={page === "analysis" && !analysisBoard}
+            onNewGame={mobileLayout && page === "analysis" && (analysisBoard || modal === "new-game") ? (custom) => {
               const next = emptyGame();
               next.source = custom ? "Kustom" : "Bebas";
               if (custom) next.event = "Analisis Bebas (Kustom)";
@@ -834,12 +874,14 @@ function ImportModal({
   saved,
   onNewGame,
   initialNewGame = false,
+  limitedSources = false,
 }: {
   onClose: () => void;
   onLoad: (g: GameData) => void;
   saved: SavedGame[];
   onNewGame?: (custom: boolean) => void;
   initialNewGame?: boolean;
+  limitedSources?: boolean;
 }) {
   const { t } = useI18n();
 
@@ -868,7 +910,7 @@ function ImportModal({
     setError("");
   };
   return (
-    <Modal title={onNewGame ? `${t("New Game")} / ${t("Impor permainan")}` : t("Bawa permainanmu ke sini.")} onClose={onClose}>
+    <Modal title={onNewGame ? `${t("New Game")} / ${t("Impor permainan")}` : t("Impor permainan")} onClose={onClose}>
       <div
         className="import-source-options"
         role="group"
@@ -888,7 +930,7 @@ function ImportModal({
               ["url", "Tautan PGN"],
               ["collection", "Koleksi"],
             ] as const
-          ).map(([value, label]) => (
+          ).filter(([value]) => !limitedSources || value === "local" || value === "url").map(([value, label]) => (
             <button
               key={value}
               aria-pressed={source === value}
@@ -951,16 +993,9 @@ function ImportModal({
           <OnlineImport key={source} source={source} onLoad={onLoad} />
         ) : (
           <>
-            <p className="modal-description">
-              {t(
-                "Tempel satu permainan PGN atau posisi FEN. Semua diproses di perangkat Anda.",
-              )}
-            </p>
-            <label className="field-label" htmlFor="game-import">
-              {t("PGN atau FEN")}
-            </label>
             <textarea
               id="game-import"
+              aria-label={t("PGN atau FEN")}
               className="import-textarea"
               autoFocus
               value={input}

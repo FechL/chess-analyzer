@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, ChevronRight, Info, FolderHeart, GraduationCap, Settings2 } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, Info, FolderHeart, GraduationCap, Settings2, UserRound } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import Title from "../components/Title";
 
@@ -6,7 +6,8 @@ const items = [
   { id: "openings", label: "Opening explorer", icon: BookOpen },
   { id: "academy", label: "Akademi catur", icon: GraduationCap },
   { id: "library", label: "Koleksi permainan", icon: FolderHeart },
-  { id: "settings", label: "Pengaturan", icon: Settings2 },
+  { id: "profile", label: "Profil", icon: UserRound },
+  { id: "settings", label: "Pengaturan", icon: Settings2, UserRound },
   { id: "help", label: "Tentang", icon: Info },
 ];
 

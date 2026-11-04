@@ -210,7 +210,7 @@ export function OpeningsPage({
       </div>
       <div className="opening-grid">
         {t(
-          openings.map((o, i) => {
+          openings.map((o) => {
             const c = new Chess();
             o.moves.slice(0, 6).forEach((m) => c.move(m));
             return (
@@ -227,7 +227,7 @@ export function OpeningsPage({
                 }}
                 onClick={() => onOpenOpening(o.id)}
               >
-                <div className={`opening-card-art art-${i % 4}`}>
+                <div className="opening-card-art">
                   <div className="opening-mini-board" inert>
                     <Board
                       fen={c.fen()}
@@ -237,19 +237,10 @@ export function OpeningsPage({
                       disabled
                     />
                   </div>
-                  <span className="eco-label">{t(o.eco)}</span>
-                  {t(
-                    completed.includes(o.id) && (
-                      <span className="complete-badge">
-                        <Check size={13} />
-                        {t(" Dipelajari")}
-                      </span>
-                    ),
-                  )}
                 </div>
                 <div className="opening-card-content">
                   <div className="opening-card-meta">
-                    <span>{t(o.side === "w" ? "● Putih" : "● Hitam")}</span>
+                    <span className="opening-card-labels"><span className="eco-label">{t(o.eco)}</span><span>{t(o.side === "w" ? "● Putih" : "● Hitam")}</span></span>
                     <span>{t(o.level)}</span>
                   </div>
                   <Title as="h3">
@@ -267,6 +258,14 @@ export function OpeningsPage({
                       )),
                     )}
                   </div>
+                  {t(
+                    completed.includes(o.id) && (
+                      <span className="complete-badge">
+                        <Check size={13} />
+                        {t(" Dipelajari")}
+                      </span>
+                    ),
+                  )}
                 </div>
               </article>
             );

@@ -35,7 +35,7 @@ function AboutContent() {
           </ul>
           <div className="study-tip">
             <ShieldCheck size={18} />
-            <p>{t("Stockfish berjalan di browser. Permainan, catatan, dan progres belajar disimpan di perangkat ini. Mengambil permainan publik atau puzzle memerlukan koneksi internet.")}</p>
+            <p>{t("Stockfish berjalan di browser. State akun, permainan, catatan, dan progres belajar disimpan di PostgreSQL. Browser menyimpan cache agar perubahan tetap tersedia saat koneksi terputus. Mengambil permainan publik atau puzzle memerlukan koneksi internet.")}</p>
           </div>
         </div>
         <div className="help-sources">

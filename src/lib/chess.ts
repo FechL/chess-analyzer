@@ -1,3 +1,4 @@
+import { persistUserStorageValue, readUserStorageValue } from "./user-state";
 import { Chess, DEFAULT_POSITION } from "chess.js";
 import type { Move } from "chess.js";
 import { clockSeconds, formatPgnTime } from "./move-time";
@@ -374,7 +375,7 @@ export function downloadFile(name: string, text: string) {
 }
 export function readStorage<T>(key: string, fallback: T): T {
   try {
-    const value = localStorage.getItem(key);
+    const value = readUserStorageValue(key);
     return value ? JSON.parse(value) : fallback;
   } catch {
     return fallback;
@@ -382,7 +383,7 @@ export function readStorage<T>(key: string, fallback: T): T {
 }
 export function writeStorage(key: string, value: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    persistUserStorageValue(key, JSON.stringify(value));
     if (key === "kuda-lessons")
       window.dispatchEvent(new Event("kuda-progress"));
   } catch {

@@ -743,17 +743,8 @@
     0 12px 25px -10px #0006;
 }
 :root[data-color-mode="dark"] .opening-card-art {
-  background: linear-gradient(145deg, #354b68, #2c3c56);
+  background: var(--surface);
   border-color: var(--line);
-}
-:root[data-color-mode="dark"] .opening-card-art.art-1 {
-  background: linear-gradient(145deg, #454362, #34364f);
-}
-:root[data-color-mode="dark"] .opening-card-art.art-2 {
-  background: linear-gradient(145deg, #544a42, #3f3b40);
-}
-:root[data-color-mode="dark"] .opening-card-art.art-3 {
-  background: linear-gradient(145deg, #314f4c, #2d4052);
 }
 :root[data-color-mode="dark"]
   :is(

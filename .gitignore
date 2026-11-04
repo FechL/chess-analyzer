@@ -5,3 +5,7 @@ public/engine/*.wasm
 public/engine/*.js
 .DS_Store
 notes.txt
+.env
+.env.*
+!.env.example
+backups/

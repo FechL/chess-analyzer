@@ -1,3 +1,4 @@
+import { persistUserStorageValue, readUserStorageValue } from "./user-state";
 import { useSyncExternalStore } from "react";
 import type { BoardTransition } from "./board-effects";
 
@@ -14,14 +15,14 @@ export function unlockBoardSound() {
 }
 function enabled() {
   try {
-    return localStorage.getItem(key) !== "off";
+    return readUserStorageValue(key) !== "off";
   } catch {
     return true;
   }
 }
 export function setBoardSound(value: boolean) {
   try {
-    localStorage.setItem(key, value ? "on" : "off");
+    persistUserStorageValue(key, value ? "on" : "off");
   } catch {
     /* Keep UI usable when storage is unavailable. */
   }

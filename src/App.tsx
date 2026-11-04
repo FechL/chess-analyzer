@@ -1,3 +1,5 @@
+import ProfilePage from "./pages/Profile";
+import { useAuth } from "./lib/auth-context";
 import AboutModal, { AboutPage } from "./components/AboutModal";
 import MobileNavigation from "./components/MobileNavigation";
 import MorePage from "./pages/More";
@@ -36,6 +38,7 @@ import {
   Target,
   Trash2,
   Upload,
+  UserRound,
   X,
 } from "lucide-react";
 import { DashboardShell } from "./components/block/dashboard-shell";
@@ -89,6 +92,7 @@ const TITLES: Record<string, string> = {
   more: "Lainnya",
   about: "Tentang",
   settings: "Pengaturan",
+  profile: "Profil",
   analysis: "Analisis permainan",
   bot: "Lawan bot",
   openings: "Opening explorer",
@@ -125,6 +129,7 @@ function restoreGame() {
 }
 export default function App() {
   const { t } = useI18n();
+  const { user } = useAuth();
 
   const boardSound = useBoardSound();
   const boardAnimation = useBoardAnimation();
@@ -198,6 +203,7 @@ export default function App() {
   const [completed, setCompleted] = useState<string[]>(() =>
     readStorage("kuda-lessons", []),
   );
+  useEffect(() => { writeStorage("kuda-route", route); }, [route]);
   useEffect(() => {
     writeStorage("kuda-session", game);
   }, [game]);
@@ -539,6 +545,7 @@ export default function App() {
         }}
         navigation={nav}
         secondaryNavigation={[
+          { id: "profile", label: user.username, icon: UserRound },
           { id: "settings", label: "Pengaturan", icon: Settings2 },
           { id: "help", label: "Tentang", icon: Info },
         ]}
@@ -548,6 +555,7 @@ export default function App() {
         navigationLabel="Navigasi Kuda Chess Studio"
 
       >
+        {page === "profile" && <ProfilePage onBack={() => navigate(mobileLayout ? "more" : "analysis")} />}
         {page === "settings" && (
           <div className="page settings-page">
             <header className="settings-page-header">

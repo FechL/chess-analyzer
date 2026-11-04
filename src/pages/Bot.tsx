@@ -1,3 +1,4 @@
+import ShortcutHelp from "../components/ShortcutHelp";
 import { useMobileLayout } from "../hooks/useMobileLayout";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -952,39 +953,14 @@ export default function BotPage({
                   </>
                 )}
               </div>
-              <DashboardPopover>
-                <DashboardPopoverTrigger asChild>
-                  <button
-                    className="icon-button shortcut-help-button"
-                    aria-label={t("Pintasan lainnya")}
-                    title={t("Pintasan lainnya")}
-                  >
-                    <CircleHelp size={16} aria-hidden="true" />
-                  </button>
-                </DashboardPopoverTrigger>
-                <DashboardPopoverContent
-                  className="shortcut-help-popover"
-                  align="end"
-                  side="top"
-                  aria-label={t("Pintasan lainnya")}
-                >
-                  <Title as="strong">{t("Pintasan lainnya")}</Title>
-                  <dl>
-                    {[
-                      ["Shift+←", "Ke posisi awal"],
-                      ["Shift+→", "Ke posisi terakhir"],
-                      ["Esc", "Batalkan premove"],
-                    ].map(([key, label]) => (
-                      <div key={key}>
-                        <dt>
-                          <kbd>{key}</kbd>
-                        </dt>
-                        <dd>{t(label)}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </DashboardPopoverContent>
-              </DashboardPopover>
+              <ShortcutHelp items={[
+                "navigate", "flip", "start", "end",
+                ...(session.mode !== "none" ? ["pause" as const] : []),
+                ...(permissions.hint ? ["hint" as const] : []),
+                ...(permissions.undo ? ["undo" as const] : []),
+                ...(permissions.engine ? ["engine", "arrows", "evaluation", "categories", "threats"] as const : []),
+                "premoves",
+              ]} />
             </>
           )}
           {session.premoves.length > 0 && !ended && (

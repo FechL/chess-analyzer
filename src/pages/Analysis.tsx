@@ -1,3 +1,4 @@
+import ShortcutHelp from "../components/ShortcutHelp";
 import { useMobileLayout } from "../hooks/useMobileLayout";
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import Title from "../components/Title";
@@ -17,7 +18,6 @@ import {
   Bookmark,
   BookOpen,
   ChevronDown,
-  CircleHelp,
   Flag,
   Lightbulb,
   LoaderCircle,
@@ -38,12 +38,6 @@ import {
   NavigationControls,
   NavigationShortcutHint,
 } from "../components/Common";
-import {
-  DashboardButton,
-  DashboardPopover,
-  DashboardPopoverTrigger,
-  DashboardPopoverContent,
-} from "../components/block/dashboard-shell";
 import { useEngine } from "../hooks/useEngine";
 import { LocalEngine } from "../lib/engine";
 import {
@@ -1420,37 +1414,11 @@ export default function Analysis({
                   </span>
                 ))}
               </div>
-              <DashboardPopover>
-                <DashboardPopoverTrigger asChild>
-                  <button
-                    className="icon-button shortcut-help-button"
-                    aria-label={t("Pintasan lainnya")}
-                    title={t("Pintasan lainnya")}
-                  >
-                    <CircleHelp size={16} aria-hidden="true" />
-                  </button>
-                </DashboardPopoverTrigger>
-                <DashboardPopoverContent
-                  className="shortcut-help-popover"
-                  align="end"
-                  side="top"
-                  aria-label={t("Pintasan lainnya")}
-                >
-                  <Title as="strong">{t("Pintasan lainnya")}</Title>
-                  <dl>
-                    {ANALYSIS_SHORTCUTS.filter(
-                      (shortcut) => shortcut.shift,
-                    ).map((shortcut) => (
-                      <div key={shortcut.key}>
-                        <dt>
-                          <kbd>{shortcut.display}</kbd>
-                        </dt>
-                        <dd>{t(shortcut.label)}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </DashboardPopoverContent>
-              </DashboardPopover>
+              <ShortcutHelp items={[
+                "navigate", "flip", "mainline", "start", "end",
+                "engine", "arrows", "evaluation", "categories",
+                "newGame", "importGame", "save",
+              ]} />
             </>
           )}
         </div>

@@ -758,6 +758,7 @@
 /* Maximize the desktop analysis board within both viewport dimensions. */
 @media (min-width: 1281px) {
   .page.viewport-board-layout {
+    padding-bottom: 14px;
     --desktop-board-column: calc(100dvh - 180px);
     --desktop-analysis-gap: 24px;
     --desktop-analysis-panel-min: 360px;
@@ -773,7 +774,11 @@
 /* Hide the left navigation before the board's right panel needs to stack. */
 @media (min-width: 761px) and (max-width: 1520px) {
   .kuda-shell > aside { display: none; }
-  .kuda-shell .shell-mobile-navigation { display: inline-flex; }
+  .kuda-shell .shell-mobile-navigation {
+    display: inline-flex;
+    top: auto;
+    bottom: 36px;
+  }
   .kuda-shell > .shell-navigation-overlay { display: block; }
 }
 /* A single board column leaves enough room to dock navigation again. */

@@ -1,3 +1,4 @@
+import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
@@ -1618,6 +1619,10 @@ export default function OpeningStudy({
                 </span>
               )}
             </div>
+            <ShortcutHelp items={[
+              "flip", "evaluation", "openingNavigate", "openingStart", "openingEnd",
+              "learnArrows", "repeatLine", "nextLine", "openingHint",
+            ]} />
           </div>
         )}
       </div>

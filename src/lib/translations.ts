@@ -107,6 +107,7 @@ export const ENGLISH: Record<string, string> = {
   Nonaktif: "Off",
   "Pintasan analisis": "Analysis shortcuts",
   "Pintasan lainnya": "More shortcuts",
+  "Panduan pintasan keyboard": "Keyboard Shortcuts",
   "Antrean premove": "Premove queue",
   "Buah dimakan": "Captured pieces",
   "Keunggulan material": "Material advantage",

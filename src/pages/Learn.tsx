@@ -1,3 +1,4 @@
+import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
@@ -1555,6 +1556,9 @@ export function PuzzlesPage({
                 <kbd>H</kbd> {t("Petunjuk")}
               </span>
             </div>
+            <ShortcutHelp items={[
+              "puzzleNavigate", "puzzleStart", "puzzleEnd", "flip", "puzzleHint", "premoves",
+            ]} />
           </div>
         )}
       </div>

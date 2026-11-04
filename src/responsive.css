@@ -726,18 +726,6 @@
 
 /* Analysis starts with the dashboard; an opened game has its own back action. */
 .home-analysis-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-.analysis-home-back {
-  position: fixed;
-  z-index: 35;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 3px 12px rgb(20 35 55 / 14%);
-}
-.analysis-home-back { right: 16px; bottom: 16px; }
 @media (min-width: 761px) {
   .kuda-shell > aside { display: flex; }
 }
@@ -757,5 +745,4 @@
   .mobile-bottom-navigation { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .home-analysis-actions { margin-top: 12px; gap: 8px; }
   .home-analysis-actions .button { font-size: 11px; padding-inline: 10px; }
-  .analysis-home-back { bottom: calc(76px + env(safe-area-inset-bottom)); right: max(12px, env(safe-area-inset-right)); }
 }

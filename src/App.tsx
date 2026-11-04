@@ -12,7 +12,6 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
-  ArrowLeft,
   BookOpen,
   Check,
   ChartNoAxesCombined,
@@ -358,6 +357,10 @@ export default function App() {
               isSaved={gameIsSaved}
               onImport={() => setModal("import")}
               onNewGame={() => setModal("new-game")}
+              onBackHome={() => {
+                if (!gameIsSaved) setShowLeaveAnalysis(true);
+                else returnToAnalysisHome();
+              }}
               autoReviewOnLoad={autoReviewOnLoad}
               onAutoReviewStarted={() => setAutoReviewOnLoad(false)}
               customEditing={customEditing}
@@ -428,12 +431,6 @@ export default function App() {
           ),
         )}
       </DashboardShell>
-      {analysisBoard && (
-        <button className="analysis-home-back icon-button" aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")} onClick={() => {
-          if (!gameIsSaved) setShowLeaveAnalysis(true);
-          else returnToAnalysisHome();
-        }}><ArrowLeft size={20} /></button>
-      )}
       {showLeaveAnalysis && (
         <Modal title={t("Permainan belum disimpan")} onClose={() => setShowLeaveAnalysis(false)}>
           <p className="modal-description">{t("Simpan permainan ke koleksi sebelum kembali?")}</p>

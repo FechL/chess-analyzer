@@ -12,6 +12,7 @@ import { Chess } from "chess.js";
 import {
   ArrowDownToLine,
   ArrowRight,
+  ArrowLeft,
   Bookmark,
   BookOpen,
   ChevronDown,
@@ -132,6 +133,7 @@ export default function Analysis({
   onImport,
   onPositionChange,
   onNewGame,
+  onBackHome,
   customEditing,
   onCustomEditingChange,
   autoReviewOnLoad,
@@ -146,6 +148,7 @@ export default function Analysis({
   onImport: () => void;
   onPositionChange: (fen: string) => void;
   onNewGame: () => void;
+  onBackHome: () => void;
   autoReviewOnLoad: boolean;
   onAutoReviewStarted: () => void;
   customEditing: boolean;
@@ -804,6 +807,9 @@ export default function Analysis({
               {t(" Impor permainan")}
             </span>
           </button>}
+          <button className="button secondary" onClick={onBackHome} aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")}>
+            <ArrowLeft size={16} />
+          </button>
         </div>
   );
   return (
@@ -913,7 +919,10 @@ export default function Analysis({
               <IconButton label={t("Simpan")} onClick={onSave}><Bookmark size={16} fill={isSaved ? "currentColor" : "none"} /></IconButton>
             ) : undefined}
             trailingActions={mobileLayout ? (
-              <IconButton label={`${t("New Game")} / ${t("Impor permainan")}`} onClick={onNewGame}><Plus size={16} /></IconButton>
+              <>
+                <IconButton label={`${t("New Game")} / ${t("Impor permainan")}`} onClick={onNewGame}><Plus size={16} /></IconButton>
+                <IconButton label={t("Kembali ke beranda analisis")} onClick={onBackHome}><ArrowLeft size={16} /></IconButton>
+              </>
             ) : undefined}
             enableShortcuts={settings.enableShortcuts}
             ply={ply}

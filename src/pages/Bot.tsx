@@ -1,5 +1,4 @@
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
-import ShortcutHelp from "../components/ShortcutHelp";
 import { useMobileLayout } from "../hooks/useMobileLayout";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -8,7 +7,6 @@ import type { Color } from "chess.js";
 import {
   ArrowLeft,
   ArrowRight,
-  CircleHelp,
   Cpu,
   Flag,
   Lightbulb,
@@ -23,7 +21,7 @@ import { useI18n } from "../lib/i18n";
 import Board, { EvalBar } from "../components/Board";
 import EngineOptions from "../components/EngineOptions";
 import CopyGameActions from "../components/CopyGameActions";
-import { NotationLine, NotationText } from "../components/Notation";
+import { NotationLine } from "../components/Notation";
 import {
   IconButton,
   Modal,
@@ -31,11 +29,6 @@ import {
   NavigationControls,
   NavigationShortcutHint,
 } from "../components/Common";
-import {
-  DashboardPopover,
-  DashboardPopoverTrigger,
-  DashboardPopoverContent,
-} from "../components/block/dashboard-shell";
 import { useEngine } from "../hooks/useEngine";
 import { LocalEngine } from "../lib/engine";
 import {
@@ -109,12 +102,10 @@ export default function BotPage({
   useEffect(() => {
     if (!permissions.engine) {
       setTab("game");
-      setHint("");
       setHintArrow("");
     }
   }, [session.mode]);
   const [thinking, setThinking] = useState(false);
-  const [hint, setHint] = useState("");
   const [hintArrow, setHintArrow] = useState("");
   const [error, setError] = useState("");
   const [advancedTime, setAdvancedTime] = useState(false);
@@ -255,7 +246,6 @@ export default function BotPage({
     request.current++;
     engine.current?.stop();
     setThinking(false);
-    setHint("");
     setHintArrow("");
   }
   function cancelPremoves() {
@@ -267,7 +257,6 @@ export default function BotPage({
     setSession((value) =>
       finishBotTurn(elapseBotTime(value, color, elapsed), next, color, premove),
     );
-    setHint("");
     setHintArrow("");
   }
   useEffect(() => {
@@ -620,7 +609,6 @@ export default function BotPage({
     )
       return;
     const id = request.current;
-    setHint("Mencari ide…");
     try {
       const result = await engine.current.analyze(fen, { ms: 600, skill: 20 });
       if (
@@ -629,9 +617,6 @@ export default function BotPage({
         latest.current.viewPly !== null
       )
         return;
-      setHint(
-        "Stockfish menyarankan " + (pvToSan(fen, [result.bestmove])[0] || "—"),
-      );
       setHintArrow(result.bestmove);
     } catch (cause) {
       if (id === request.current) setError((cause as Error).message);
@@ -787,7 +772,7 @@ export default function BotPage({
   return (
     <div ref={pageRef} className="page bot-page viewport-board-layout">
       <div className="analysis-grid bot-workspace">
-        <div className="bot-player-header analysis-player-header">
+        <div className="bot-player-header analysis-player-header board-page-header">
           <div className="bot-player human-player">
             {clock(human)}
             <div className="bot-player-info">
@@ -955,14 +940,6 @@ export default function BotPage({
                   </>
                 )}
               </div>
-              <ShortcutHelp items={[
-                "navigate", "flip", "start", "end",
-                ...(session.mode !== "none" ? ["pause" as const] : []),
-                ...(permissions.hint ? ["hint" as const] : []),
-                ...(permissions.undo ? ["undo" as const] : []),
-                ...(permissions.engine ? ["engine", "arrows", "evaluation", "categories", "threats"] as const : []),
-                "premoves",
-              ]} />
             </>
           )}
           {session.premoves.length > 0 && !ended && (
@@ -994,12 +971,6 @@ export default function BotPage({
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-          {hint && (
-            <div className="hint-box" role="status">
-              <Lightbulb size={16} />
-              <NotationText text={t(hint)} moves={[{ san: hintArrow ? pvToSan(visibleFen, [hintArrow], 1)[0] : undefined, color: human }]} />
             </div>
           )}
         </div>
@@ -1175,33 +1146,6 @@ export default function BotPage({
                     <div className="config-group bot-mode-group">
                       <div className="bot-mode-label-row">
                         <Title as="label">{t("Mode")}</Title>
-                        <DashboardPopover>
-                          <DashboardPopoverTrigger asChild>
-                            <button
-                              className="icon-button bot-mode-help"
-                              aria-label={t("Penjelasan mode bantuan")}
-                              title={t("Penjelasan mode bantuan")}
-                            >
-                              <CircleHelp size={15} />
-                            </button>
-                          </DashboardPopoverTrigger>
-                          <DashboardPopoverContent
-                            className="shortcut-help-popover bot-mode-popover"
-                            align="end"
-                            side="top"
-                            aria-label={t("Penjelasan mode bantuan")}
-                          >
-                            <Title as="strong">{t("Mode bantuan")}</Title>
-                            <dl>
-                              {BOT_MODES.map((item) => (
-                                <div key={item.id}>
-                                  <dt>{t(item.label)}</dt>
-                                  <dd>{t(item.description)}</dd>
-                                </div>
-                              ))}
-                            </dl>
-                          </DashboardPopoverContent>
-                        </DashboardPopover>
                       </div>
                       <div
                         className="segmented bot-mode-choices"

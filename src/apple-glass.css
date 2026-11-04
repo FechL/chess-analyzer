@@ -579,7 +579,6 @@ kbd {
   border-radius: 8px;
   box-shadow:
     0 0 0 1px rgb(105 121 129 / 25%),
-    0 1px 0 #fff,
     inset 0 2px 5px rgb(42 56 65 / 10%);
 }
 .board-walnut {
@@ -770,6 +769,9 @@ kbd {
 }
 .board-controls > .icon-button {
   justify-self: end;
+}
+.puzzle-page .board-controls {
+  margin-left: 0;
 }
 .board-control-actions {
   justify-self: end;
@@ -4347,3 +4349,7 @@ textarea::placeholder {
 .opening-overview-moves .notation-san { vertical-align: middle; line-height: 1.5; }
 .opening-overview-moves .notation-piece { flex-shrink: 0; display: block; }
 .opening-moves > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+.app-settings .settings-coordinates-toggle { margin-top: 12px; }
+
+.bot-side-panel .panel-tabs > .bot-guide-trigger { flex: 0 0 28px; width: 28px; min-width: 28px; height: 32px; padding: 4px; }

@@ -77,6 +77,7 @@ export type Settings = {
   engine: "lite" | "full";
   liveEngine: boolean;
   engineDepth: number;
+  showCoordinates?: boolean;
   showArrows: boolean;
   showEvalBar: boolean;
   autoAnalyzeImported: boolean;
@@ -109,6 +110,7 @@ const DEFAULT_SETTINGS: Settings = {
   engine: "lite",
   liveEngine: true,
   engineDepth: 0,
+  showCoordinates: true,
   showArrows: true,
   showEvalBar: true,
   autoAnalyzeImported: true,
@@ -330,6 +332,7 @@ export default function App() {
                   )),
                 )}
               </div>
+              <label className="board-sound-setting settings-coordinates-toggle"><input type="checkbox" role="switch" checked={settings.showCoordinates !== false} onChange={event => setSettings(current => ({ ...current, showCoordinates: event.target.checked }))} />{t("Tampilkan koordinat papan")}</label>
             </div>
             <div className="settings-section">
               <Title as="label">{t("Tema buah")}</Title>
@@ -539,7 +542,7 @@ export default function App() {
         }}
         navigation={nav}
         secondaryNavigation={[
-          { id: "profile", label: user.username, icon: UserRound },
+          { id: "profile", label: user.displayName || user.username, icon: UserRound },
           { id: "settings", label: "Pengaturan", icon: Settings2 },
           { id: "about", label: "Tentang", icon: Info },
         ]}
@@ -560,7 +563,7 @@ export default function App() {
           </div>
         )}
         {page === "about" && <AboutPage onBack={() => navigate(mobileLayout ? "more" : "analysis")} />}
-        {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
+        {page === "more" && <MorePage onNavigate={navigate} />}
         {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} />}
         {t(
           analysisBoard && (
@@ -629,7 +632,6 @@ export default function App() {
           page === "puzzles" && (
             <PuzzlesPage
               settings={pageSettings}
-              onSettingsChange={updatePageSettings}
               onAnalyze={analyzePosition}
             />
           ),

@@ -11,7 +11,7 @@ const items = [
   { id: "help", label: "Tentang", icon: Info },
 ];
 
-export default function MorePage({ onNavigate, completedCount = 0 }: { onNavigate: (page: string) => void; completedCount?: number }) {
+export default function MorePage({ onNavigate }: { onNavigate: (page: string) => void }) {
   const { t } = useI18n();
   return (
     <div className="page more-page">
@@ -25,7 +25,6 @@ export default function MorePage({ onNavigate, completedCount = 0 }: { onNavigat
             <span className="home-activity-icon" aria-hidden="true"><Icon /></span>
             <Title as="h2">{t(label)}</Title>
             <p>{t("Pelajari dasar catur dan tingkatkan keterampilanmu.")}</p>
-            {id === "academy" && <small className="home-academy-progress">{completedCount} {t("pelajaran selesai")}</small>}
             <ArrowRight size={17} className="home-activity-arrow" />
           </button>
         ))}

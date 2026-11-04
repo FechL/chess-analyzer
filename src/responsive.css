@@ -329,7 +329,7 @@
   .opening-study-page .board-section .board-control-actions { justify-self: end; }
   .puzzle-page .analysis-sidebar .panel-tabs {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) 32px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px;
     width: 100%;
     min-width: 0;
@@ -839,4 +839,32 @@
   .settings-notation-moves .move-row { grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr); gap: 2px; }
   .settings-notation-moves .move-cell { font-size: 10px; padding: 5px 2px; }
   .settings-notation-moves .notation-piece { width: 16px; height: 16px; }
+}
+
+/* One shared height for the content directly above every full-size board. */
+.page:is(.analysis-page, .bot-page) { --board-header-height: 44px; --board-header-line: 22px; --board-header-gap: 8px; }
+.page .board-page-header { box-sizing: border-box; height: var(--board-header-height); min-height: var(--board-header-height); max-height: var(--board-header-height); align-items: center; padding-block: 0; margin-block: 0 var(--board-header-gap); }
+.page .analysis-player-header { height: var(--board-header-height); min-height: var(--board-header-height); align-items: center; }
+.page .board-page-header > .game-title-block { height: var(--board-header-height); min-width: 0; display: grid; grid-template-rows: repeat(2, var(--board-header-line)); align-items: center; row-gap: 0; }
+.page .board-page-header .game-title-block > strong { line-height: var(--board-header-line); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.page .board-page-header .game-title-block > :is(.game-players, .opening-repertoire) { margin-block: 0; line-height: var(--board-header-line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page .board-page-header .game-players { flex-wrap: nowrap; }
+.page .analysis-player-header .bot-player > .bot-player-info { height: var(--board-header-height); grid-template-rows: repeat(2, var(--board-header-line)); row-gap: 0; }
+.page .analysis-player-header .bot-player > .chess-clock { box-sizing: border-box; height: var(--board-header-height); min-height: var(--board-header-height); margin-block: 0; }
+.page .bot-workspace { row-gap: var(--board-header-gap); }
+.page .bot-workspace > .board-page-header { margin-block: 0; }
+@media (min-width: 761px) and (max-width: 1280px) {
+  .page .workspace-toolbar.board-page-header:has(> .workspace-actions) { height: auto; max-height: none; row-gap: 12px; }
+  .page .workspace-toolbar.board-page-header:has(> .workspace-actions) > :is(.game-title-block, .analysis-player-header) { grid-row: 2; grid-column: 1; }
+}
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .page:is(.analysis-page, .bot-page) { --board-header-height: 36px; --board-header-line: 18px; --board-header-gap: 6px; }
+}
+
+/* Prevent content-width tab headers from leaving a blank strip in mobile panels. */
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell .page .analysis-sidebar .analysis-panel { align-items: stretch; }
+  .kuda-shell .page .analysis-sidebar .analysis-panel > .panel-tabs { box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0; align-self: stretch; margin-inline: 0; }
+  .kuda-shell .page .analysis-sidebar .panel-tabs > button:not(.icon-button) { flex: 1 1 0; min-width: 0; padding-inline: 5px; }
+  .kuda-shell .page .analysis-sidebar .panel-tabs > .icon-button { flex: 0 0 28px; min-width: 28px; margin-left: 0; }
 }

@@ -1,10 +1,12 @@
 import { createContext, useContext } from "react";
 export type Appearance = {
+  showCoordinates?: boolean;
   notationStyle: "letters" | "pieces" | "both";
   pieceTheme: "classic" | "merida" | "celtic";
   colorMode: "light" | "dark" | "system";
 };
 export const AppearanceContext = createContext<Appearance>({
+  showCoordinates: true,
   notationStyle: "letters",
   pieceTheme: "classic",
   colorMode: "light",

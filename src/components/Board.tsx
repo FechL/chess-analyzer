@@ -76,7 +76,7 @@ export default function Board({
 }: Props) {
   const { t } = useI18n();
 
-  const { pieceTheme } = useAppearance();
+  const { pieceTheme, showCoordinates = true } = useAppearance();
   const boardRef = useRef<HTMLDivElement>(null);
   const previous = useRef({ fen, flipped, queued: false });
   const animations = useRef<Animation[]>([]);
@@ -517,12 +517,12 @@ export default function Board({
                   }}
                 >
                   {t(
-                    col === 0 && (
+                    showCoordinates && col === 0 && (
                       <span className="coordinate rank">{t(rank)}</span>
                     ),
                   )}
                   {t(
-                    row === 7 && (
+                    showCoordinates && row === 7 && (
                       <span className="coordinate file">{t(file)}</span>
                     ),
                   )}

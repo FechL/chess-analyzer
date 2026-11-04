@@ -1,10 +1,8 @@
-import ShortcutHelp from "../components/ShortcutHelp";
 import { useMobileLayout } from "../hooks/useMobileLayout";
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import Title from "../components/Title";
 import { saveGameAccuracy } from "../lib/game-accuracy";
 import EngineOptions from "../components/EngineOptions";
-import AnalysisGuide from "../components/AnalysisGuide";
 import CopyGameActions from "../components/CopyGameActions";
 // i18n: rendered text
 import { pieceAsset } from "../lib/preferences";
@@ -794,7 +792,7 @@ export default function Analysis({
   );
   return (
     <div ref={pageRef} className="page analysis-page viewport-board-layout">
-      <div className="workspace-toolbar">
+      <div className="workspace-toolbar board-page-header">
         <div className="bot-player-header analysis-player-header">
           {!customEditing &&
             ([flipped ? "b" : "w", flipped ? "w" : "b"] as const).map(
@@ -955,7 +953,6 @@ export default function Analysis({
                     </button>
                   )),
                 )}
-                <AnalysisGuide />
               </div>
               {t(
                 !customEditing && (error || engineError) && (
@@ -1397,11 +1394,6 @@ export default function Analysis({
                   </span>
                 ))}
               </div>
-              <ShortcutHelp items={[
-                "navigate", "flip", "mainline", "start", "end",
-                "engine", "arrows", "evaluation", "categories",
-                "newGame", "importGame", "save",
-              ]} />
             </>
           )}
         </div>

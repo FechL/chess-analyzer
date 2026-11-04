@@ -18,15 +18,27 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     if (phase === "ready") return;
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
-    const applySystemTheme = () => {
-      const mode = systemTheme.matches ? "dark" : "light";
+    const applyTheme = () => {
+      let preference: "light" | "dark" | "system" = "system";
+      if (phase !== "anonymous") {
+        try {
+          const stored = JSON.parse(readUserStorageValue("kuda-settings") || "{}").colorMode;
+          if (stored === "light" || stored === "dark" || stored === "system") preference = stored;
+        } catch { /* Follow the system if cached settings are unavailable. */ }
+      }
+      const mode = preference === "system" ? (systemTheme.matches ? "dark" : "light") : preference;
       document.documentElement.dataset.colorMode = mode;
       document.documentElement.classList.toggle("dark", mode === "dark");
       document.documentElement.style.colorScheme = mode;
     };
-    applySystemTheme();
-    systemTheme.addEventListener("change", applySystemTheme);
-    return () => systemTheme.removeEventListener("change", applySystemTheme);
+    const changed = (event: StorageEvent) => { if (event.key === "kuda-settings") applyTheme(); };
+    applyTheme();
+    systemTheme.addEventListener("change", applyTheme);
+    window.addEventListener("storage", changed);
+    return () => {
+      systemTheme.removeEventListener("change", applyTheme);
+      window.removeEventListener("storage", changed);
+    };
   }, [phase]);
 
   async function prepare(account: Account, importLocal = false) {

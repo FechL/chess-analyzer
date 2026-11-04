@@ -2,6 +2,19 @@ import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  "Gunakan petunjuk?": "Use a Hint?",
+  "Gunakan petunjuk": "Use Hint",
+  "Menggunakan petunjuk akan memutus streak. Puzzle ini tidak dihitung sebagai penyelesaian tanpa bantuan, meskipun akhirnya berhasil.": "Using a hint will break your streak. This puzzle will not count as an unassisted solve, even if you finish it.",
+  "Panduan lawan bot": "Play a Bot Guide",
+  "Pilih bot, warna buah, kontrol waktu, dan mode bantuan, lalu mulai permainan. Perkiraan Elo menunjukkan tingkat latihan bot.": "Choose a bot, your color, time control, and assistance mode, then start the game. Estimated Elo indicates the bot's practice level.",
+  "Meninjau langkah sebelumnya tidak menghentikan jam atau giliran bot. Gunakan Pause untuk menjeda pada mode bantuan. Kembali ke posisi terbaru untuk melanjutkan langkah Anda.": "Browsing previous moves keeps the clock and the bot's turn running. Pause is available in assisted modes. Return to the latest position to make your next move.",
+  "Mode bantuan penuh membuka Engine dan Options, termasuk evaluasi, panah, kategori langkah, dan penanda ancaman lawan. Pengaturan ini terpisah dari Game Analysis.": "Full Assistance unlocks Engine and Options, including evaluation, arrows, move categories, and opponent threats. These settings are separate from Game Analysis.",
+  "Saat bot berpikir, Anda dapat mengantre hingga lima langkah. Klik kanan atau tekan Esc untuk membatalkan antrean.": "While the bot thinks, queue up to five moves. Right-click or press Esc to cancel the queue.",
+  "Setelah permainan berakhir, Review Game membuka permainan di Game Analysis. Posisi dan notasi juga dapat disalin melalui Copy FEN dan Copy PGN.": "After the game ends, Review Game opens it in Game Analysis. Use Copy FEN and Copy PGN to copy the position or notation.",
+  "Navigasi permainan": "Game Navigation",
+  "Opsi bantuan": "Assistance Options",
+  "Ulasan permainan": "Game Review",
+  "Tampilkan koordinat papan": "Show Board Coordinates",
   "Pratinjau papan 3×3": "3×3 Board Preview",
   "Pelajaran sudah selesai dipelajari.": "You've completed this lesson.",
   "Pelajari langkah dan ikuti panah di papan.": "Learn the moves and follow the arrows on the board.",

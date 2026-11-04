@@ -1,5 +1,4 @@
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
-import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Chess, DEFAULT_POSITION } from "chess.js";
@@ -14,18 +13,12 @@ import {
   LockKeyhole,
   RotateCcw,
   Search,
-  CircleHelp,
   Target,
 } from "lucide-react";
 import type { Settings } from "../App";
 import type { Opening } from "../data/content";
 import { openingOverviewMoves } from "../data/opening-overviews";
 import Board, { EvalBar } from "../components/Board";
-import {
-  DashboardPopover,
-  DashboardPopoverTrigger,
-  DashboardPopoverContent,
-} from "../components/block/dashboard-shell";
 import {
   IconButton,
   MoveList,
@@ -817,7 +810,7 @@ export default function OpeningStudy({
 
   return (
     <div ref={pageRef} className="page analysis-page opening-study-page viewport-board-layout">
-      <div className="workspace-toolbar opening-study-heading">
+      <div className="workspace-toolbar opening-study-heading board-page-header">
         <div className="game-title-block">
           <Title as="strong">{opening.name}</Title>
           <span className="opening-repertoire">
@@ -996,47 +989,6 @@ export default function OpeningStudy({
               >
                 {t("Review")}
               </button>
-              <DashboardPopover>
-                <DashboardPopoverTrigger asChild>
-                  <button
-                    className="icon-button shortcut-help-button opening-mode-help"
-                    aria-label={t("Panduan mode opening")}
-                    title={t("Panduan mode opening")}
-                  >
-                    <CircleHelp size={16} aria-hidden="true" />
-                  </button>
-                </DashboardPopoverTrigger>
-                <DashboardPopoverContent
-                  className="shortcut-help-popover opening-mode-popover"
-                  align="end"
-                  side="bottom"
-                  aria-label={t("Panduan mode opening")}
-                >
-                  <Title as="strong">{t("Panduan mode opening")}</Title>
-                  {MODES.map((item) => (
-                    <section key={item.id}>
-                      <strong>{t(item.label)}</strong>
-                      <p>{t(item.description)}</p>
-                    </section>
-                  ))}
-                  <section>
-                    <strong>{t("Review")}</strong>
-                    <p>
-                      {t(
-                        "Tes acak dari line yang sudah dipelajari dan diselesaikan dengan Practice 100%. Setiap line muncul sekali per sesi. Nyawa dan timer bisa diaktifkan bersama atau terpisah.",
-                      )}
-                    </p>
-                  </section>
-                  <section>
-                    <strong>{t("Materi opening")}</strong>
-                    <p>
-                      {t(
-                        "Materi memakai jalur opening Lichess serta cabang latihan yang dikembangkan melalui analisis Stockfish. Setiap jalur diperiksa dari sisi pemain. Latihan mengikuti satu jalur; langkah lain juga bisa benar.",
-                      )}
-                    </p>
-                  </section>
-                </DashboardPopoverContent>
-              </DashboardPopover>
             </div>
             {tab === "lesson" && (
               <div className="opening-mode-picker">
@@ -1625,10 +1577,6 @@ export default function OpeningStudy({
                 </span>
               )}
             </div>
-            <ShortcutHelp items={[
-              "flip", "evaluation", "openingNavigate", "openingStart", "openingEnd",
-              "learnArrows", "repeatLine", "nextLine", "openingHint",
-            ]} />
           </div>
         )}
       </div>

@@ -2,7 +2,6 @@ import { NotationMove, NotationText } from "../components/Notation";
 import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import { openingLines } from "../lib/opening-training";
 import type { OpeningProgress } from "../lib/opening-training";
-import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 // i18n: rendered text
 import { useI18n } from "@/lib/i18n";
@@ -17,7 +16,6 @@ import {
   CheckCheck,
   ChevronLeft,
   ChevronRight,
-  CircleHelp,
   Clock3,
   Flag,
   Flame,
@@ -34,7 +32,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import Board, { EvalBar } from "../components/Board";
+import Board from "../components/Board";
 import {
   IconButton,
   Modal,
@@ -45,19 +43,12 @@ import { LESSONS, OPENINGS } from "../data/content";
 import { ACADEMY_MODULES } from "../data/academy";
 import type { Exercise } from "../data/content";
 import { readStorage, writeStorage } from "../lib/chess";
-import type { Evaluation } from "../lib/chess";
-import { useEngine } from "../hooks/useEngine";
 import { playBoardSound } from "../lib/board-sound";
 import { LocalEngine } from "../lib/engine";
 import { findPuzzleReply } from "../lib/puzzle-reply";
 import type { PuzzleReply } from "../lib/puzzle-reply";
 import { appendPremove, executePremove } from "../lib/premove";
 import type { Premove } from "../lib/premove";
-import {
-  DashboardPopover,
-  DashboardPopoverContent,
-  DashboardPopoverTrigger,
-} from "../components/block/dashboard-shell";
 import {
   cachedPuzzles,
   consumePuzzle,
@@ -376,7 +367,7 @@ export function AcademyStudy({
       ref={pageRef}
       className="page analysis-page academy-study-page viewport-board-layout"
     >
-      <div className="workspace-toolbar">
+      <div className="workspace-toolbar board-page-header">
         <div className="game-title-block">
           <Title as="strong">{t(lesson.title)}</Title>
           <span className="opening-repertoire">
@@ -537,7 +528,6 @@ export function AcademyStudy({
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>
-                <ShortcutHelp items={["navigate", "start", "end", "flip"]} />
               </div>
             )}
           </div>
@@ -549,11 +539,9 @@ export function AcademyStudy({
 
 export function PuzzlesPage({
   settings,
-  onSettingsChange,
   onAnalyze,
 }: {
   settings: Settings;
-  onSettingsChange: (settings: Settings) => void;
   onAnalyze: (fen: string, name: string) => void;
 }) {
   const { t } = useI18n();
@@ -603,7 +591,6 @@ export function PuzzlesPage({
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [positionFen, setPositionFen] = useState("");
-  const [evaluation, setEvaluation] = useState<Evaluation>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const requestId = useRef(0);
@@ -620,7 +607,6 @@ export function PuzzlesPage({
   const recordedPuzzleId = useRef<string | undefined>(undefined);
   const consumedPuzzleIds = useRef(new Set<string>());
   const autoNextTimer = useRef<number | undefined>(undefined);
-  const { engine, status } = useEngine(settings.engine);
   const replyEngine = useRef<LocalEngine | null>(null);
   useEffect(
     () => () => {
@@ -890,41 +876,21 @@ export function PuzzlesPage({
     puzzleSession.current = snapshot;
     writeStorage("kuda-puzzle-session", snapshot);
   };
-  const validEvaluation =
-    evaluation?.fen === positionFen ? evaluation : undefined;
-  useEffect(() => {
-    if (
-      !settings.showEvalBar ||
-      status !== "ready" ||
-      !engine.current ||
-      !positionFen
-    )
-      return;
-    const instance = engine.current;
-    let active = true;
-    const timer = setTimeout(() => {
-      instance
-        .analyze(positionFen, { ms: 350, multiPV: 1 })
-        .then((value) => {
-          if (active) setEvaluation(value);
-        })
-        .catch(() => {});
-    }, 120);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-      instance.stop();
-    };
-  }, [positionFen, status, settings.showEvalBar, settings.engine, engine]);
   const pageRef = useDesktopBoardSize(`${puzzle?.id}:${attempt}:${historyEntry?.number}:${historyAttempt}`);
   const viewedPuzzle = historyEntry ? historyEntry.puzzle : puzzle;
   const color = (viewedPuzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
   const activeColor = (puzzle?.fen.split(" ")[1] as "w" | "b") ?? "w";
+  const activeTheme = PUZZLE_THEMES.find(([id]) => id === theme)?.[1];
+  const activeDifficulty = PUZZLE_DIFFICULTIES.find(([id]) => id === difficulty)?.[1];
   return (
     <div ref={pageRef} className="page analysis-page puzzle-page viewport-board-layout">
-      <div className="workspace-toolbar">
+      <div className="workspace-toolbar board-page-header">
         <div className="game-title-block">
-          <strong>{viewedPuzzle && t(color === "w" ? "Putih melangkah" : "Hitam melangkah")}</strong>
+          <Title as="strong">{t(historyEntry ? "Puzzle Lichess #" + historyEntry.id : puzzle ? "Puzzle Lichess #" + puzzle.id : "Puzzle Lichess")}</Title>
+          <div className="game-players">
+            {viewedPuzzle && <span className="game-player"><strong>{t(color === "w" ? "Putih" : "Hitam")}</strong><span>{t("melangkah")}{t(" · ")}{t("Rating ")}{t(viewedPuzzle.rating)}</span></span>}
+            <span className="game-player"><strong>{t(activeTheme ?? "Campuran")}</strong><span>{t(activeDifficulty ?? "Normal")}</span></span>
+          </div>
         </div>
       </div>
       <div className="analysis-grid">
@@ -941,16 +907,6 @@ export function PuzzlesPage({
                 startTraining
                 puzzleMode
                 enableShortcuts={settings.enableShortcuts}
-                evalBar={
-                  settings.showEvalBar ? (
-                    <EvalBar
-                      cp={validEvaluation?.cp}
-                      mate={validEvaluation?.mate}
-                      active={!!validEvaluation}
-                      flipped={color === "b"}
-                    />
-                  ) : null
-                }
                 onPositionChange={setPositionFen}
                 onFindReply={getOpponentReply}
                 onComplete={() => playBoardSound("success")}
@@ -982,18 +938,7 @@ export function PuzzlesPage({
                   paused={paused || !!historyEntry}
                   onStart={startOrResumePuzzle}
                   enableShortcuts={settings.enableShortcuts && !historyEntry}
-                  evalBar={
-                    settings.showEvalBar ? (
-                      <EvalBar
-                        cp={evaluation?.cp}
-                        mate={evaluation?.mate}
-                        active={!!evaluation}
-                        pending={!!evaluation && !validEvaluation}
-                        flipped={activeColor === "b"}
-                      />
-                    ) : null
-                  }
-                  onPositionChange={historyEntry ? undefined : setPositionFen}
+                    onPositionChange={historyEntry ? undefined : setPositionFen}
                   onFindReply={getOpponentReply}
                   onMistake={breakStreak}
                   onSolve={(clean) => {
@@ -1040,82 +985,6 @@ export function PuzzlesPage({
                     </button>
                   )),
                 )}
-                <DashboardPopover>
-                  <DashboardPopoverTrigger asChild>
-                    <button
-                      className="icon-button puzzle-guide-trigger"
-                      aria-label={t("Panduan puzzle")}
-                      title={t("Panduan puzzle")}
-                    >
-                      <CircleHelp size={15} aria-hidden="true" />
-                    </button>
-                  </DashboardPopoverTrigger>
-                  <DashboardPopoverContent
-                    className="shortcut-help-popover analysis-guide-popover puzzle-guide-popover"
-                    align="end"
-                    side="bottom"
-                    aria-label={t("Panduan puzzle")}
-                  >
-                    <Title as="strong">{t("Panduan puzzle")}</Title>
-                    <div className="analysis-guide-copy">
-                      <p>
-                        <strong>{t("Tujuan latihan")}</strong>
-                        {t(
-                          "Mainkan semua langkah solusi untuk sisi yang ditandai melangkah. Balasan lawan akan bergerak otomatis.",
-                        )}
-                      </p>
-                      <p>
-                        <strong>{t("Premove")}</strong>
-                        {t(
-                          "Saat lawan membalas, antrekan hingga lima langkah. Langkah dijalankan saat giliranmu jika masih legal dan tetap dinilai sesuai solusi puzzle. Klik kanan atau tekan Esc untuk membatalkan antrean.",
-                        )}
-                      </p>
-                      <p>
-                        <strong>{t("Streak dan rekor")}</strong>
-                        {t(
-                          "Penyelesaian tanpa langkah salah menambah streak. Langkah salah atau melewati puzzle mereset streak; rekor terbaik tetap tersimpan.",
-                        )}
-                      </p>
-                      <p>
-                        <strong>{t("Lanjut otomatis dan lewati")}</strong>
-                        {t(
-                          "Auto next memuat puzzle berikutnya setelah solusi selesai. Matikan di Opsi jika ingin tetap di posisi akhir. Skip puzzle mencatat durasi lalu mengambil puzzle lain.",
-                        )}
-                      </p>
-                      <p>
-                        <strong>{t("Riwayat dan waktu")}</strong>
-                        {t(
-                          "Riwayat di sidebar mencatat puzzle selesai atau dilewati serta waktu sejak puzzle dimuat sampai tindakan tersebut.",
-                        )}
-                        {t("Klik tautan riwayat untuk meninjau posisi dan solusi. Hingga 100 puzzle disimpan lengkap di perangkat. Timer puzzle aktif berhenti selama meninjau riwayat; streak tidak berubah.")}
-                      </p>
-                      <p>
-                        <strong>{t("Rating dan bar evaluasi")}</strong>
-                        {t(
-                          "Rating adalah perkiraan tingkat puzzle dari Lichess, bukan rating pemain. Bar evaluasi memakai Stockfish lokal dan bisa dimatikan di Opsi.",
-                        )}
-                      </p>
-                      <p>
-                        <strong>{t("Koleksi puzzle")}</strong>
-                        {t(
-                          "Hingga lima puzzle disimpan sementara di perangkat. Puzzle yang dipakai akan diganti agar antrean terisi kembali.",
-                        )}
-                      </p>
-                      {puzzle && (
-                        <a href={puzzle.url} target="_blank" rel="noreferrer">
-                          {t("Lihat puzzle ini di Lichess ↗")}
-                        </a>
-                      )}
-                      <a
-                        href="https://database.lichess.org/#puzzles"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {t("Sumber: database puzzle Lichess · CC0 ↗")}
-                      </a>
-                    </div>
-                  </DashboardPopoverContent>
-                </DashboardPopover>
               </div>
               {t(
                 tab === "puzzle" && (
@@ -1278,22 +1147,6 @@ export function PuzzlesPage({
                         <input
                           type="checkbox"
                           role="switch"
-                          checked={settings.showEvalBar}
-                          onChange={(e) =>
-                            onSettingsChange({
-                              ...settings,
-                              showEvalBar: e.target.checked,
-                            })
-                          }
-                        />
-                        {t("Bar evaluasi")}
-                      </label>
-                    </div>
-                    <div className="puzzle-filter">
-                      <label className="board-sound-setting">
-                        <input
-                          type="checkbox"
-                          role="switch"
                           checked={autoNext}
                           onChange={(e) => {
                             setAutoNext(e.target.checked);
@@ -1393,9 +1246,6 @@ export function PuzzlesPage({
                 <kbd>H</kbd> {t("Petunjuk")}
               </span>
             </div>
-            <ShortcutHelp items={[
-              "puzzleNavigate", "puzzleStart", "puzzleEnd", "flip", "puzzleHint", "premoves",
-            ]} />
           </div>
         )}
       </div>
@@ -1494,6 +1344,8 @@ export function LineTrainer({
   const [training, setTraining] = useState(startTraining);
   const [feedback, setFeedback] = useState("");
   const [showHint, setShowHint] = useState(false);
+  const [showHintWarning, setShowHintWarning] = useState(false);
+  const hintUsed = useRef(false);
   const [revealed, setRevealed] = useState(false);
   const [alternateFen, setAlternateFen] = useState<string>();
   const [flipped, setFlipped] = useState(false);
@@ -1525,6 +1377,23 @@ export function LineTrainer({
     (!puzzleMode || (started && !paused));
   const last = chess.history({ verbose: true }).at(-1);
   const displayedFen = preview?.fen ?? chess.fen();
+  const revealHint = () => {
+    if (done || preview || !started || paused || isOpponent) return;
+    if (puzzleMode && !hintUsed.current) {
+      hintUsed.current = true;
+      mistaken.current = true;
+      onMistake?.();
+    }
+    setShowHintWarning(false);
+    setShowHint(true);
+  };
+  const requestHint = () => {
+    if (done || preview || !started || paused || isOpponent) return;
+    if (showHint) { setShowHint(false); return; }
+    if (puzzleMode && onMistake && !hintUsed.current) { setShowHintWarning(true); return; }
+    revealHint();
+  };
+  useEffect(() => { if (paused || !started || done) setShowHintWarning(false); }, [paused, started, done]);
   useEffect(
     () => () => {
       previewRequest.current++;
@@ -1538,7 +1407,7 @@ export function LineTrainer({
     onFeedbackChange?.(showHint && !done ? { kind: "hint" } : moveFeedback);
   }, [moveFeedback, showHint, done, puzzleMode, onFeedbackChange]);
   useEffect(() => {
-    if ((!puzzleMode && !workspace) || !enableShortcuts || !started || paused)
+    if ((!puzzleMode && !workspace) || !enableShortcuts || !started || paused || showHintWarning)
       return;
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
@@ -1583,7 +1452,7 @@ export function LineTrainer({
         setFlipped((current) => !current);
       } else if (!event.shiftKey && event.key.toLowerCase() === "h" && !done) {
         event.preventDefault();
-        setShowHint((current) => !current);
+        requestHint();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -1600,6 +1469,11 @@ export function LineTrainer({
     visibleStep,
     step,
     !!workspace,
+    showHintWarning,
+    showHint,
+    onMistake,
+    isOpponent,
+    preview,
   ]);
   useEffect(() => {
     onPositionChange?.(displayedFen);
@@ -1619,6 +1493,8 @@ export function LineTrainer({
     }
   }, [done, training, revealed, onComplete, onSolve]);
   const reset = (train: boolean) => {
+    setShowHintWarning(false);
+    hintUsed.current = false;
     setBrowsePly(undefined);
     previewRequest.current++;
     previewBusy.current = false;
@@ -1778,7 +1654,7 @@ export function LineTrainer({
     return true;
   };
   let guidedMove: ReturnType<Chess["move"]> | undefined;
-  if (workspace && moves[visibleStep]) {
+  if ((workspace || (puzzleMode && showHint)) && moves[visibleStep]) {
     try {
       guidedMove = new Chess(chess.fen()).move(moves[visibleStep]);
     } catch {
@@ -1792,7 +1668,7 @@ export function LineTrainer({
         puzzleMode || workspace ? flipped !== (color === "b") : color === "b"
       }
       arrow={
-        workspace && guidedMove && !done && !browsing && !isOpponent
+        (workspace || (puzzleMode && showHint && started && !paused)) && guidedMove && !done && !browsing && !isOpponent && !preview
           ? `${guidedMove.from}${guidedMove.to}`
           : undefined
       }
@@ -2010,8 +1886,8 @@ export function LineTrainer({
                 <IconButton
                   label={t("Petunjuk")}
                   active={showHint}
-                  disabled={done || !!preview || !started || paused}
-                  onClick={() => setShowHint((v) => !v)}
+                  disabled={done || !!preview || !started || paused || isOpponent}
+                  onClick={requestHint}
                 >
                   <Lightbulb size={16} />
                 </IconButton>
@@ -2089,6 +1965,10 @@ export function LineTrainer({
           </div>
         ),
       )}
+      {showHintWarning && <Modal title={t("Gunakan petunjuk?")} onClose={() => setShowHintWarning(false)}>
+        <p className="modal-description">{t("Menggunakan petunjuk akan memutus streak. Puzzle ini tidak dihitung sebagai penyelesaian tanpa bantuan, meskipun akhirnya berhasil.")}</p>
+        <div className="modal-actions"><button className="button secondary" onClick={() => setShowHintWarning(false)}>{t("Batal")}</button><button className="button primary" onClick={revealHint}>{t("Gunakan petunjuk")}</button></div>
+      </Modal>}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Title from "./Title";
 import { NotationMove } from "./Notation";
-import { pieceAsset } from "../lib/preferences";
+import { pieceAsset, useAppearance } from "../lib/preferences";
 import type { Appearance } from "../lib/preferences";
 import { useI18n } from "../lib/i18n";
 
@@ -12,6 +12,7 @@ export default function SettingsBoardPreview({
   pieceTheme: Appearance["pieceTheme"];
 }) {
   const { t } = useI18n();
+  const { showCoordinates = true } = useAppearance();
   const pieces = ["bB", "bQ", "bP", null, null, null, "wN", "wK", "wR"];
   return (
     <div className="settings-preview">
@@ -33,7 +34,7 @@ export default function SettingsBoardPreview({
                     draggable={false}
                   />
                 )}
-                {index % 3 === 0 && (
+                {showCoordinates && index % 3 === 0 && (
                   <span className="coordinate rank">
                     {8 - Math.floor(index / 3)}
                   </span>

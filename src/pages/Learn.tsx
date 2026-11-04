@@ -164,22 +164,6 @@ export function OpeningsPage({
   ).sort((a, b) => Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)));
   return (
     <div className="page learning-page">
-      <div className="page-intro">
-        <div>
-          <div className="eyebrow">{t("OPENING EXPLORER")}</div>
-          <Title as="h1">
-            {t("Langkah pertama.")}
-            <br />
-            {t("Rencana yang lebih besar")}
-            <span>{t(".")}</span>
-          </Title>
-          <p>
-            {t(
-              "Jangan hanya menghafal. Temukan alasan di balik setiap langkah.",
-            )}
-          </p>
-        </div>
-      </div>
       <CatalogToolbar search={search} onSearch={setSearch} placeholder={t("Cari opening atau kode ECO…")} label={t("Cari opening")}>
         <div className="segmented">
           {t(
@@ -322,20 +306,6 @@ export function AcademyPage({
   };
   return (
     <div className="page learning-page">
-      <div className="page-intro">
-        <div>
-          <div className="eyebrow">CHESS ACADEMY</div>
-          <Title as="h1">
-            {t("Pahami satu ide.")}
-            <br />
-            {t("Naik satu tingkat")}
-            <span>{t(".")}</span>
-          </Title>
-          <p>
-            {t("Pelajaran singkat. Papan interaktif. Pemahaman yang bertahan.")}
-          </p>
-        </div>
-      </div>
       <CatalogToolbar className="academy-toolbar" search={search} onSearch={setSearch} placeholder={t("Cari topik atau pelajaran…")} label={t("Cari pelajaran")}>
         <div className="segmented academy-status-filter" role="group" aria-label={t("Status pelajaran")}>
           {[["all", "Semua status"], ["new", "Belum selesai"], ["completed", "Selesai"]].map(([id, label]) => <button key={id} type="button" className={lessonStatus === id ? "active" : ""} aria-pressed={lessonStatus === id} onClick={() => setLessonStatus(id)}>{t(label)}</button>)}

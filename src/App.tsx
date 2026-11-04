@@ -1,6 +1,6 @@
 import ProfilePage from "./pages/Profile";
 import { useAuth } from "./lib/auth-context";
-import AboutModal, { AboutPage } from "./components/AboutModal";
+import { AboutPage } from "./components/AboutModal";
 import MobileNavigation from "./components/MobileNavigation";
 import MorePage from "./pages/More";
 import Title from "./components/Title";
@@ -137,8 +137,17 @@ export default function App() {
   const [route, setRoute] = useState(
     () => location.hash.slice(1) || (readStorage("kuda-analysis-open", false) ? "analysis/game" : "analysis"),
   );
+  const [studyRoutes, setStudyRoutes] = useState<Record<string, string>>(() => readStorage("kuda-study-routes", {}));
+  useEffect(() => {
+    const section = route.split("/")[0];
+    if (section !== "openings" && section !== "academy") return;
+    if (studyRoutes[section] === route) return;
+    const next = { ...studyRoutes, [section]: route };
+    setStudyRoutes(next);
+    writeStorage("kuda-study-routes", next);
+  }, [route, studyRoutes]);
   const routePage = route.split("/")[0];
-  const page = routePage === "home" || (!mobileLayout && (routePage === "more" || routePage === "about" || routePage === "settings"))
+  const page = routePage === "home" || (!mobileLayout && routePage === "more")
     ? "analysis"
     : TITLES[routePage] ? routePage : "analysis";
   const [analysisActive, setAnalysisActive] = useState(() =>
@@ -182,21 +191,8 @@ export default function App() {
     [saved, currentPgn],
   );
   const [modal, setModal] = useState<
-    "import" | "new-game" | "settings" | "help" | undefined
+    "import" | "new-game" | undefined
   >();
-  useEffect(() => {
-    if (mobileLayout && (modal === "help" || modal === "settings")) {
-      const target = modal === "help" ? "about" : "settings";
-      setModal(undefined);
-      setRoute(target);
-      window.history.replaceState(window.history.state, "", `#${target}`);
-    } else if (!mobileLayout && (routePage === "about" || routePage === "settings")) {
-      const target = analysisActive ? "analysis/game" : "analysis";
-      setModal(routePage === "about" ? "help" : "settings");
-      setRoute(target);
-      window.history.replaceState(window.history.state, "", `#${target}`);
-    }
-  }, [mobileLayout, modal, routePage, analysisActive]);
   const [customEditing, setCustomEditing] = useState(false);
   const [autoReviewOnLoad, setAutoReviewOnLoad] = useState(false);
   const [toast, setToast] = useState("");
@@ -249,16 +245,13 @@ export default function App() {
     return () => window.removeEventListener("kuda-progress", update);
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
-  const navigate = (id: string) => {
-    if (mobileLayout && (id === "help" || id === "settings")) {
-      const target = id === "help" ? "about" : "settings";
-      setRoute(target);
-      location.hash = target;
-      return;
-    }
-    if (id === "settings" || id === "help") {
-      setModal(id);
-      return;
+  const navigate = (id: string, catalog = false) => {
+    if (id === "help") id = "about";
+    if (!catalog && (id === "openings" || id === "academy")) {
+      const savedRoute = studyRoutes[id];
+      const savedId = typeof savedRoute === "string" && savedRoute.startsWith(`${id}/`) ? savedRoute.slice(id.length + 1) : undefined;
+      const exists = id === "openings" ? OPENINGS.some(item => item.id === savedId) : LESSONS.some(item => item.id === savedId);
+      if (exists) id = savedRoute;
     }
     const target = id === "home" || id === "analysis"
       ? (analysisActive ? "analysis/game" : "analysis")
@@ -521,7 +514,6 @@ export default function App() {
           id: "library",
           label: "Koleksi permainan",
           icon: FolderHeart,
-          count: saved.length || undefined,
         },
       ],
     },
@@ -548,7 +540,7 @@ export default function App() {
         secondaryNavigation={[
           { id: "profile", label: user.username, icon: UserRound },
           { id: "settings", label: "Pengaturan", icon: Settings2 },
-          { id: "help", label: "Tentang", icon: Info },
+          { id: "about", label: "Tentang", icon: Info },
         ]}
         activeItemId={page}
         onActiveItemChange={navigate}
@@ -560,13 +552,13 @@ export default function App() {
         {page === "settings" && (
           <div className="page settings-page">
             <header className="settings-page-header">
-              <button className="icon-button back-icon" onClick={() => navigate("more")} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
+              <button className="icon-button back-icon" onClick={() => navigate(mobileLayout ? "more" : "analysis")} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
               <Title as="h1">{t("Pengaturan")}</Title>
             </header>
             {renderSettings()}
           </div>
         )}
-        {page === "about" && <AboutPage onBack={() => navigate("more")} />}
+        {page === "about" && <AboutPage onBack={() => navigate(mobileLayout ? "more" : "analysis")} />}
         {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
         {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} />}
         {t(
@@ -615,7 +607,7 @@ export default function App() {
                 <OpeningStudy
                   key={activeOpening.id}
                   opening={activeOpening}
-                  onBack={() => navigate("openings")}
+                  onBack={() => navigate("openings", true)}
                   settings={pageSettings}
                   onSettingsChange={updatePageSettings}
                 />
@@ -629,7 +621,7 @@ export default function App() {
         )}
         {t(
           page === "academy" && (
-            activeLesson ? <AcademyStudy key={activeLesson.id} lesson={activeLesson} settings={pageSettings} onBack={() => navigate("academy")} onOpenLesson={id => navigate(`academy/${id}`)} onAnalyze={analyzePosition} /> : <AcademyPage settings={pageSettings} onOpenLesson={id => navigate(`academy/${id}`)} />
+            activeLesson ? <AcademyStudy key={activeLesson.id} lesson={activeLesson} settings={pageSettings} onBack={() => navigate("academy", true)} onOpenLesson={id => navigate(`academy/${id}`)} onAnalyze={analyzePosition} /> : <AcademyPage settings={pageSettings} onOpenLesson={id => navigate(`academy/${id}`)} />
           ),
         )}
         {t(
@@ -651,7 +643,6 @@ export default function App() {
                 setSaved((s) => s.filter((g) => g.id !== id));
                 notify("Permainan dihapus dari koleksi.");
               }}
-              onImport={() => setModal("import")}
             />
           ),
         )}
@@ -683,12 +674,6 @@ export default function App() {
           />
         ),
       )}
-      {modal === "settings" && !mobileLayout && (
-        <Modal title={t("Pengaturan")} onClose={() => setModal(undefined)}>
-          {renderSettings()}
-        </Modal>
-      )}
-      {modal === "help" && !mobileLayout && <AboutModal onClose={() => setModal(undefined)} />}
       {t(
         toast && (
           <div className="toast" role="status">
@@ -904,14 +889,12 @@ function Library({
   saved,
   onLoad,
   onDelete,
-  onImport,
   onToggleFavorite,
 }: {
   saved: SavedGame[];
   onLoad: (g: GameData) => void;
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
-  onImport: () => void;
 }) {
   const { t } = useI18n();
 
@@ -928,29 +911,6 @@ function Library({
   const filtered = filterLibrary(saved, {search, favorites, kind, from: "", until: ""});
   return (
     <div className="page library-page">
-      <div className="page-intro">
-        <div>
-          <div className="eyebrow">{t("KOLEKSI PRIBADI")}</div>
-          <Title as="h1">
-            {t("Permainan berlalu.")}
-            <br />
-            {t("Pelajarannya tinggal")}
-            <span>{t(".")}</span>
-          </Title>
-          <p>
-            {t("Simpan permainan yang berarti, dan kunjungi lagi kapan saja.")}
-          </p>
-        </div>
-        <button
-          className="button primary library-import-action"
-          onClick={onImport}
-          aria-label={t("Impor permainan")}
-          title={t("Impor permainan")}
-        >
-          <ArrowDownToLine size={16} />
-          <span>{t(" Impor permainan")}</span>
-        </button>
-      </div>
       <div className={`catalog-toolbar library-toolbar${searchExpanded ? " is-search-expanded" : ""}`}>
       <div className="library-filters">
         <button className="button secondary library-favorite-filter" aria-label={t("Favorit")} title={t("Favorit")} aria-pressed={favorites} onClick={() => setFavorites((value) => !value)}>
@@ -1022,12 +982,6 @@ function Library({
                   : "Buka ruang analisis, lalu klik Simpan. Permainanmu akan tersusun di sini.",
               )}
             </p>
-            {!saved.length && (
-            <button className="button primary" onClick={onImport}>
-              {t("Impor permainan pertama ")}
-              <ArrowRight size={16} />
-            </button>
-            )}
           </div>
         ),
       )}

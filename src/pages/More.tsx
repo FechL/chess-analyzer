@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, ChevronRight, CircleHelp, FolderHeart, GraduationCap, Settings2 } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, Info, FolderHeart, GraduationCap, Settings2 } from "lucide-react";
 import { useI18n } from "../lib/i18n";
 import Title from "../components/Title";
 
@@ -7,7 +7,7 @@ const items = [
   { id: "academy", label: "Akademi catur", icon: GraduationCap },
   { id: "library", label: "Koleksi permainan", icon: FolderHeart },
   { id: "settings", label: "Pengaturan", icon: Settings2 },
-  { id: "help", label: "Panduan & referensi", icon: CircleHelp },
+  { id: "help", label: "Tentang", icon: Info },
 ];
 
 export default function MorePage({ onNavigate, completedCount = 0 }: { onNavigate: (page: string) => void; completedCount?: number }) {

@@ -2,6 +2,30 @@ import { ACADEMY_ENGLISH } from "../data/academy";
 import { OPENING_ENGLISH } from "./opening-translations";
 
 export const ENGLISH: Record<string, string> = {
+  "Tentang": "About",
+  "Kembali": "Back",
+  "Ruang untuk menganalisis permainan dan berlatih catur, langsung di browser Anda.":
+    "A space to analyze games and practice chess, directly in your browser.",
+  "Ulas permainan lengkap, jelajahi variasi, dan simpan catatan untuk setiap posisi.":
+    "Review full games, explore variations, and keep notes for each position.",
+  "Bermain melawan bot dengan pilihan kontrol waktu dan mode bantuan.":
+    "Play against a bot with your choice of time control and assistance mode.",
+  "Pelajari line opening, berlatih dari ingatan, dan uji kembali line yang sudah dikuasai.":
+    "Learn opening lines, practice from memory, and test lines you have mastered.",
+  "Selesaikan puzzle Lichess dan pantau waktu, streak, serta riwayat latihan.":
+    "Solve Lichess puzzles and track your solving time, streak, and history.",
+  "Pelajari gerak buah, aturan catur, taktik, strategi, dan endgame melalui pelajaran interaktif.":
+    "Learn piece movement, chess rules, tactics, strategy, and endgames through interactive lessons.",
+  "Simpan permainan, tandai favorit, dan salin PGN atau FEN.":
+    "Save games, mark favorites, and copy PGN or FEN.",
+  "Stockfish berjalan di browser. Permainan, catatan, dan progres belajar disimpan di perangkat ini. Mengambil permainan publik atau puzzle memerlukan koneksi internet.":
+    "Stockfish runs in your browser. Games, notes, and learning progress are stored on this device. Loading public games or puzzles requires an internet connection.",
+  "SUMBER & TEKNOLOGI": "SOURCES & TECHNOLOGY",
+  "Permainan publik, database opening, dan puzzle": "Public games, opening database, and puzzles",
+  "Permainan publik dan referensi ulasan permainan": "Public games and game review reference",
+  "Referensi fitur analisis dan variasi engine": "Analysis features and engine variations reference",
+  "Referensi latihan dan motif taktik": "Tactical training and themes reference",
+  "Komponen antarmuka berbasis React dan Tailwind": "Interface components built with React and Tailwind",
   "Analisis papan": "Analyze",
   "Kumpulan opening": "Openings",
   "Kembali ke beranda analisis": "Back to Analyze",

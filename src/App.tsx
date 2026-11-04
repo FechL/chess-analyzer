@@ -1,3 +1,4 @@
+import AboutModal, { AboutPage } from "./components/AboutModal";
 import MobileNavigation from "./components/MobileNavigation";
 import MorePage from "./pages/More";
 import Title from "./components/Title";
@@ -12,24 +13,22 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowRight,
+  ArrowLeft,
   BookOpen,
   Check,
   ChartNoAxesCombined,
-  CircleHelp,
-  Cpu,
   Download,
   FolderHeart,
   GraduationCap,
   Grid2X2,
   Import,
-  LayoutDashboard,
+  Info,
   LibraryBig,
   Monitor,
   Plus,
   RotateCcw,
   Search,
   Settings2,
-  ShieldCheck,
   Star,
   Sun,
   Moon,
@@ -63,7 +62,6 @@ import {
 } from "./lib/chess";
 import type { GameData } from "./lib/chess";
 import { OPENINGS } from "./data/content";
-import { ANALYSIS_SHORTCUTS } from "./lib/analysis-shortcuts";
 
 const OpeningStudy = lazy(() => import("./pages/OpeningStudy"));
 
@@ -89,6 +87,8 @@ export type SavedGame = { id: string; date: string; game: GameData; favorite?: b
 const TITLES: Record<string, string> = {
   home: "Beranda",
   more: "Lainnya",
+  about: "Tentang",
+  settings: "Pengaturan",
   analysis: "Analisis permainan",
   bot: "Lawan bot",
   openings: "Opening explorer",
@@ -133,7 +133,7 @@ export default function App() {
     () => location.hash.slice(1) || (readStorage("kuda-analysis-open", false) ? "analysis/game" : "analysis"),
   );
   const routePage = route.split("/")[0];
-  const page = routePage === "home" || (!mobileLayout && routePage === "more")
+  const page = routePage === "home" || (!mobileLayout && (routePage === "more" || routePage === "about" || routePage === "settings"))
     ? "analysis"
     : TITLES[routePage] ? routePage : "analysis";
   const [analysisActive, setAnalysisActive] = useState(() =>
@@ -178,6 +178,19 @@ export default function App() {
   const [modal, setModal] = useState<
     "import" | "new-game" | "settings" | "help" | undefined
   >();
+  useEffect(() => {
+    if (mobileLayout && (modal === "help" || modal === "settings")) {
+      const target = modal === "help" ? "about" : "settings";
+      setModal(undefined);
+      setRoute(target);
+      window.history.replaceState(window.history.state, "", `#${target}`);
+    } else if (!mobileLayout && (routePage === "about" || routePage === "settings")) {
+      const target = analysisActive ? "analysis/game" : "analysis";
+      setModal(routePage === "about" ? "help" : "settings");
+      setRoute(target);
+      window.history.replaceState(window.history.state, "", `#${target}`);
+    }
+  }, [mobileLayout, modal, routePage, analysisActive]);
   const [customEditing, setCustomEditing] = useState(false);
   const [autoReviewOnLoad, setAutoReviewOnLoad] = useState(false);
   const [toast, setToast] = useState("");
@@ -230,6 +243,12 @@ export default function App() {
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
   const navigate = (id: string) => {
+    if (mobileLayout && (id === "help" || id === "settings")) {
+      const target = id === "help" ? "about" : "settings";
+      setRoute(target);
+      location.hash = target;
+      return;
+    }
     if (id === "settings" || id === "help") {
       setModal(id);
       return;
@@ -285,224 +304,7 @@ export default function App() {
     g.event = name;
     load(g);
   };
-  const nav = [
-    {
-      id: "workspace",
-      title: "RUANG BERMAIN",
-      items: [
-        { id: "analysis", label: "Analisis permainan", icon: ChartNoAxesCombined },
-        { id: "bot", label: "Lawan bot", icon: Swords },
-      ],
-    },
-    {
-      id: "learn",
-      title: "TUMBUH & BELAJAR",
-      items: [
-        { id: "puzzles", label: "Puzzle", icon: Target },
-        { id: "openings", label: "Opening explorer", icon: BookOpen },
-        { id: "academy", label: "Akademi catur", icon: GraduationCap },
-      ],
-    },
-    {
-      id: "personal",
-      title: "RUANG PRIBADI",
-      items: [
-        {
-          id: "library",
-          label: "Koleksi permainan",
-          icon: FolderHeart,
-          count: saved.length || undefined,
-        },
-      ],
-    },
-  ];
-  return (
-    <AppearanceContext.Provider value={settings}>
-      <DashboardShell
-        hideHeader
-        className="kuda-shell"
-        defaultSidebarWidth={232}
-        minSidebarWidth={205}
-        maxSidebarWidth={300}
-        brand={{
-          name: "kuda",
-          href: "#analysis",
-          description: "CHESS STUDIO",
-          logo: (
-            <span className="brand-icon">
-              <img src="/pieces/wN.svg" alt={t("")} />
-            </span>
-          ),
-        }}
-        navigation={nav}
-        secondaryNavigation={[
-          { id: "settings", label: "Pengaturan", icon: Settings2 },
-          { id: "help", label: "Panduan & referensi", icon: CircleHelp },
-        ]}
-        activeItemId={page}
-        onActiveItemChange={navigate}
-        title={t(TITLES[page])}
-        navigationLabel="Navigasi Kuda Chess Studio"
-
-      >
-        {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
-        {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} onImport={() => setModal("import")} />}
-        {t(
-          analysisBoard && (
-            <Analysis
-              key={revision}
-              game={game}
-              setGame={setGame}
-              settings={pageSettings}
-              onSettingsChange={updatePageSettings}
-              onSave={save}
-              isSaved={gameIsSaved}
-              onImport={() => setModal("import")}
-              onNewGame={() => setModal("new-game")}
-              onBackHome={() => {
-                if (!gameIsSaved) setShowLeaveAnalysis(true);
-                else returnToAnalysisHome();
-              }}
-              autoReviewOnLoad={autoReviewOnLoad}
-              onAutoReviewStarted={() => setAutoReviewOnLoad(false)}
-              customEditing={customEditing}
-              onCustomEditingChange={setCustomEditing}
-              onPositionChange={setAnalysisFen}
-            />
-          ),
-        )}
-        {t(
-          page === "bot" && (
-            <BotPage
-              settings={pageSettings}
-              analysisFen={analysisFen}
-              onReview={load}
-            />
-          ),
-        )}
-        {t(
-          page === "openings" &&
-            (activeOpening ? (
-              <Suspense
-                fallback={
-                  <div className="page opening-loading" role="status">
-                    {t("Memuat opening…")}
-                  </div>
-                }
-              >
-                <OpeningStudy
-                  key={activeOpening.id}
-                  opening={activeOpening}
-                  settings={pageSettings}
-                  onSettingsChange={updatePageSettings}
-                />
-              </Suspense>
-            ) : (
-              <OpeningsPage
-                settings={pageSettings}
-                onOpenOpening={(id) => navigate(`openings/${id}`)}
-              />
-            )),
-        )}
-        {t(
-          page === "academy" && (
-            <AcademyPage settings={pageSettings} onAnalyze={analyzePosition} />
-          ),
-        )}
-        {t(
-          page === "puzzles" && (
-            <PuzzlesPage
-              settings={pageSettings}
-              onSettingsChange={updatePageSettings}
-              onAnalyze={analyzePosition}
-            />
-          ),
-        )}
-        {t(
-          page === "library" && (
-            <Library
-              saved={saved}
-              onLoad={load}
-              onToggleFavorite={(id) => setSaved((items) => items.map((item) => item.id === id ? {...item, favorite: !item.favorite} : item))}
-              onDelete={(id) => {
-                setSaved((s) => s.filter((g) => g.id !== id));
-                notify("Permainan dihapus dari koleksi.");
-              }}
-              onImport={() => setModal("import")}
-            />
-          ),
-        )}
-      </DashboardShell>
-      {showLeaveAnalysis && (
-        <Modal title={t("Permainan belum disimpan")} onClose={() => setShowLeaveAnalysis(false)}>
-          <p className="modal-description">{t("Simpan permainan ke koleksi sebelum kembali?")}</p>
-          <div className="modal-actions">
-            <button className="text-button" onClick={returnToAnalysisHome}>{t("Kembali tanpa menyimpan")}</button>
-            <button className="button primary" onClick={() => { save(); returnToAnalysisHome(); }}>{t("Simpan dan kembali")}</button>
-          </div>
-        </Modal>
-      )}
-      {mobileLayout && <MobileNavigation page={page} onNavigate={navigate} />}
-      {t(
-        modal === "new-game" && !mobileLayout && (
-          <Modal
-            title={t("Mulai permainan baru")}
-            onClose={() => setModal(undefined)}
-          >
-            <p className="modal-description">
-              {t("Pilih papan awal untuk ruang analisis bebas.")}
-            </p>
-            <div className="new-game-options">
-              <button
-                className="button secondary"
-                onClick={() => {
-                  const g = emptyGame();
-                  g.source = "Bebas";
-                  load(g);
-                }}
-              >
-                <Plus size={16} />
-                {t(" Dari posisi awal")}
-              </button>
-              <button
-                className="button primary"
-                onClick={() => {
-                  const g = emptyGame();
-                  g.event = "Analisis Bebas (Kustom)";
-                  g.source = "Kustom";
-                  load(g, true);
-                }}
-              >
-                <Grid2X2 size={16} />
-                {t(" Atur buah sendiri")}
-              </button>
-            </div>
-          </Modal>
-        ),
-      )}
-      {t(
-        (modal === "import" || (modal === "new-game" && mobileLayout)) && (
-          <ImportModal
-            initialNewGame={modal === "new-game"}
-            limitedSources={page === "analysis" && !analysisBoard}
-            onNewGame={mobileLayout && page === "analysis" && (analysisBoard || modal === "new-game") ? (custom) => {
-              const next = emptyGame();
-              next.source = custom ? "Kustom" : "Bebas";
-              if (custom) next.event = "Analisis Bebas (Kustom)";
-              load(next, custom);
-            } : undefined}
-            onClose={() => setModal(undefined)}
-            saved={saved}
-            onLoad={load}
-          />
-        ),
-      )}
-      {t(
-        modal === "settings" && (
-          <Modal
-            title={t("Pengaturan")}
-            onClose={() => setModal(undefined)}
-          >
+  const renderSettings = () => (
             <div className="app-settings">
             <div className="settings-section">
               <Title as="label">{t("Tampilan papan")}</Title>
@@ -685,167 +487,235 @@ export default function App() {
               </button>
             </div>
             </div>
-          </Modal>
-        ),
+  );
+  const nav = [
+    {
+      id: "workspace",
+      title: "RUANG BERMAIN",
+      items: [
+        { id: "analysis", label: "Analisis permainan", icon: ChartNoAxesCombined },
+        { id: "bot", label: "Lawan bot", icon: Swords },
+      ],
+    },
+    {
+      id: "learn",
+      title: "TUMBUH & BELAJAR",
+      items: [
+        { id: "puzzles", label: "Puzzle", icon: Target },
+        { id: "openings", label: "Opening explorer", icon: BookOpen },
+        { id: "academy", label: "Akademi catur", icon: GraduationCap },
+      ],
+    },
+    {
+      id: "personal",
+      title: "RUANG PRIBADI",
+      items: [
+        {
+          id: "library",
+          label: "Koleksi permainan",
+          icon: FolderHeart,
+          count: saved.length || undefined,
+        },
+      ],
+    },
+  ];
+  return (
+    <AppearanceContext.Provider value={settings}>
+      <DashboardShell
+        hideHeader
+        className="kuda-shell"
+        defaultSidebarWidth={232}
+        minSidebarWidth={205}
+        maxSidebarWidth={300}
+        brand={{
+          name: "kuda",
+          href: "#analysis",
+          description: "CHESS STUDIO",
+          logo: (
+            <span className="brand-icon">
+              <img src="/pieces/wN.svg" alt={t("")} />
+            </span>
+          ),
+        }}
+        navigation={nav}
+        secondaryNavigation={[
+          { id: "settings", label: "Pengaturan", icon: Settings2 },
+          { id: "help", label: "Tentang", icon: Info },
+        ]}
+        activeItemId={page}
+        onActiveItemChange={navigate}
+        title={t(TITLES[page])}
+        navigationLabel="Navigasi Kuda Chess Studio"
+
+      >
+        {page === "settings" && (
+          <div className="page settings-page">
+            <header className="settings-page-header">
+              <button className="icon-button" onClick={() => navigate("more")} aria-label={t("Kembali")} title={t("Kembali")}><ArrowLeft size={20} /></button>
+              <Title as="h1">{t("Pengaturan")}</Title>
+            </header>
+            {renderSettings()}
+          </div>
+        )}
+        {page === "about" && <AboutPage onBack={() => navigate("more")} />}
+        {page === "more" && <MorePage onNavigate={navigate} completedCount={completed.length} />}
+        {page === "analysis" && !analysisBoard && <HomePage saved={saved} onLoad={load} onNewGame={() => setModal("new-game")} onImport={() => setModal("import")} />}
+        {t(
+          analysisBoard && (
+            <Analysis
+              key={revision}
+              game={game}
+              setGame={setGame}
+              settings={pageSettings}
+              onSettingsChange={updatePageSettings}
+              onSave={save}
+              isSaved={gameIsSaved}
+              onImport={() => setModal("import")}
+              onNewGame={() => setModal("new-game")}
+              onBackHome={() => {
+                if (!gameIsSaved) setShowLeaveAnalysis(true);
+                else returnToAnalysisHome();
+              }}
+              autoReviewOnLoad={autoReviewOnLoad}
+              onAutoReviewStarted={() => setAutoReviewOnLoad(false)}
+              customEditing={customEditing}
+              onCustomEditingChange={setCustomEditing}
+              onPositionChange={setAnalysisFen}
+            />
+          ),
+        )}
+        {t(
+          page === "bot" && (
+            <BotPage
+              settings={pageSettings}
+              analysisFen={analysisFen}
+              onReview={load}
+            />
+          ),
+        )}
+        {t(
+          page === "openings" &&
+            (activeOpening ? (
+              <Suspense
+                fallback={
+                  <div className="page opening-loading" role="status">
+                    {t("Memuat opening…")}
+                  </div>
+                }
+              >
+                <OpeningStudy
+                  key={activeOpening.id}
+                  opening={activeOpening}
+                  settings={pageSettings}
+                  onSettingsChange={updatePageSettings}
+                />
+              </Suspense>
+            ) : (
+              <OpeningsPage
+                settings={pageSettings}
+                onOpenOpening={(id) => navigate(`openings/${id}`)}
+              />
+            )),
+        )}
+        {t(
+          page === "academy" && (
+            <AcademyPage settings={pageSettings} onAnalyze={analyzePosition} />
+          ),
+        )}
+        {t(
+          page === "puzzles" && (
+            <PuzzlesPage
+              settings={pageSettings}
+              onSettingsChange={updatePageSettings}
+              onAnalyze={analyzePosition}
+            />
+          ),
+        )}
+        {t(
+          page === "library" && (
+            <Library
+              saved={saved}
+              onLoad={load}
+              onToggleFavorite={(id) => setSaved((items) => items.map((item) => item.id === id ? {...item, favorite: !item.favorite} : item))}
+              onDelete={(id) => {
+                setSaved((s) => s.filter((g) => g.id !== id));
+                notify("Permainan dihapus dari koleksi.");
+              }}
+              onImport={() => setModal("import")}
+            />
+          ),
+        )}
+      </DashboardShell>
+      {showLeaveAnalysis && (
+        <Modal title={t("Permainan belum disimpan")} onClose={() => setShowLeaveAnalysis(false)}>
+          <p className="modal-description">{t("Simpan permainan ke koleksi sebelum kembali?")}</p>
+          <div className="modal-actions">
+            <button className="text-button" onClick={returnToAnalysisHome}>{t("Kembali tanpa menyimpan")}</button>
+            <button className="button primary" onClick={() => { save(); returnToAnalysisHome(); }}>{t("Simpan dan kembali")}</button>
+          </div>
+        </Modal>
       )}
+      {mobileLayout && <MobileNavigation page={page} onNavigate={navigate} />}
       {t(
-        modal === "help" && (
+        modal === "new-game" && !mobileLayout && (
           <Modal
-            title={t("Selamat datang di Kuda.")}
+            title={t("Mulai permainan baru")}
             onClose={() => setModal(undefined)}
-            wide
           >
-            <div className="help-layout">
-              <div className="prose">
-                <span className="small-label">
-                  {t("RUANG KECIL UNTUK PERMAINAN BESAR")}
-                </span>
-                <Title as="h3">{t("Belajar dengan memainkan idenya.")}</Title>
-                <p>
-                  {t(
-                    "Mulai dari contoh Opera Game, impor PGN/FEN Anda, atau buat analisis baru. Klik buah lalu petak tujuan; Anda juga bisa menyeret buah.",
-                  )}
-                </p>
-                <ul>
-                  <li>
-                    <strong>{t("Analisis:")}</strong>
-                    {t(
-                      " ulas seluruh permainan, periksa evaluasi dan variasi, tambahkan catatan, lalu latih ulang kesalahan.",
-                    )}
-                  </li>
-                  <li>
-                    <strong>{t("Lawan bot:")}</strong>
-                    {t(
-                      " pilih satu dari empat preset, warna, dan waktu. Gunakan petunjuk saat belajar.",
-                    )}
-                  </li>
-                  <li>
-                    <strong>{t("Opening:")}</strong>
-                    {t(
-                      " 12 jalur terkurasi dengan penjelasan dan latihan urutan.",
-                    )}
-                  </li>
-                  <li>
-                    <strong>{t("Akademi:")}</strong>
-                    {t(
-                      " 9 tutorial interaktif tentang dasar, taktik, skakmat, dan aturan khusus.",
-                    )}
-                  </li>
-                  <li>
-                    <strong>{t("Taktik:")}</strong>
-                    {t(" 6 tantangan terkurasi untuk mengenali pola.")}
-                  </li>
-                  <li>
-                    <strong>{t("Koleksi:")}</strong>
-                    {t(" simpan permainan dan ekspor PGN.")}
-                  </li>
-                </ul>
-                {!mobileLayout && (<>
-                <p>
-                  <kbd>{t("←")}</kbd> <kbd>{t("→")}</kbd>
-                  {t(" navigasi langkah · ")}
-                  <kbd>{t("F")}</kbd>
-                  {t(" balik papan · ")}
-                  <kbd>{t("Esc")}</kbd>
-                  {t(" tutup dialog")}
-                </p>
-                <Title as="h3">{t("Pintasan analisis")}</Title>
-                <ul className="analysis-shortcut-list">
-                  {ANALYSIS_SHORTCUTS.map((shortcut) => (
-                    <li key={shortcut.key}>
-                      <kbd>{shortcut.display}</kbd> {t(shortcut.label)}
-                    </li>
-                  ))}
-                </ul>
-                </>)}
-                <div className="study-tip">
-                  <ShieldCheck size={18} />
-                  <p>
-                    {t(
-                      "Permainan, catatan, dan progres disimpan di localStorage browser. Ekspor PGN untuk salinan cadangan permainan Anda.",
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="help-sources">
-                <span className="section-label">{t("RISET & TEKNOLOGI")}</span>
-                <a
-                  href="https://lichess.org/features"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <BookOpen size={18} />
-                  <div>
-                    <strong>{t("Lichess")}</strong>
-                    <span>{t("Analisis, study, opening, dan latihan")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="https://www.chess.com/analysis"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Grid2X2 size={18} />
-                  <div>
-                    <strong>{t("Chess.com")}</strong>
-                    <span>{t("Game review dan latihan kesalahan")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="https://chessify.me/analysis"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Cpu size={18} />
-                  <div>
-                    <strong>{t("Chessify")}</strong>
-                    <span>{t("Variasi dan pengaturan engine")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="https://chesstempo.com/chess-tactics/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Target size={18} />
-                  <div>
-                    <strong>{t("ChessTempo")}</strong>
-                    <span>{t("Latihan berdasarkan motif taktik")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="https://www.obsidianui.dev/docs/dashboard-shell"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <LayoutDashboard size={18} />
-                  <div>
-                    <strong>{t("ObsidianUI")}</strong>
-                    <span>{t("Dashboard Shell resmi, React & Tailwind")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="https://github.com/nmrugg/stockfish.js"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Swords size={18} />
-                  <div>
-                    <strong>{t("Stockfish.js")}</strong>
-                    <span>{t("Engine lokal WebAssembly · GPL v3")}</span>
-                  </div>
-                  <ArrowRight size={15} />
-                </a>
-              </div>
+            <p className="modal-description">
+              {t("Pilih papan awal untuk ruang analisis bebas.")}
+            </p>
+            <div className="new-game-options">
+              <button
+                className="button secondary"
+                onClick={() => {
+                  const g = emptyGame();
+                  g.source = "Bebas";
+                  load(g);
+                }}
+              >
+                <Plus size={16} />
+                {t(" Dari posisi awal")}
+              </button>
+              <button
+                className="button primary"
+                onClick={() => {
+                  const g = emptyGame();
+                  g.event = "Analisis Bebas (Kustom)";
+                  g.source = "Kustom";
+                  load(g, true);
+                }}
+              >
+                <Grid2X2 size={16} />
+                {t(" Atur buah sendiri")}
+              </button>
             </div>
           </Modal>
         ),
       )}
+      {t(
+        (modal === "import" || (modal === "new-game" && mobileLayout)) && (
+          <ImportModal
+            initialNewGame={modal === "new-game"}
+            limitedSources={page === "analysis" && !analysisBoard}
+            onNewGame={mobileLayout && page === "analysis" && (analysisBoard || modal === "new-game") ? (custom) => {
+              const next = emptyGame();
+              next.source = custom ? "Kustom" : "Bebas";
+              if (custom) next.event = "Analisis Bebas (Kustom)";
+              load(next, custom);
+            } : undefined}
+            onClose={() => setModal(undefined)}
+            saved={saved}
+            onLoad={load}
+          />
+        ),
+      )}
+      {modal === "settings" && !mobileLayout && (
+        <Modal title={t("Pengaturan")} onClose={() => setModal(undefined)}>
+          {renderSettings()}
+        </Modal>
+      )}
+      {modal === "help" && !mobileLayout && <AboutModal onClose={() => setModal(undefined)} />}
       {t(
         toast && (
           <div className="toast" role="status">

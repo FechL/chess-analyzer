@@ -790,3 +790,13 @@
 @media (max-width: 1050px) and (pointer: coarse) {
   .kuda-shell .shell-mobile-navigation { display: none; }
 }
+
+.about-page-header, .settings-page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.about-page-header h1, .settings-page-header h1 { margin: 0; font-size: 22px; }
+.about-page .help-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.about-page .prose h3 { margin-top: 0; }
+
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .kuda-shell .dashboard-main-scroll { scrollbar-width: none; }
+  .kuda-shell .dashboard-main-scroll::-webkit-scrollbar { width: 0; }
+}

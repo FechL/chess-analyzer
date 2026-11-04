@@ -4254,3 +4254,11 @@ textarea::placeholder {
 
 .opening-card .opening-mini-board .chessboard-wrap { height: auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
 .opening-card .opening-mini-board .chessboard { height: auto; min-height: 0; aspect-ratio: 1; border-radius: 0; box-shadow: none; }
+
+.opening-card-content { display: flex; flex-direction: column; }
+.opening-card-progress { margin-top: auto; padding-top: 16px; }
+.opening-card-progress-counts { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 10px; margin-bottom: 8px; }
+.opening-card-progress-counts > span:last-child { color: var(--ink); }
+.opening-card-progress-track { display: flex; height: 5px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.opening-card-practiced { background: var(--ink); }
+.opening-card-learned { background: var(--muted); opacity: .5; }

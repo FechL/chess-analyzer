@@ -1,3 +1,4 @@
+import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import ShortcutHelp from "../components/ShortcutHelp";
 import { useMobileLayout } from "../hooks/useMobileLayout";
 import Title from "../components/Title";
@@ -90,6 +91,7 @@ export default function BotPage({
   onReview: (game: GameData) => void;
 }) {
   const { t } = useI18n();
+  const pageRef = useDesktopBoardSize();
   const mobileLayout = useMobileLayout();
   const [session, setSession] = useState<BotSession>(() =>
     restoreBotSession(readStorage(SESSION_KEY, null)),
@@ -783,7 +785,7 @@ export default function BotPage({
               ? t("Permainan dijeda")
               : t(gameStatus(chess));
   return (
-    <div className="page bot-page">
+    <div ref={pageRef} className="page bot-page viewport-board-layout">
       <div className="analysis-grid bot-workspace">
         <div className="bot-player-header analysis-player-header">
           <div className="bot-player human-player">

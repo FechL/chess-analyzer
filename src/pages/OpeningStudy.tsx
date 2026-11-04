@@ -1,3 +1,4 @@
+import { useDesktopBoardSize } from "../hooks/useDesktopBoardSize";
 import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -113,6 +114,7 @@ export default function OpeningStudy({
   onSettingsChange: (settings: Settings) => void;
 }) {
   const { t } = useI18n();
+  const pageRef = useDesktopBoardSize();
   const moveAnimations = useBoardAnimation();
   const { engine, status: engineStatus } = useEngine(settings.engine);
   const [evaluation, setEvaluation] = useState<Evaluation>();
@@ -811,7 +813,7 @@ export default function OpeningStudy({
   }
 
   return (
-    <div className="page analysis-page opening-study-page">
+    <div ref={pageRef} className="page analysis-page opening-study-page viewport-board-layout">
       <div className="workspace-toolbar opening-study-heading">
         <div className="game-title-block">
           <Title as="strong">{opening.name}</Title>

@@ -1,3 +1,5 @@
+import { openingLines } from "../lib/opening-training";
+import type { OpeningProgress } from "../lib/opening-training";
 import ShortcutHelp from "../components/ShortcutHelp";
 import Title from "../components/Title";
 // i18n: rendered text
@@ -122,9 +124,6 @@ export function OpeningsPage({
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [completed] = useState<string[]>(() =>
-    readStorage("kuda-openings", []),
-  );
   const openings = OPENINGS.filter(
     (o) =>
       (filter === "all" || o.side === filter) &&
@@ -211,6 +210,13 @@ export function OpeningsPage({
       <div className="opening-grid">
         {t(
           openings.map((o) => {
+            const lines = openingLines(o);
+            const progress = readStorage<OpeningProgress>(`kuda-opening-progress-${o.id}`, {});
+            const learned = lines.filter(line => progress[line.id]?.learned).length;
+            const practiced = lines.filter(line => {
+              const result = progress[line.id]?.completed?.practice;
+              return result?.mistakes === 0 && result.hints === 0;
+            }).length;
             const c = new Chess();
             o.moves.slice(0, 6).forEach((m) => c.move(m));
             return (
@@ -258,14 +264,16 @@ export function OpeningsPage({
                       )),
                     )}
                   </div>
-                  {t(
-                    completed.includes(o.id) && (
-                      <span className="complete-badge">
-                        <Check size={13} />
-                        {t(" Dipelajari")}
-                      </span>
-                    ),
-                  )}
+                  <div className="opening-card-progress">
+                    <div className="opening-card-progress-counts">
+                      <span>Learn: {learned}/{lines.length}</span>
+                      <span>Practice: {practiced}/{lines.length}</span>
+                    </div>
+                    <div className="opening-card-progress-track" role="img" aria-label={`Learn: ${learned}/${lines.length}, Practice: ${practiced}/${lines.length}`}>
+                      <span className="opening-card-practiced" style={{ width: `${practiced / lines.length * 100}%` }} />
+                      <span className="opening-card-learned" style={{ width: `${Math.max(0, learned - practiced) / lines.length * 100}%` }} />
+                    </div>
+                  </div>
                 </div>
               </article>
             );

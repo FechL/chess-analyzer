@@ -30,8 +30,9 @@
   align-items: stretch;
 }
 .opening-study-page .board-controls {
-  margin-left: 0;
+  margin-left: 31px;
 }
+.opening-study-page .board-section:not(:has(.eval-bar)) .board-controls { margin-left: 0; }
 .opening-study-sidebar {
   position: relative;
   min-width: 0;

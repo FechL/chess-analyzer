@@ -202,7 +202,7 @@ export const ENGLISH: Record<string, string> = {
     "Right-click to mark squares, drag with the right mouse button to draw arrows. Escape clears annotations.",
   "Menit per pemain": "Minutes per player",
   "Tambahan detik per langkah": "Increment in seconds",
-  "Gunakan waktu ini": "Use this time control",
+  "Gunakan waktu ini": "Apply",
   Jeda: "Pause",
   Lanjutkan: "Resume",
   "Klik papan untuk memulai puzzle.": "Click the board to start the puzzle.",
@@ -575,7 +575,7 @@ export const ENGLISH: Record<string, string> = {
   "Tanpa batas · latihan santai": "Unlimited · casual practice",
   "5 menit per pemain": "5 minutes per player",
   "10 menit per pemain": "10 minutes per player",
-  "Mulai permainan": "Start game",
+  "Mulai permainan": "Start Game",
   "Level adalah preset latihan, bukan rating Elo terkalibrasi. Jam pada mode latihan dapat dipulihkan dengan memulai ulang.":
     "Levels are practice presets, not calibrated Elo ratings. Restarting resets the practice clock.",
   "Sedang berpikir…": "Thinking…",

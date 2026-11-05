@@ -26,7 +26,7 @@ function AboutContent() {
   return (
     <div className="help-layout">
         <div className="prose">
-          <Title as="h3">Kuda Chess Studio</Title>
+          <h3><Title>Kuda Chess Studio</Title> <span className="about-author">by FechL</span></h3>
           <p>{t("Ruang untuk menganalisis permainan dan berlatih catur, langsung di browser Anda.")}</p>
           <ul>
             {features.map(([name, description]) => (

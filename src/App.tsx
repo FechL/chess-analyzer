@@ -542,7 +542,7 @@ export default function App() {
         }}
         navigation={nav}
         secondaryNavigation={[
-          { id: "profile", label: user.displayName || user.username, icon: UserRound },
+          { id: "profile", label: user.displayName || user.username, preserveLabel: true, icon: UserRound },
           { id: "settings", label: "Pengaturan", icon: Settings2 },
           { id: "about", label: "Tentang", icon: Info },
         ]}
@@ -663,8 +663,6 @@ export default function App() {
       {t(
         (modal === "import" || modal === "new-game") && (
           <ImportModal
-            initialNewGame={modal === "new-game"}
-            limitedSources={page === "analysis" && !analysisBoard}
             onNewGame={page === "analysis" ? (custom) => {
               const next = emptyGame();
               next.source = custom ? "Kustom" : "Bebas";
@@ -703,21 +701,15 @@ function ImportModal({
   onLoad,
   saved,
   onNewGame,
-  initialNewGame = false,
-  limitedSources = false,
 }: {
   onClose: () => void;
   onLoad: (g: GameData) => void;
   saved: SavedGame[];
   onNewGame?: (custom: boolean) => void;
-  initialNewGame?: boolean;
-  limitedSources?: boolean;
 }) {
   const { t } = useI18n();
 
-  const [source, setSource] = useState<"new" | "local" | "collection" | OnlineSource>(
-    initialNewGame && onNewGame ? "new" : "local",
-  );
+  const [source, setSource] = useState<"local" | "collection" | OnlineSource>("local");
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const file = useRef<HTMLInputElement>(null);
@@ -740,52 +732,34 @@ function ImportModal({
     setError("");
   };
   return (
-    <Modal title={onNewGame ? `${t("New Game")} / ${t("Impor permainan")}` : t("Impor permainan")} onClose={onClose}>
+    <Modal title={onNewGame ? t("New Game") : t("Impor permainan")} onClose={onClose} className="new-game-modal">
       <div
         className="import-source-options"
         role="group"
         aria-label={t("Sumber permainan")}
       >
-        {onNewGame && (
-          <button className={source === "new" ? "active" : ""} aria-pressed={source === "new"} onClick={() => setSource("new")}>
-            {t("New Game")}
-          </button>
-        )}
         {t(
           (
             [
               ["local", "PGN / FEN"],
               ["chesscom", "Chess.com"],
               ["lichess", "Lichess"],
-              ["url", "Tautan PGN"],
               ["collection", "Koleksi"],
             ] as const
-          ).filter(([value]) => !limitedSources || value === "local" || value === "url").map(([value, label]) => (
+          ).map(([value, label]) => (
             <button
               key={value}
               aria-pressed={source === value}
               className={source === value ? "active" : ""}
               onClick={() => setSource(value)}
             >
-              {t(label)}
+              {t(value === "local" && onNewGame ? "New Game" : label)}
             </button>
           )),
         )}
       </div>
       {t(
-        source === "new" ? (
-          <>
-            <p className="modal-description">{t("Pilih papan awal untuk ruang analisis bebas.")}</p>
-            <div className="new-game-options">
-              <button className="button secondary" onClick={() => onNewGame?.(false)}>
-                <Plus size={16} /> {t("Dari posisi awal")}
-              </button>
-              <button className="button primary" onClick={() => onNewGame?.(true)}>
-                <Grid2X2 size={16} /> {t("Atur buah sendiri")}
-              </button>
-            </div>
-          </>
-        ) : source === "collection" ? (
+        source === "collection" ? (
           <div className="saved-import-list">
             {t(
               saved.length ? (
@@ -823,6 +797,16 @@ function ImportModal({
           <OnlineImport key={source} source={source} onLoad={onLoad} />
         ) : (
           <>
+            {onNewGame && (
+              <div className="new-game-options new-game-local-options">
+                <button className="button secondary" onClick={() => onNewGame(false)}>
+                  <Plus size={16} /> {t("Dari posisi awal")}
+                </button>
+                <button className="button primary" onClick={() => onNewGame(true)}>
+                  <Grid2X2 size={16} /> {t("Atur buah sendiri")}
+                </button>
+              </div>
+            )}
             <textarea
               id="game-import"
               aria-label={t("PGN atau FEN")}
@@ -836,7 +820,7 @@ function ImportModal({
               placeholder={t(
                 '[White "Nama Anda"]\n[Black "Lawan"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4…',
               )}
-              rows={9}
+              rows={onNewGame ? 5 : 7}
             />
             <input
               className="sr-only"
@@ -880,6 +864,10 @@ function ImportModal({
                 {t("Buka analisis ")}
                 <ArrowRight size={15} />
               </button>
+            </div>
+            <div className="new-game-pgn-link">
+              <label className="field-label" htmlFor="online-game-input">{t("Tautan PGN")}</label>
+              <OnlineImport source="url" onLoad={onLoad} autoFocus={false} />
             </div>
           </>
         ),

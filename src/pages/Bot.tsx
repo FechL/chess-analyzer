@@ -7,11 +7,9 @@ import type { Color } from "chess.js";
 import {
   ArrowLeft,
   ArrowRight,
-  Cpu,
   Flag,
   Lightbulb,
   LoaderCircle,
-  Pause,
   Play,
   RotateCcw,
   Undo2,
@@ -87,7 +85,7 @@ export default function BotPage({
   const pageRef = useDesktopBoardSize();
   const mobileLayout = useMobileLayout();
   const [session, setSession] = useState<BotSession>(() =>
-    restoreBotSession(readStorage(SESSION_KEY, null)),
+    ({ ...restoreBotSession(readStorage(SESSION_KEY, null)), paused: document.hidden }),
   );
   const latest = useRef(session);
   latest.current = session;
@@ -217,22 +215,23 @@ export default function BotPage({
   useEffect(() => {
     const persist = () => {
       const value = latest.current;
-      writeStorage(SESSION_KEY, {
-        ...value,
-        paused: value.started && value.mode !== "none" ? true : value.paused,
-      });
+      writeStorage(SESSION_KEY, { ...value, paused: value.started });
     };
     const interval = setInterval(persist, 1000);
     window.addEventListener("beforeunload", persist);
     const hidden = () => {
-      if (document.hidden && latest.current.mode !== "none") {
-        request.current++;
-        engine.current?.stop();
-        setSession((value) => ({
-          ...value,
-          paused: value.started && value.mode !== "none" ? true : value.paused,
-        }));
-      }
+      const tick = clockTick.current;
+      const elapsed = tick ? (performance.now() - tick.last) / 1000 : 0;
+      clockTick.current = undefined;
+      if (document.hidden) stopWork();
+      setSession((value) => {
+        const next = {
+          ...elapseBotTime(value, gameFromPgn(value.pgn).turn(), elapsed),
+          paused: document.hidden,
+        };
+        latest.current = next;
+        return next;
+      });
     };
     document.addEventListener("visibilitychange", hidden);
     return () => {
@@ -578,7 +577,7 @@ export default function BotPage({
       premoves: [],
       viewPly: null,
       outcome: "",
-      paused: next.turn() !== human,
+      paused: document.hidden,
     }));
   }
   function navigate(nextPly: number) {
@@ -587,16 +586,6 @@ export default function BotPage({
       ...elapseBotTime(value, chess.turn(), elapsed),
       viewPly: nextPly >= history.length ? null : Math.max(0, nextPly),
       premoves: [],
-    }));
-  }
-  function pause() {
-    if (session.mode === "none") return;
-    const elapsed = pendingElapsed();
-    stopWork();
-    setSession((value) => ({
-      ...elapseBotTime(value, chess.turn(), elapsed),
-      paused: !value.paused,
-      viewPly: null,
     }));
   }
   async function getHint() {
@@ -652,11 +641,6 @@ export default function BotPage({
       ) {
         event.preventDefault();
         undo();
-      } else if (event.key.toLowerCase() === "p" && !event.shiftKey) {
-        if (session.started && !ended && session.mode !== "none") {
-          event.preventDefault();
-          pause();
-        }
       } else if (
         ["e", "a", "v", "c", "t"].includes(event.key.toLowerCase()) &&
         !event.shiftKey &&
@@ -721,7 +705,7 @@ export default function BotPage({
         className={`chess-clock ${available && chess.turn() === color ? "clock-active" : ""}${session.started && !unlimited && session.clocks[color] < 60 ? " clock-low" : ""}`}
       >
         {unlimited
-          ? "∞"
+          ? <span className="clock-unlimited">∞</span>
           : `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`}
       </time>
     );
@@ -903,11 +887,6 @@ export default function BotPage({
                 <span>
                   <kbd>F</kbd> {t("Balik papan")}
                 </span>
-                {session.mode !== "none" && (
-                  <span>
-                    <kbd>P</kbd> {t("Jeda")}
-                  </span>
-                )}
                 {permissions.hint && (
                   <span>
                     <kbd>H</kbd> {t("Petunjuk")}
@@ -978,7 +957,7 @@ export default function BotPage({
         </div>
         <div className="analysis-sidebar bot-sidebar">
           <aside className="analysis-panel bot-side-panel">
-            <div className="panel-tabs">
+            {session.started && <div className="panel-tabs">
               <button
                 className={tab === "game" ? "active" : ""}
                 onClick={() => setTab("game")}
@@ -1009,8 +988,8 @@ export default function BotPage({
               >
                 {t("Opsi")}
               </button>
-            </div>
-            {mobileSetup || tab === "game" ? (
+            </div>}
+            {!session.started || tab === "game" ? (
               <div className={`bot-game-panel${session.started ? " is-playing" : ""}`}>
                 {!session.started && (
                   <>
@@ -1227,23 +1206,10 @@ export default function BotPage({
                   </button>
                   {session.started && (
                     <div>
-                      {ended ? (
+                      {ended && (
                         <button className="button secondary" onClick={review}>
                           <ArrowRight size={14} />
                           {t("Ulas permainan")}
-                        </button>
-                      ) : (
-                        <button
-                          className="button secondary"
-                          onClick={pause}
-                          disabled={session.mode === "none"}
-                        >
-                          {session.paused ? (
-                            <Play size={14} />
-                          ) : (
-                            <Pause size={14} />
-                          )}
-                          {t(session.paused ? "Lanjutkan" : "Jeda")}
                         </button>
                       )}
                       {!ended && history.length >= 2 && (
@@ -1271,19 +1237,6 @@ export default function BotPage({
               </div>
             ) : tab === "engine" && permissions.engine ? (
               <>
-                <div className="engine-status">
-                  <div className="engine-chip">
-                    <Cpu size={15} />
-                    <strong>Stockfish 19</strong>
-                    <span>{options.engine}</span>
-                  </div>
-                  <button
-                    className="text-button engine-settings-link"
-                    onClick={() => setTab("options")}
-                  >
-                    {t("Ganti engine")} <ArrowRight size={13} />
-                  </button>
-                </div>
                 {error && (
                   <div className="error-message" role="alert">
                     {t(error)}

@@ -646,6 +646,7 @@ type NavIcon = ElementType;
 export type DashboardShellNavItem = {
   id: string;
   label: string;
+  preserveLabel?: boolean;
   /** A duo-icons or lucide icon, or any component that accepts `className`. */
   icon?: NavIcon;
   /** Shows a colored dot instead of an icon, for projects or pipelines. */
@@ -1523,8 +1524,12 @@ function NavItem({ item, isActive, isQuiet, pillId, onSelect }: NavItemProps) {
           </span>
         ) : null,
       )}
-      <span className="relative min-w-0 flex-1 truncate text-left">
-        {titleCase(t(item.label))}
+      <span
+        className="relative min-w-0 flex-1 truncate text-left"
+        translate={item.preserveLabel ? "no" : undefined}
+        style={item.preserveLabel ? { textTransform: "none" } : undefined}
+      >
+        {item.preserveLabel ? item.label : titleCase(t(item.label))}
       </span>
       {t(
         item.count !== undefined && (

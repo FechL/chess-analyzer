@@ -772,9 +772,9 @@ export default function Analysis({
             ),
           )}
           <button
-            className="button secondary"
+            className="button primary"
             onClick={onNewGame}
-            aria-label={`${t("New Game")} / ${t("Impor permainan")}`}
+            aria-label={t("New Game")}
             title={
               settings.enableShortcuts
                 ? t("New Game") + " (Shift+N)"
@@ -782,7 +782,7 @@ export default function Analysis({
             }
             aria-keyshortcuts={settings.enableShortcuts ? "Shift+N" : undefined}
           >
-            <Plus size={15} />
+            <Plus size={16} />
             <span className="workspace-action-label">{t(" New Game")}</span>
           </button>
           <button className="icon-button back-icon" onClick={onBackHome} aria-label={t("Kembali ke beranda analisis")} title={t("Kembali ke beranda analisis")}>
@@ -898,7 +898,7 @@ export default function Analysis({
             ) : undefined}
             trailingActions={mobileLayout ? (
               <>
-                <IconButton label={`${t("New Game")} / ${t("Impor permainan")}`} onClick={onNewGame}><Plus size={16} /></IconButton>
+                <button className="button primary icon-button" aria-label={t("New Game")} title={t("New Game")} onClick={onNewGame}><Plus size={16} /></button>
                 <IconButton label={t("Kembali ke beranda analisis")} onClick={onBackHome}><ArrowLeft size={16} /></IconButton>
               </>
             ) : undefined}

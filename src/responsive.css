@@ -1,4 +1,50 @@
 /* Mobile overrides live together; desktop board/panel alignment stays unchanged. */
+.chess-clock .clock-unlimited {
+  display: inline-block;
+  font-size: 28px;
+  line-height: 1;
+  vertical-align: middle;
+}
+.modal.new-game-modal {
+  width: min(720px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  height: 620px;
+  max-height: 88dvh;
+  overflow-x: hidden;
+}
+.new-game-modal .modal-inner { min-width: 0; }
+.new-game-modal .import-source-options { flex-wrap: wrap; }
+.new-game-modal .import-source-options > button { min-width: 0; }
+.new-game-modal .new-game-local-options { margin-bottom: 16px; }
+.new-game-modal .new-game-pgn-link { margin-top: 20px; }
+.new-game-modal .import-textarea {
+  box-sizing: border-box;
+  height: 156px;
+  min-height: 156px;
+  max-height: 156px;
+  resize: none;
+  overflow-y: auto;
+}
+.new-game-modal .online-game-list { margin-top: 16px; }
+.new-game-modal :is(input, select, textarea) { max-width: 100%; min-width: 0; }
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .modal.new-game-modal {
+    box-sizing: border-box;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  .modal.new-game-modal .modal-inner {
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+}
+
 @media (max-width: 760px) {
   .kuda-shell { width: 100%; height: 100dvh; min-height: 0; }
   .kuda-shell > section { max-width: 100%; min-width: 0; }
@@ -517,6 +563,14 @@
 .more-brand > span:last-child { display: grid; gap: 4px; }
 .more-brand strong { font-size: 25px; }
 .more-brand small { color: var(--muted); font-size: 9px; letter-spacing: 2px; }
+@media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
+  .more-brand .brand-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+  }
+  .more-brand .brand-icon img { width: 44px; height: 44px; }
+}
 .more-page h1 { margin-bottom: 18px; font-size: 22px; color: var(--ink); }
 .more-menu { display: grid; gap: 8px; }
 .more-menu button { display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; font-size: 13px; }
@@ -632,6 +686,8 @@
 @media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
   .home-page .home-analysis-action { display: none; }
   .home-page .home-welcome { padding-bottom: 12px; }
+  .home-page .home-welcome > div { min-width: 0; }
+  .home-page .home-knight { display: block; width: clamp(88px, 27vw, 128px); }
   .home-page .home-welcome p { margin-bottom: 0; }
   .home-page > .home-game-panels { margin-top: 8px; }
 }
@@ -795,6 +851,7 @@
 .about-page-header h1, .settings-page-header h1 { margin: 0; font-size: 22px; }
 .about-page .help-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 .about-page .prose h3 { margin-top: 0; }
+.help-layout .prose h3 .about-author { color: var(--muted); font-size: 0.8em; font-weight: 400; white-space: nowrap; }
 
 @media (max-width: 760px), (max-width: 1050px) and (pointer: coarse) {
   .kuda-shell .dashboard-main-scroll { scrollbar-width: none; }

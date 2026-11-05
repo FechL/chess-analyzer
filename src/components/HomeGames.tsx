@@ -298,7 +298,7 @@ export default function HomeGames({
             )}
           </form>
         )}
-        {selected && (
+        {!adding && selected && (
           <div className="home-player-selector">
             <select
               aria-label={t("Pemain tersimpan")}
@@ -446,7 +446,7 @@ export default function HomeGames({
             {addPlayerButton}
           </div>
         )}
-        {!selected && (
+        {!adding && !selected && (
           <div className="home-player-selector">{addPlayerButton}</div>
         )}
 

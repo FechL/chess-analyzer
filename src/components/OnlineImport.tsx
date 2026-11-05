@@ -19,9 +19,11 @@ export type OnlineSource = "chesscom" | "lichess" | "url";
 export default function OnlineImport({
   source,
   onLoad,
+  autoFocus = true,
 }: {
   source: OnlineSource;
   onLoad: (game: GameData) => void;
+  autoFocus?: boolean;
 }) {
   const { t } = useI18n();
 
@@ -106,7 +108,7 @@ export default function OnlineImport({
             id="online-game-input"
             aria-label={t(source === "url" ? "Tautan PGN" : "Username")}
             className="online-import-input"
-            autoFocus
+            autoFocus={autoFocus}
             autoComplete="off"
             spellCheck={false}
             disabled={busy}

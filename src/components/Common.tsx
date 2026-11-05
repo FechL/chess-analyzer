@@ -29,11 +29,13 @@ export function Modal({
   children,
   onClose,
   wide = false,
+  className = "",
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   wide?: boolean;
+  className?: string;
 }) {
   const { t } = useI18n();
 
@@ -46,7 +48,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={`modal ${wide ? "wide" : ""}`}
+      className={`modal ${wide ? "wide" : ""} ${className}`}
       onCancel={(e) => {
         e.preventDefault();
         onClose();

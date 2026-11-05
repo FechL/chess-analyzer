@@ -21,7 +21,6 @@ import {
   Flame,
   GraduationCap,
   Lightbulb,
-  Pause,
   Play,
   RotateCcw,
   Search,
@@ -578,7 +577,15 @@ export function PuzzlesPage({
     readStorage("kuda-puzzle-streak", 0),
   );
   const [started, setStarted] = useState(true);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(document.hidden);
+  const hintedPuzzles = useRef<string[]>(readStorage("kuda-puzzle-hinted", []));
+  useEffect(() => {
+    const updateVisibility = () => {
+      setPaused(document.hidden);
+    };
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
   const [best, setBest] = useState(() => readStorage("kuda-puzzle-best", 0));
   const [record, setRecord] = useState(() =>
     readStorage("kuda-puzzle-record", false),
@@ -595,12 +602,8 @@ export function PuzzlesPage({
   const [error, setError] = useState("");
   const requestId = useRef(0);
   const elapsedRef = useRef(0);
-  const startedRef = useRef(started);
-  const pausedRef = useRef(paused);
   const firstPuzzleLoad = useRef(true);
   const puzzleSession = useRef<PuzzleSessionSnapshot | undefined>(undefined);
-  startedRef.current = started;
-  pausedRef.current = paused;
   puzzleSession.current = puzzle
     ? { puzzleId: puzzle.id, theme, difficulty, elapsedMs, started }
     : undefined;
@@ -715,7 +718,7 @@ export function PuzzlesPage({
         savedSession.theme === theme &&
         savedSession.difficulty === difficulty;
       const shouldStart = true;
-      const shouldPause = firstPuzzleLoad.current ? false : pausedRef.current;
+      const shouldPause = document.hidden;
       const restoredElapsed = restored ? savedSession.elapsedMs : 0;
       firstPuzzleLoad.current = false;
       elapsedRef.current = restoredElapsed;
@@ -779,7 +782,7 @@ export function PuzzlesPage({
     if (!puzzle) return;
     setShowSkipWarning(false);
     setPuzzleSolved(true);
-    recordAttempt("solved", clean);
+    recordAttempt("solved", clean && !hintedPuzzles.current.includes(puzzle.id));
     playBoardSound("success");
     const next = [...new Set([...completed, puzzle.id])];
     setCompleted(next);
@@ -830,7 +833,6 @@ export function PuzzlesPage({
     setShowSkipWarning(false);
     setRecord(false);
     writeStorage("kuda-puzzle-record", false);
-    if (streak <= 0) return;
     setStreak(0);
     writeStorage("kuda-puzzle-streak", 0);
   };
@@ -847,25 +849,8 @@ export function PuzzlesPage({
   };
   const startOrResumePuzzle = () => {
     if (!puzzle || puzzleSolved) return;
-    startedRef.current = true;
-    pausedRef.current = false;
     setStarted(true);
     setPaused(false);
-    const snapshot = {
-      puzzleId: puzzle.id,
-      theme,
-      difficulty,
-      elapsedMs: elapsedRef.current,
-      started: true,
-    };
-    puzzleSession.current = snapshot;
-    writeStorage("kuda-puzzle-session", snapshot);
-  };
-  const togglePuzzlePause = () => {
-    if (!puzzle || !startedRef.current || puzzleSolved) return;
-    const nextPaused = !pausedRef.current;
-    pausedRef.current = nextPaused;
-    setPaused(nextPaused);
     const snapshot = {
       puzzleId: puzzle.id,
       theme,
@@ -941,8 +926,14 @@ export function PuzzlesPage({
                     onPositionChange={historyEntry ? undefined : setPositionFen}
                   onFindReply={getOpponentReply}
                   onMistake={breakStreak}
+                  onHint={() => {
+                    hintedPuzzles.current = [...new Set([...hintedPuzzles.current, puzzle.id])].slice(-100);
+                    writeStorage("kuda-puzzle-hinted", hintedPuzzles.current);
+                    breakStreak();
+                  }}
                   onSolve={(clean) => {
-                    if (clean) growStreak();
+                    if (hintedPuzzles.current.includes(puzzle.id)) breakStreak();
+                    else if (clean) growStreak();
                   }}
                   onComplete={complete}
                   onAnalyze={(fen) =>
@@ -1210,14 +1201,6 @@ export function PuzzlesPage({
                 ) : (
                   <>
                     <button
-                      className="button secondary"
-                      disabled={!puzzle || busy || puzzleSolved || !started}
-                      onClick={togglePuzzlePause}
-                    >
-                      {paused ? <Play size={14} /> : <Pause size={14} />}
-                      {t(paused ? "Lanjutkan" : "Jeda")}
-                    </button>
-                    <button
                       className="button primary"
                       disabled={!puzzle || busy}
                       onClick={requestNextPuzzle}
@@ -1300,6 +1283,7 @@ export function LineTrainer({
   onFeedbackChange,
   onFindReply,
   onMistake,
+  onHint,
   onSolve,
   onComplete,
   onAnalyze,
@@ -1329,6 +1313,7 @@ export function LineTrainer({
   onFeedbackChange?: (feedback: PuzzleMoveFeedback) => void;
   onFindReply?: (fen: string) => Promise<PuzzleReply | undefined>;
   onMistake?: () => void;
+  onHint?: () => void;
   onSolve?: (clean: boolean) => void;
   onComplete: (clean: boolean) => void;
   onAnalyze: (fen: string) => void;
@@ -1382,6 +1367,7 @@ export function LineTrainer({
     if (puzzleMode && !hintUsed.current) {
       hintUsed.current = true;
       mistaken.current = true;
+      onHint?.();
       onMistake?.();
     }
     setShowHintWarning(false);
